@@ -24,5 +24,5 @@ holidays           # días festivos de EE. UU. para las variables temporales
 kaggle             # descarga del dataset desde la API
 
 # --- visualización final ---
-treamlit
+streamlit
 dash
