@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "5af9c96df3cf7ec0",
+        "id": "a342e49d8a971ed1",
         "type": "tabs",
         "children": [
           {
-            "id": "676c10f57ede8ebf",
+            "id": "944e9045fbe8a7c5",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -79,7 +79,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "0d726f429a78de84",
@@ -181,6 +181,8 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "676c10f57ede8ebf",
-  "lastOpenFiles": []
+  "active": "944e9045fbe8a7c5",
+  "lastOpenFiles": [
+    "README.md"
+  ]
 }
