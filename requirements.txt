@@ -1,0 +1,28 @@
+# --- Datos ---
+pandas
+numpy
+pyarrow            # leer/guardar parquet (data/processed)
+scipy
+
+# --- Visualización ---
+matplotlib
+seaborn
+plotly
+
+# --- Notebooks ---
+jupyterlab
+ipykernel
+
+# --- Series de tiempo y pronóstico ---
+statsmodels        # descomposición STL, ARIMA, suavizamiento exponencial
+scikit-learn       # métricas, validación, modelos base
+xgboost            # pronóstico con gradient boosting
+prophet            # pronóstico con estacionalidad (instalación pesada)
+
+# --- Utilidades ---
+holidays           # días festivos de EE. UU. para las variables temporales
+kaggle             # descarga del dataset desde la API
+
+# --- visualización final ---
+treamlit
+dash
