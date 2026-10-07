@@ -1,7 +1,5 @@
 # Análisis de Consumo Horario de Energía
 
-Proyecto de ciencia y visualización de datos sobre el consumo eléctrico horario de la red PJM.
-
 ## Dataset
 
 - **Fuente:** [Hourly Energy Consumption (Kaggle)](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption)
