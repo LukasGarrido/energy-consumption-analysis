@@ -25,3 +25,11 @@ def list_region_files(raw_dir: Path = RAW_DIR) -> dict[str, Path]:
         files[region] = path
     return files
 
+
+#Funcion que carga un archivo individual y lo deja listo para usar
+def load_region(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path)
+    df.columns = ["Datetime", "MW"]
+    df["Datetime"] = pd.to_datetime(df["Datetime"]) #convierte el texto de fecha en un tipo fecha real, necesario para extraer hora, mes, etc.
+    return df.sort_values("Datetime").reset_index(drop=True) #ordena cronológicamente
+
