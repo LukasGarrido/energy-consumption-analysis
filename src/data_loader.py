@@ -33,3 +33,16 @@ def load_region(path: Path) -> pd.DataFrame:
     df["Datetime"] = pd.to_datetime(df["Datetime"]) #convierte el texto de fecha en un tipo fecha real, necesario para extraer hora, mes, etc.
     return df.sort_values("Datetime").reset_index(drop=True) #ordena cronológicamente
 
+#Funcion que carga todos los archivos y los devuelve en un diccionario
+def load_regions_dict(raw_dir: Path = RAW_DIR) -> dict[str, pd.DataFrame]:
+    return {region: load_region(path) for region, path in list_region_files(raw_dir).items()}
+
+
+#Funcion que Junta todas las regiones en un solo DataFrame en formato largo.
+def load_all_regions(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
+    frames = []
+    for region, df in load_regions_dict(raw_dir).items():
+        df = df.copy()
+        df["region"] = region
+        frames.append(df)
+    return pd.concat(frames, ignore_index=True)
