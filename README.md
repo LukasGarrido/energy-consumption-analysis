@@ -8,7 +8,7 @@ Proyecto de ciencia de datos enfocado en el análisis, exploración y modelado d
 
 El objetivo principal es identificar patrones temporales en la demanda de energía (por hora, día de la semana y estacionalidad anual), evaluar tendencias de largo plazo, detectar periodos críticos de demanda pico y comparar el comportamiento entre distintas regiones geográficas.
 
-### Aspectos Clave
+### Aspectos
 
 - **Conjunto de Datos:** Registros horarios de consumo de energía en megavatios (MW) procedentes de PJM Interconnection (Kaggle).
 - **Enfoque Metodológico:** Análisis exploratorio de datos (EDA), tratamiento de series de tiempo (limpieza de horas duplicadas/faltantes por cambios de huso horario), agregaciones temporales, descomposición de estacionalidad/tendencia y pronósticos de demanda.
@@ -63,7 +63,8 @@ La documentación modular del proyecto se encuentra organizada en el directorio 
 ├── reports/
 │   └── figures/                  # Figuras y gráficos exportados
 ├── src/                          # Módulos Python reutilizables
-│   ├── __init__.py
+│   ├── __init__.py               # Inicialización del paquete
+│   ├── config.py                 # Configuración del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
 │   ├── features.py               # Extracción e ingeniería de características
 │   └── plots.py                  # Utilidades y funciones de graficado
