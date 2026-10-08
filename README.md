@@ -42,7 +42,6 @@ La documentación modular del proyecto se encuentra organizada en el directorio 
 │   └── index.html                # Aplicación o dashboard de visualización
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep; excluidos por .gitignore)
-│   ├── interim/                  # Datos en etapas intermedias de procesamiento
 │   └── processed/                # Datos procesados y limpios para análisis
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
 │   ├── 00_indice.md              # Índice general de la documentación
