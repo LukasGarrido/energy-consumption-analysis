@@ -50,8 +50,10 @@ ipython_config.py
 # ==============================================================================
 data/raw/*
 !data/raw/.gitkeep
-# data/processed/*.csv
-# data/interim/
+
+data/processed/*
+!data/processed/.gitkeep
+
 *.parquet
 *.feather
 *.h5
