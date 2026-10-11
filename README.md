@@ -64,6 +64,7 @@ La documentación modular del proyecto se encuentra organizada en el directorio 
 │   └── figures/                  # Figuras y gráficos exportados
 ├── src/                          # Módulos Python reutilizables
 │   ├── __init__.py               # Inicialización del paquete
+│   ├── cleaning.py               # Limpieza de datos
 │   ├── config.py                 # Configuración del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
 │   ├── features.py               # Extracción e ingeniería de características
