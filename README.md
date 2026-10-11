@@ -17,9 +17,9 @@ El objetivo principal es identificar patrones temporales en la demanda de energ�
 
 ---
 
-## Documentación Detallada
+## Documentación
 
-La documentación modular del proyecto se encuentra organizada en el directorio [`docs/`](docs/00_indice.md):
+La documentación del proyecto se encuentra organizada en el directorio [`docs/`](docs/00_indice.md):
 
 - [Índice de Documentación](docs/00_indice.md)
 - [01. Objetivo del Análisis](docs/01_objetivo.md)
