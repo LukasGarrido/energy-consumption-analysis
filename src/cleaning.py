@@ -5,7 +5,7 @@ Cada función recibe el DataFrame de UNA región (columnas Datetime y MW) y
 devuelve uno nuevo, sin modificar el original. Orden de uso:
 
     unificar_duplicados -> marcar_valores_sospechosos -> reindexar_calendario_horario
-    -> interpolar_huecos -> validar_limpieza
+    -> recortar_extremos_vacios -> interpolar_huecos -> validar_limpieza
 """
 
 from pathlib import Path
@@ -62,6 +62,24 @@ def reindexar_calendario_horario(df: pd.DataFrame) -> pd.DataFrame:
 
     print(f"Horas agregadas al calendario: {len(df) - n_filas_originales}")
     return df
+
+
+def recortar_extremos_vacios(df: pd.DataFrame) -> pd.DataFrame:
+    """Elimina las filas vacías del inicio y del final de la serie.
+
+    Los vacíos de los extremos no se pueden interpolar (falta un dato válido
+    a un lado), así que se recortan. Debe ejecutarse después de reindexar.
+    """
+    validos = df["MW"].notna()
+    if not validos.any():
+        raise ValueError("La región no tiene ningún valor válido.")
+
+    primero = validos.idxmax()
+    ultimo = validos[::-1].idxmax()
+    n_recortadas = len(df) - (ultimo - primero + 1)
+
+    print(f"Filas recortadas en los extremos: {n_recortadas}")
+    return df.loc[primero:ultimo].reset_index(drop=True)
 
 
 def interpolar_huecos(df: pd.DataFrame, limite_horas: int = 2) -> pd.DataFrame:
