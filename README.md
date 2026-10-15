@@ -42,7 +42,7 @@ La documentación del proyecto se encuentra organizada en el directorio [`docs/`
 │   └── index.html                # Aplicación o dashboard de visualización
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep; excluidos por .gitignore)
-│   └── processed/                # Datos procesados y limpios para análisis
+│   └── processed/                # Datos procesados y limpios para análisis (.gitkeep)
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
 │   ├── 00_indice.md              # Índice general de la documentación
 │   ├── 01_objetivo.md            # Objetivos del análisis
@@ -72,6 +72,7 @@ La documentación del proyecto se encuentra organizada en el directorio [`docs/`
 ├── .gitignore                    # Configuración de exclusiones de Git
 ├── AGENTS.md                     # Directrices para agentes de IA y colaboradores
 ├── LICENSE                       # Licencia del proyecto
+├── pyproject.toml                # Configuración de empaquetado del proyecto
 ├── README.md                     # Descripción general del repositorio
 └── requirements.txt              # Dependencias del proyecto
 ```
