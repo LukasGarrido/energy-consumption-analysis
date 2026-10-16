@@ -8,6 +8,8 @@ devuelve uno nuevo, sin modificar el original.
 import holidays
 import pandas as pd
 
+from src.config import HORIZONTE_HORAS, REZAGOS_HORAS, VENTANAS_HORAS
+
 # Estaciones meteorológicas del hemisferio norte, por meses completos
 ESTACIONES = {
     12: "Invierno", 1: "Invierno", 2: "Invierno",
@@ -48,4 +50,49 @@ def normalizar_por_region(df: pd.DataFrame, columna: str = "MW") -> pd.DataFrame
     """
     df = df.copy()
     df["MW_rel"] = df[columna] / df.groupby("region")[columna].transform("mean")
+    return df
+
+
+def agregar_rezagos(
+    df: pd.DataFrame,
+    rezagos: list[int] = REZAGOS_HORAS,
+    horizonte: int = HORIZONTE_HORAS,
+    columna: str = "MW",
+) -> pd.DataFrame:
+    """Agrega el consumo de hace k horas (MW_lag_k), calculado por región.
+
+    Supone una serie horaria regular y sin huecos (lo garantiza la limpieza).
+    Lanza un error si algún rezago es menor que el horizonte: usaría información
+    que no se tendría al pronosticar (fuga de datos).
+    """
+    if min(rezagos) < horizonte:
+        raise ValueError(
+            f"Hay rezagos menores que el horizonte ({horizonte} h): usarían "
+            "información que no se tendría al momento de pronosticar."
+        )
+
+    df = df.sort_values(["region", "Datetime"]).reset_index(drop=True)
+    grupo = df.groupby("region")[columna]
+    for k in rezagos:
+        df[f"{columna}_lag_{k}"] = grupo.shift(k)
+    return df
+
+
+def agregar_medias_moviles(
+    df: pd.DataFrame,
+    ventanas: list[int] = VENTANAS_HORAS,
+    horizonte: int = HORIZONTE_HORAS,
+    columna: str = "MW",
+) -> pd.DataFrame:
+    """Agrega el consumo medio de las `w` horas previas (MW_media_{w}h), por región.
+
+    La ventana se desplaza `horizonte` horas: para la hora t usa solo datos hasta
+    t - horizonte, es decir, información disponible al pronosticar.
+    """
+    df = df.sort_values(["region", "Datetime"]).reset_index(drop=True)
+    grupo = df.groupby("region")[columna]
+    for w in ventanas:
+        df[f"{columna}_media_{w}h"] = grupo.transform(
+            lambda s: s.shift(horizonte).rolling(w).mean()
+        )
     return df
