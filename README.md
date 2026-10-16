@@ -39,7 +39,7 @@ La documentación del proyecto se encuentra organizada en el directorio [`docs/`
 
 ```text
 ├── app/
-│   └── index.html                # Aplicación o dashboard de visualización
+│   └── streamlit_app.py          # Aplicación o dashboard interactivo (Streamlit)
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep; excluidos por .gitignore)
 │   └── processed/                # Datos procesados y limpios para análisis (.gitkeep)
@@ -69,6 +69,7 @@ La documentación del proyecto se encuentra organizada en el directorio [`docs/`
 │   ├── config.py                 # Configuración del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
 │   ├── features.py               # Extracción e ingeniería de características
+│   ├── modeling.py               # Entrenamiento, evaluación y métricas de modelos
 │   └── plots.py                  # Utilidades y funciones de graficado
 ├── .gitignore                    # Configuración de exclusiones de Git
 ├── AGENTS.md                     # Directrices para agentes de IA y colaboradores
