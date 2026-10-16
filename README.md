@@ -61,7 +61,8 @@ La documentación del proyecto se encuentra organizada en el directorio [`docs/`
 │   ├── 03_analisis.ipynb         # Análisis de patrones, estacionalidad y regiones
 │   └── 04_modelado.ipynb         # Modelado y pronóstico de demanda
 ├── reports/
-│   └── figures/                  # Figuras y gráficos exportados
+│   ├── figures/                  # Figuras y gráficos exportados
+│   └── templates/                # Plantillas y formatos de informes (PDF, documentos)
 ├── src/                          # Módulos Python reutilizables
 │   ├── __init__.py               # Inicialización del paquete
 │   ├── cleaning.py               # Limpieza de datos
