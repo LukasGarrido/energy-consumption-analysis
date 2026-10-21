@@ -6,30 +6,33 @@
 
 ---
 
-Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., & Wirth, R. (2000). _CRISP-DM 1.0: Step-by-step data mining guide_. CRISP-DM Consortium.
-
-Cleveland, R. B., Cleveland, W. S., McRae, J. E., & Terpenning, I. (1990). STL: A seasonal-trend decomposition procedure based on loess. _Journal of Official Statistics, 6_(1), 3-73.
-
-Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020). Array programming with NumPy. _Nature, 585_, 357-362. [https://doi.org/10.1038/s41586-020-2649-2](https://doi.org/10.1038/s41586-020-2649-2)
-
-Hong, T., & Fan, S. (2016). Probabilistic electric load forecasting: A tutorial review. _International Journal of Forecasting, 32_(3), 914-938.
-
-Hunter, J. D. (2007). Matplotlib: A 2D graphics environment. _Computing in Science & Engineering, 9_(3), 90-95.
-
-Hyndman, R. J., & Athanasopoulos, G. (2021). _Forecasting: Principles and practice_ (3rd ed.). OTexts. [https://otexts.com/fpp3/](https://otexts.com/fpp3/)
-
-Kluyver, T., Ragan-Kelley, B., Pérez, F., et al. (2016). Jupyter Notebooks: A publishing format for reproducible computational workflows. En F. Loizides & B. Schmidt (Eds.), _Positioning and Power in Academic Publishing_ (pp. 87-90). IOS Press.
-
-McKinney, W. (2010). Data structures for statistical computing in Python. _Proceedings of the 9th Python in Science Conference_, 56-61.
-
-Mulla, R. (2018). _Hourly Energy Consumption_. Kaggle. [https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption)
-
-Plotly Technologies Inc. (2015). _Collaborative data science_. [https://plot.ly](https://plot.ly)
-
-Tukey, J. W. (1977). _Exploratory data analysis_. Addison-Wesley.
-
-Waskom, M. L. (2021). seaborn: Statistical data visualization. _Journal of Open Source Software, 6_(60), 3021. [https://doi.org/10.21105/joss.03021](https://doi.org/10.21105/joss.03021)
-
+- Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., & Wirth, R. (2000). CRISP-DM 1.0: Step-by-step data mining guide. CRISP-DM Consortium.
+    
+- Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. En _Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining_ (pp. 785-794). ACM. [https://doi.org/10.1145/2939672.2939785](https://doi.org/10.1145/2939672.2939785)
+    
+- Cleveland, R. B., Cleveland, W. S., McRae, J. E., & Terpenning, I. (1990). STL: A seasonal-trend decomposition procedure based on loess. Journal of Official Statistics, 6(1), 3-73.
+    
+- Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020). Array programming with NumPy. Nature, 585, 357-362. [https://doi.org/10.1038/s41586-020-2649-2](https://doi.org/10.1038/s41586-020-2649-2)
+    
+- Hong, T., & Fan, S. (2016). Probabilistic electric load forecasting: A tutorial review. International Journal of Forecasting, 32(3), 914-938.
+    
+- Hunter, J. D. (2007). Matplotlib: A 2D graphics environment. Computing in Science & Engineering, 9(3), 90-95.
+    
+- Hyndman, R. J., & Athanasopoulos, G. (2021). Forecasting: Principles and practice (3rd ed.). OTexts. [https://otexts.com/fpp3/](https://otexts.com/fpp3/)
+    
+- Kluyver, T., Ragan-Kelley, B., Pérez, F., et al. (2016). Jupyter Notebooks: A publishing format for reproducible computational workflows. En F. Loizides & B. Schmidt (Eds.), Positioning and Power in Academic Publishing (pp. 87-90). IOS Press.
+    
+- McKinney, W. (2010). Data structures for statistical computing in Python. Proceedings of the 9th Python in Science Conference, 56-61.
+    
+- Mulla, R. (2018). Hourly Energy Consumption. Kaggle. [https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption)
+    
+- Plotly Technologies Inc. (2015). Collaborative data science. [https://plot.ly](https://plot.ly)
+    
+- Seabold, S., & Perktold, J. (2010). statsmodels: Econometric and statistical modeling with Python. En _Proceedings of the 9th Python in Science Conference_ (pp. 57-61). [https://doi.org/10.25080/Majora-92bf1920-011](https://www.google.com/search?q=https://doi.org/10.25080/Majora-92bf1920-011)
+    
+- Tukey, J. W. (1977). Exploratory data analysis. Addison-Wesley.
+    
+- Waskom, M. L. (2021). seaborn: Statistical data visualization. Journal of Open Source Software, 6(60), 3021. [https://doi.org/10.21105/joss.03021](https://doi.org/10.21105/joss.03021)
 ---
 
 ### Mapeo de Referencias en el Documento
