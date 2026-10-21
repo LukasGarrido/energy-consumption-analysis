@@ -53,13 +53,13 @@ Los modelos se evaluarán sobre un periodo de prueba que no se use en el entrena
 
 ### 3.1 Herramientas
 
-|Herramienta|Uso|
-|---|---|
-|Python (pandas, NumPy, Matplotlib, Seaborn, Plotly)|Procesamiento, análisis y visualización|
-|Jupyter Notebook|Desarrollo y documentación del análisis|
-|VS Code y Antigravity IDE|Edición de código|
-|GitHub|Control de versiones y gestión del código|
-|Obsidian|Documentación técnica y registro de decisiones|
+| Herramienta                                              | Uso                                            |
+| -------------------------------------------------------- | ---------------------------------------------- |
+| Python (pandas, NumPy, Matplotlib, Seaborn, Plotly, etc) | Procesamiento, análisis y visualización        |
+| Jupyter Notebook                                         | Desarrollo y documentación del análisis        |
+| VS Code / Antigravity IDE                                | Edición de código                              |
+| GitHub                                                   | Control de versiones y gestión del código      |
+| Obsidian                                                 | Documentación técnica y registro de decisiones |
 
 ### 3.2 Datos
 
@@ -69,14 +69,14 @@ Dataset _Hourly Energy Consumption_ (Kaggle), descrito en [02_base_de_datos.md](
 
 ## 4. Cronograma
 
-| Fase                                       | Actividades                                                                 | Fechas        | Entregable                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------- | ------------- | ----------------------------------------------- |
-| 1. Comprensión del problema y de los datos | Definir preguntas de análisis, descargar el dataset y revisar su estructura | `09-10-2026`  | Documento de proyecto y dataset descargado      |
-| 2. Exploración y limpieza                  | EDA, tratamiento de nulos, duplicados y horas faltantes                     | `12-10-2026`  | Datos en `data/processed/` y resumen de calidad |
-| 3. Análisis                                | Patrones temporales, estacionalidad, tendencia y comparación entre regiones | `[completar]` | Notebook de análisis                            |
-| 4. Pronóstico                              | Diseño, entrenamiento y evaluación de modelos                               | `[completar]` | Notebook de modelado y resultados               |
-| 5. Visualización                           | Diseño y construcción de gráficos y de la presentación final                | `[completar]` | Visualización final                             |
-| 6. Documentación y cierre                  | Conclusiones, informe final y orden del repositorio                         | `[completar]` | Informe final y repositorio                     |
+| Fase                                       | Actividades                                                                 | Entregable                                      |
+| ------------------------------------------ | --------------------------------------------------------------------------- | ----------------------------------------------- |
+| 1. Comprensión del problema y de los datos | Definir preguntas de análisis, descargar el dataset y revisar su estructura | Documento de proyecto y dataset descargado      |
+| 2. Exploración y limpieza                  | EDA, tratamiento de nulos, duplicados y horas faltantes                     | Datos en `data/processed/` y resumen de calidad |
+| 3. Análisis                                | Patrones temporales, estacionalidad, tendencia y comparación entre regiones | Notebook de análisis                            |
+| 4. Pronóstico                              | Diseño, entrenamiento y evaluación de modelos                               | Notebook de modelado y resultados               |
+| 5. Visualización                           | Diseño y construcción de gráficos y de la presentación final                | Visualización final                             |
+| 6. Documentación y cierre                  | Conclusiones, informe final y orden del repositorio                         | Informe final y repositorio                     |
 
 ---
 
