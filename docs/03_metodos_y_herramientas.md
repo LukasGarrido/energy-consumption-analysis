@@ -21,6 +21,7 @@
 - **Análisis de estacionalidad y tendencia:** medias móviles y descomposición de la serie (utilizando `statsmodels`).
 - **Visualización:** gráficos de líneas, mapas de calor (hora por día de la semana), diagramas de caja y comparaciones entre regiones, en versiones estáticas e interactivas.
 - **Pronóstico:** Implementación y ajuste de un modelo predictivo supervisado basado en **XGBoost** (_Extreme Gradient Boosting_) evaluado sobre las características temporales e históricas extraídas.
+- **Limpieza de series de tiempo:** unificación de duplicados por promedio, reindexado a calendario horario, interpolación lineal de huecos cortos y validación.
 
 ---
 

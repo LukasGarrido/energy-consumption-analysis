@@ -33,6 +33,9 @@
 - Tukey, J. W. (1977). Exploratory data analysis. Addison-Wesley.
     
 - Waskom, M. L. (2021). seaborn: Statistical data visualization. Journal of Open Source Software, 6(60), 3021. [https://doi.org/10.21105/joss.03021](https://doi.org/10.21105/joss.03021)
+
+- PJM Interconnection. (s. f.). MSRS Report Format Documentation: Hourly Load Data. [https://www.pjm.com/-/media/markets-ops/settlements/msrs/desc/msrs-customer-report-documentation-hourly-load-data.ashx](https://www.pjm.com/-/media/markets-ops/settlements/msrs/desc/msrs-customer-report-documentation-hourly-load-data.ashx)
+
 ---
 
 ### Mapeo de Referencias en el Documento
