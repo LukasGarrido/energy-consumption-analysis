@@ -1,17 +1,17 @@
 # Documentación del modelo
 
-> Este documento se completa a medida que avanza el proyecto. Los campos marcados como `[por definir]` se llenan al terminar el EDA y al elegir los modelos.
+> Este documento se completa a medida que avanza el proyecto. Los campos marcados como `[por definir]` se llenan al terminar el EDA (Análisis exploratorio) y al elegir los modelos.
 
 ---
 
 ## 1. Datos de entrada
 
-|Elemento|Detalle|
-|---|---|
-|Regiones utilizadas|`[por definir]`|
-|Periodo|`[por definir]`|
-|Variable objetivo|Consumo horario en MW|
-|Archivo de entrada|`data/processed/` `[por definir]`|
+| Elemento            | Detalle                           |
+| ------------------- | --------------------------------- |
+| Regiones utilizadas | `[por definir]`                   |
+| Periodo             | `[por definir]`                   |
+| Variable objetivo   | Consumo horario en MW             |
+| Archivo de entrada  | `data/processed/` `[por definir]` |
 
 ---
 
@@ -19,12 +19,12 @@
 
 ### 2.1 Tratamiento de calidad
 
-|Problema|Tratamiento aplicado|
-|---|---|
-|Valores nulos|`[por definir]`|
-|Duplicados|`[por definir]`|
-|Horas faltantes por cambio de horario|`[por definir]`|
-|Valores atípicos|`[por definir]`|
+| Problema                              | Tratamiento aplicado |
+| ------------------------------------- | -------------------- |
+| Valores nulos                         | `[por definir]`      |
+| Duplicados                            | `[por definir]`      |
+| Horas faltantes por cambio de horario | `[por definir]`      |
+| Valores atípicos                      | `[por definir]`      |
 
 ### 2.2 Variables creadas
 
