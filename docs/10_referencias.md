@@ -54,6 +54,12 @@
 | Método: pronóstico | Hyndman y Athanasopoulos (2021), Hong y Fan (2016) |
 | Metodología por fases | Chapman et al. (2000) |
 
+### Formato de entregable 
+
+El Reporte tendra el formato de informe técnico para una conferencia de IEEE
+
+[IEEE Template](https://www.overleaf.com/latex/templates/ieee-conference-template/grfzhhncsfqn)
+
 ---
 
 [← Volver al Índice](file:///c:/Users/lukas/Desktop/Projects/energy-consumption-analysis/docs/00_indice.md)
