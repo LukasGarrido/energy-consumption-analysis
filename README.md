@@ -119,22 +119,22 @@ Ejecuta los notebooks **en orden numérico**, con *Restart & Run All*. La guía 
 │   ├── 02_limpieza.ipynb         # Limpieza y tratamiento de series de tiempo
 │   ├── 03_analisis.ipynb         # Patrones, estacionalidad, regiones y picos
 │   ├── 04_modelado.ipynb         # Pronóstico de referencia a 24 horas
-│   ├── 05_agrupamiento.ipynb     # Agrupamiento de perfiles diarios (por crear)
-│   ├── 06_anomalias.ipynb        # Detección de días atípicos (por crear)
-│   └── 07_exportacion.ipynb      # Tablas para el panel (por crear)
+│   ├── 05_agrupamiento.ipynb     # Agrupamiento de perfiles diarios
+│   ├── 06_anomalias.ipynb        # Detección de días atípicos
+│   └── 07_exportacion.ipynb      # Tablas para el panel
 ├── reports/
 │   ├── figures/                  # Figuras y gráficos exportados
 │   └── templates/                # Plantillas y formatos de informes (PDF, documentos)
 ├── src/                          # Módulos Python reutilizables
 │   ├── __init__.py               # Inicialización del paquete
-│   ├── anomalies.py              # Residuos y días atípicos (por crear)
+│   ├── anomalies.py              # Residuos y días atípicos
 │   ├── cleaning.py               # Limpieza de datos
 │   ├── config.py                 # Rutas y parámetros del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
 │   ├── features.py               # Variables de calendario, rezagos y medias móviles
 │   ├── modeling.py               # División, modelos, métricas y comparación
 │   ├── plots.py                  # Utilidades y funciones de graficado
-│   └── profiles.py               # Perfiles diarios y agrupamiento (por crear)
+│   └── profiles.py               # Perfiles diarios y agrupamiento
 ├── .gitignore                    # Configuración de exclusiones de Git
 ├── AGENTS.md                     # Directrices para agentes de IA y colaboradores
 ├── LICENSE                       # Licencia del proyecto
