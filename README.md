@@ -2,8 +2,6 @@
 
 Análisis de la demanda eléctrica horaria de 12 regiones de la red PJM (Estados Unidos, 1998–2018): tipos de día, diferencias entre regiones y episodios atípicos, apoyado en aprendizaje automático y comunicado mediante visualizaciones.
 
-Proyecto de la asignatura **Visualización de Datos** · Grupo 5
-
 ---
 
 ## Descripción
