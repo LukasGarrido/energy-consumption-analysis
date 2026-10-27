@@ -1,86 +1,37 @@
 # Casos de uso
 
-Historias de usuario que describen qué necesitaría lograr cada parte interesada con este análisis y por qué. Cada historia incluye criterios de aceptación para verificar que se cumplió.
-
-**Formato:** _Como_ [parte interesada], _quiero_ [qué lograr], _para_ [motivo].
-
----
+Formato: *Como* [parte interesada], *quiero* [qué lograr], *para* [motivo].
 
 ## Partes interesadas
 
-| Parte interesada                  | Descripción                                                                     |
-| --------------------------------- | ------------------------------------------------------------------------------- |
-| Analista de planeación energética | Necesita entender cuándo y cuánto se consume para planificar la capacidad       |
-| Operador de red                   | Necesita anticipar la demanda y detectar regiones con comportamientos distintos |
-| Estudiante o investigador         | Necesita reproducir y validar el análisis, o usarlo como base para otro trabajo |
-
----
+| Parte interesada | Descripción |
+|---|---|
+| Analista de planeación energética | Necesita entender cuándo y cuánto se consume para planificar la capacidad |
+| Operador de red | Necesita anticipar la demanda y detectar regiones y días con comportamientos distintos |
+| Estudiante o investigador | Necesita reproducir y validar el análisis |
 
 ## Historias de usuario
 
-### HU-01. Patrones por hora y día de la semana
+| N.º | Historia | Criterios de aceptación | Estado |
+|---|---|---|---|
+| HU-01 | Como analista, quiero ver el consumo por hora del día y día de la semana, para anticipar los momentos de mayor demanda | Mapa de calor por región; se indica en qué horas y días se concentra el consumo | Cumplida (notebook 03) |
+| HU-02 | Como analista, quiero conocer la estacionalidad y la tendencia, para distinguir los efectos estacionales de la evolución de largo plazo | Gráficos de consumo por mes y de tendencia; meses de mayor y menor consumo | Cumplida (notebook 03) |
+| HU-03 | Como operador, quiero comparar el consumo entre regiones, para identificar cuáles tienen más variabilidad | Comparación sobre un periodo común; diferencias y similitudes señaladas | Cumplida (notebook 03) |
+| HU-04 | Como operador, quiero identificar los días y horas de máximo consumo, para entender cuándo la red está más exigida | Máximos por región y su ubicación en el tiempo | Cumplida (notebook 03) |
+| HU-05 | Como operador, quiero conocer cuándo y cuánto falla un pronóstico a 24 horas, para saber cuánto confiar en él | Métricas comparadas con un modelo base; error por hora, mes y tipo de día | Cumplida (notebook 04); falta la ventana móvil |
+| HU-06 | Como investigador, quiero reproducir el análisis desde cero, para validar los resultados | Pasos documentados en la guía de usuario; notebooks ejecutables en orden | Parcial |
+| HU-07 | Como analista, quiero ver qué tipos de día existen y cuándo ocurre cada uno, para entender las formas de la demanda más allá de laborable y fin de semana | Grupos con silueta reportada; curva de cada grupo y su ubicación en el calendario | Por hacer (notebook 05) |
+| HU-08 | Como operador, quiero ver qué días se desvían de lo esperable, para identificar episodios de demanda inusual | Lista de días con z modificado > 3.5 y contraste con episodios conocidos | Por hacer (notebook 06) |
+| HU-09 | Como analista, quiero explorar los resultados en un panel interactivo, para filtrar por región, fecha y estación sin programar | Panel con filtros y selección cruzada entre vistas | Por hacer (Power BI) |
 
-**Como** analista de planeación energética, **quiero** ver el consumo promedio por hora del día y día de la semana, **para** anticipar los momentos de mayor demanda.
+## Trazabilidad
 
-**Criterios de aceptación:**
-
-- Existe un mapa de calor de hora por día de la semana para cada región analizada.
-- Se indica en qué horas y días se concentra el mayor consumo.
-
-### HU-02. Estacionalidad y tendencia
-
-**Como** analista de planeación energética, **quiero** conocer cómo cambia el consumo a lo largo del año y de los años, **para** distinguir los efectos estacionales de la tendencia de largo plazo.
-
-**Criterios de aceptación:**
-
-- Hay un gráfico de consumo por mes y otro con la tendencia de largo plazo.
-- Se describen los meses o estaciones de mayor y menor consumo.
-
-### HU-03. Comparación entre regiones
-
-**Como** operador de red, **quiero** comparar el consumo entre regiones, **para** identificar cuáles tienen más variabilidad o picos más marcados.
-
-**Criterios de aceptación:**
-
-- La comparación se hace sobre un periodo común para todas las regiones.
-- Se señalan las diferencias y similitudes más relevantes.
-
-### HU-04. Periodos de máxima demanda
-
-**Como** operador de red, **quiero** identificar los días y horas de máximo consumo, **para** entender cuándo la red está más exigida.
-
-**Criterios de aceptación:**
-
-- Se listan los periodos de mayor demanda por región.
-- Se muestran en una visualización que permita ubicarlos en el tiempo.
-
-### HU-05. Pronóstico de la demanda
-
-**Como** operador de red, **quiero** una estimación de la demanda futura con su error asociado, **para** apoyar la planificación a corto plazo.
-
-**Criterios de aceptación:**
-
-- El modelo se evalúa sobre un periodo de prueba con MAE, RMSE y MAPE.
-- Se compara contra un modelo base y se explica la diferencia.
-
-### HU-06. Reproducibilidad
-
-**Como** estudiante o investigador, **quiero** reproducir el análisis desde cero, **para** validar los resultados o reutilizarlos.
-
-**Criterios de aceptación:**
-
-- Los pasos de instalación, descarga de datos y ejecución están en la [guía de usuario](https://claude.ai/chat/09_guia_usuario.md).
-- Los notebooks se ejecutan en orden sin errores.
-
----
-
-## Trazabilidad con los objetivos
-
-|Historia|Objetivo específico relacionado|
-|---|---|
-|HU-01|Identificar patrones por hora del día, día de la semana y mes del año|
-|HU-02|Estudiar la estacionalidad y la tendencia de largo plazo|
-|HU-03|Comparar el comportamiento de las distintas regiones|
-|HU-04|Detectar los periodos de máxima demanda|
-|HU-05|Pronóstico de la demanda (método)|
-|HU-06|Repositorio ordenado, con notebooks y documentación|
+| Historia | Pregunta | Objetivo específico |
+|---|---|---|
+| HU-01, HU-02, HU-04 | P1 | OE3 (indicadores) |
+| HU-03 | P2 | OE3 |
+| HU-05 | P4 | Pronóstico de referencia |
+| HU-07 | P1 | OE2 |
+| HU-08 | P3 | OE4 |
+| HU-09 | P1 a P4 | OE5 |
+| HU-06 | Transversal | OE1 |
