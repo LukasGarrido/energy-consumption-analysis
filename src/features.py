@@ -8,7 +8,8 @@ devuelve uno nuevo, sin modificar el original.
 import holidays
 import pandas as pd
 
-from src.config import HORIZONTE_HORAS, REZAGOS_HORAS, VENTANAS_HORAS
+from src.config import DESFASE_FIN_DE_HORA, HORIZONTE_HORAS, REZAGOS_HORAS, VENTANAS_HORAS
+
 
 # Estaciones meteorológicas del hemisferio norte, por meses completos
 ESTACIONES = {
@@ -20,25 +21,31 @@ ESTACIONES = {
 
 
 def agregar_variables_temporales(df: pd.DataFrame, col_fecha: str = "Datetime") -> pd.DataFrame:
-    """Agrega variables calculadas a partir de la fecha.
+    """Agrega variables de calendario según el día operativo.
 
-    Columnas nuevas: anio, mes, hora, dia_semana (0 = lunes), es_fin_de_semana,
-    estacion y es_festivo (festivos federales de EE. UU.).
+    En el dataset, Datetime marca el final de la hora (00:00 es la hora 23 del
+    día anterior). Las variables se calculan desde Datetime - 1 h, de modo que
+    cada día operativo tenga sus 24 horas (0 a 23).
+
+    Columnas nuevas: fecha (día operativo), anio, mes, hora (0 = 00:00-01:00),
+    dia_semana (0 = lunes), es_fin_de_semana, estacion y es_festivo
+    (festivos federales de EE. UU.).
     """
     df = df.copy()
-    fecha = df[col_fecha]
+    inicio_hora = df[col_fecha] - DESFASE_FIN_DE_HORA
 
-    df["anio"] = fecha.dt.year
-    df["mes"] = fecha.dt.month
-    df["hora"] = fecha.dt.hour
-    df["dia_semana"] = fecha.dt.dayofweek
+    df["fecha"] = inicio_hora.dt.normalize()
+    df["anio"] = inicio_hora.dt.year
+    df["mes"] = inicio_hora.dt.month
+    df["hora"] = inicio_hora.dt.hour
+    df["dia_semana"] = inicio_hora.dt.dayofweek
     df["es_fin_de_semana"] = df["dia_semana"] >= 5
     df["estacion"] = df["mes"].map(ESTACIONES)
 
     feriados = holidays.country_holidays(
-        "US", years=range(int(fecha.dt.year.min()), int(fecha.dt.year.max()) + 1)
+        "US", years=range(int(df["anio"].min()), int(df["anio"].max()) + 1)
     )
-    df["es_festivo"] = fecha.dt.normalize().isin(pd.to_datetime(list(feriados.keys())))
+    df["es_festivo"] = df["fecha"].isin(pd.to_datetime(list(feriados.keys())))
     return df
 
 
