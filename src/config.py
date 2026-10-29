@@ -33,3 +33,6 @@ UMBRAL_Z_MODIFICADO = 3.5       # z modificado (Iglewicz y Hoaglin) para marcar 
 
 # Reproducibilidad 
 SEMILLA = 42                    # para que los resultados sean reproducibles
+
+N_PLIEGUES = 3                  # pliegues mínimos de la validación en ventana móvil
+MESES_PLIEGUE = 12              # duración de la prueba de cada pliegue
