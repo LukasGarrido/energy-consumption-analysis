@@ -6,6 +6,9 @@ devuelve uno nuevo, sin modificar el original. Orden de uso:
 
     unificar_duplicados -> marcar_valores_sospechosos -> reindexar_calendario_horario
     -> recortar_extremos_vacios -> interpolar_huecos -> validar_limpieza
+
+limpiar_region encadena esos pasos para una región, y run_cleaning lo aplica
+a las 12 regiones y guarda los resultados en data/processed/.
 """
 
 from pathlib import Path
@@ -14,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from src.config import RAW_DIR, PROCESSED_DIR
-from src.data_loader import load_regions_dict, load_all_regions
+from src.data_loader import load_regions_dict
 
 
 def unificar_duplicados(df: pd.DataFrame) -> pd.DataFrame:
@@ -30,6 +33,9 @@ def marcar_valores_sospechosos(df: pd.DataFrame) -> pd.DataFrame:
 
     La fila se queda, pero sin dato. Por ahora se consideran errores los
     valores menores o iguales a 0 y los infinitos.
+
+    Los atípicos aislados (por ejemplo DOM 1,253 MW o PJMW 487 MW) NO se tocan:
+    detectarlos exige comparar contra el patrón esperado (decisión D2, por hacer).
     """
     df = df.copy()
     vacios_antes = df["MW"].isna().sum()
@@ -139,6 +145,38 @@ def validar_limpieza(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def run_cleaning(raw_dir: Path = RAW_DIR, processed_dir: Path = PROCESSED_DIR) -> None:
-    """Ejecuta todos los pasos anteriores en orden (pendiente)."""
-    pass
+def limpiar_region(df: pd.DataFrame, limite_horas: int = 2) -> pd.DataFrame:
+    """Aplica todos los pasos de limpieza a UNA región y la valida.
+
+    Lanza un error si la región no supera validar_limpieza.
+    """
+    df = unificar_duplicados(df)
+    df = marcar_valores_sospechosos(df)
+    df = reindexar_calendario_horario(df)
+    df = recortar_extremos_vacios(df)
+    df = interpolar_huecos(df, limite_horas=limite_horas)
+    return validar_limpieza(df)
+
+
+def run_cleaning(raw_dir: Path = RAW_DIR, processed_dir: Path = PROCESSED_DIR) -> pd.DataFrame:
+    """Limpia las 12 regiones y guarda un parquet por región y uno conjunto.
+
+    Salidas en processed_dir: {REGION}.parquet y consumo_horario.parquet
+    (formato largo: Datetime, MW, region). Lanza un error si alguna región
+    no supera la validación.
+    """
+    regiones = load_regions_dict(raw_dir)
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    limpias = []
+    for nombre, df in regiones.items():
+        print(f"\n--- {nombre} ---")
+        limpia = limpiar_region(df)
+        limpia["region"] = nombre
+        limpia.to_parquet(processed_dir / f"{nombre}.parquet", index=False)
+        limpias.append(limpia)
+
+    todo = pd.concat(limpias, ignore_index=True)
+    todo.to_parquet(processed_dir / "consumo_horario.parquet", index=False)
+    print(f"\nTotal: {len(todo):,} filas en {len(limpias)} regiones.")
+    return todo
