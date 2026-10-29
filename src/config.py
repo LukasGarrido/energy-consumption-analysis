@@ -36,3 +36,9 @@ SEMILLA = 42                    # para que los resultados sean reproducibles
 
 N_PLIEGUES = 3                  # pliegues mínimos de la validación en ventana móvil
 MESES_PLIEGUE = 12              # duración de la prueba de cada pliegue
+
+# Agrupamiento de perfiles diarios 
+MUESTRA_AGRUPAMIENTO = 10_000   # días usados para elegir k y ajustar Ward (limita el costo)
+
+# Detección de anomalías
+TOLERANCIA_EPISODIO_DIAS = 1    # margen al contrastar un día atípico con un episodio
