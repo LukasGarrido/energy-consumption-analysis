@@ -49,22 +49,6 @@ Los datos crudos **no se incluyen en el repositorio**, se descargan desde Kaggle
 
 ---
 
-## Estado del proyecto
-
-| Componente | Estado |
-|---|---|
-| Exploración y calidad de los datos (notebook 01) | Hecho |
-| Limpieza y validación (notebook 02) | Hecho |
-| Análisis descriptivo (notebook 03) | Hecho |
-| Pronóstico de referencia (notebook 04) | Hecho, falta la validación en ventana móvil |
-| Agrupamiento de perfiles diarios (notebook 05) | Por hacer |
-| Detección de anomalías (notebook 06) | Por hacer |
-| Exportación de tablas para el panel (notebook 07) | Por hacer |
-| Panel interactivo en Power BI | Por hacer |
-| Documentación | En curso |
-
----
-
 ## Inicio rápido
 
 ```bash
