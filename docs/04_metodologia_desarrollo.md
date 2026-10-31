@@ -1,4 +1,4 @@
-# Metodología de desarrollo
+﻿# Metodología de desarrollo
 
 El proyecto avanza por fases, con un notebook por fase y las funciones reutilizables en `src/`. En cada fase se formulan hipótesis a partir de los resultados y se contrastan con los datos antes de aceptarlas. Por ejemplo:
 
@@ -13,8 +13,8 @@ El proyecto avanza por fases, con un notebook por fase y las funciones reutiliza
 |---|---|---|---|
 | 1. Exploración y calidad | Estructura, convención horaria, cobertura, duplicados, horas faltantes y valores sospechosos | Notebook 01 | Hecho |
 | 2. Preparación | Limpieza con reglas explícitas y validación | Notebook 02 y `data/processed/` | Hecho |
-| 3. Análisis descriptivo | Patrones por hora, día y estación; tendencia; comparación; picos | Notebook 03 | Hecho, recalcular con el día operativo |
-| 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base; MASE; validación en ventana móvil; residuos fuera de muestra | Notebook 04 | Implementado|
+| 3. Análisis descriptivo | Patrones por hora, día y estación, tendencia, comparación, picos | Notebook 03 | Hecho, recalcular con el día operativo |
+| 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base, MASE, validación en ventana móvil, residuos fuera de muestra | Notebook 04 | Implementado|
 | 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | Notebook 05 | Implementado |
 | 6. Detección de anomalías | Residuo diario, z modificado y contraste con episodios conocidos | Notebook 06 | Implementado |
 | 7. Visualización | Exportación de tablas y construcción del panel | Notebook 07 y panel en Power BI | Notebook 07 implementado, panel por hacer |
@@ -38,7 +38,7 @@ Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el 
 
 ## Decisiones de diseño
 
-Cada decisión se escribe aquí una vez; los demás documentos la enlazan.
+Cada decisión se escribe aquí una vez, los demás documentos la enlazan.
 
 | ID | Decisión | Motivo | Alternativa descartada | Impacto | Estado |
 |---|---|---|---|---|---|

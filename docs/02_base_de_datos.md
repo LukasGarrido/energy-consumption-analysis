@@ -1,4 +1,4 @@
-# Base de datos (dataset)
+﻿# Base de datos (dataset)
 
 ## Fuente y contenido
 
@@ -18,7 +18,7 @@ Las regiones no cubren los mismos años, por lo que **no existe un periodo comú
 - Las otras 10 regiones llegan hasta 2018-08-03 y se denominan *vigentes*. Comparten el periodo **2013-06-01 → 2018-08-03**.
 - `NI` termina en 2011-01 cuando empieza `COMED`, y `PJM_Load` termina en 2002-01 cuando empiezan `PJME` y `PJMW`. Podrían ser la misma zona en periodos consecutivos, pero no está comprobado.
 
-Las comparaciones entre regiones se hacen sobre las 10 vigentes en su periodo común; `NI` y `PJM_Load` se analizan por separado.
+Las comparaciones entre regiones se hacen sobre las 10 vigentes en su periodo común, `NI` y `PJM_Load` se analizan por separado.
 
 ---
 
@@ -55,7 +55,7 @@ Casi todo se explica por el cambio de horario de EE. UU. (desde 2007, del segund
 | Región | Valor | Fecha | Tipo | Tratamiento |
 | ------ | ----- | ----- | ---- | ----------- |
 | FE | 0 MW | 2011-06-01 01:00 | Primer registro de la serie | Se marca vacío y se recorta |
-| DOM | 1,253 MW | 2009-12-12 00:00 | Aislado; el siguiente valor más bajo es 5,518 MW | Se conserva (D2) |
+| DOM | 1,253 MW | 2009-12-12 00:00 | Aislado, el siguiente valor más bajo es 5,518 MW | Se conserva (D2) |
 | PJMW | 487 MW | 2003-05-29 00:00 | Aislado | Se conserva (D2) |
 | PJMW | 2,553 y 2,574 MW | 2012-04-01 y 2012-04-02 | Aislados | Se conserva (D2) |
 | EKPC | 514 MW | 2013-09-29, de madrugada | Racha de varias horas en domingo: valle real, no error | Se conserva |
@@ -72,11 +72,11 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 | Regla                         | Umbral o criterio                                                                           | Fundamento                                                                 | Estado                                                    |
 | ----------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------- |
 | Comparabilidad entre regiones | Solo en el periodo común (10 regiones, 2013-06-01 → 2018-08-02 en días operativos)          | Derivado de la cobertura observada                                         | Aplicada                                                  |
-| Cobertura mínima              | Una región se excluye de una comparación si tiene menos del 99 % de las horas de su periodo | Criterio del proyecto; el valor observado es de 99.98 % o más              | Cumplida                                                  |
+| Cobertura mínima              | Una región se excluye de una comparación si tiene menos del 99 % de las horas de su periodo | Criterio del proyecto, el valor observado es de 99.98 % o más              | Cumplida                                                  |
 | Horas repetidas               | Se promedian las lecturas                                                                   | Cambio de horario de otoño (desde 2014): dos lecturas para una hora        | Aplicada                                                  |
 | Valores imposibles            | MW ≤ 0 pasa a vacío                                                                         | Restricción física: la demanda no puede ser negativa                       | Aplicada                                                  |
-| Valores atípicos aislados     | z modificado de la desviación respecto del patrón esperado > 3.5 y horas vecinas normales   | Iglewicz y Hoaglin (1993)                                                  | **Por hacer (D2)**: hoy solo se corrigen los valores ≤ 0; `DOM` y `PJMW` se conservan |
-| Picos altos continuos         | Se conservan                                                                                | Son demanda real; se distinguen por su continuidad                         | Aplicada                                                  |
+| Valores atípicos aislados     | z modificado de la desviación respecto del patrón esperado > 3.5 y horas vecinas normales   | Iglewicz y Hoaglin (1993)                                                  | **Por hacer (D2)**: hoy solo se corrigen los valores ≤ 0, `DOM` y `PJMW` se conservan |
+| Picos altos continuos         | Se conservan                                                                                | Son demanda real, se distinguen por su continuidad                         | Aplicada                                                  |
 | Rachas bajas reales           | Se conservan                                                                                | Un valle de varias horas seguidas es consumo real (`EKPC`, 2013-09-29)     | Aplicada                                                  |
 | Horas faltantes               | Se reindexa a un calendario horario completo                                                | Una serie regular es requisito de rezagos, medias móviles y descomposición | Aplicada                                                  |
 | Interpolación                 | Lineal, hasta 2 horas seguidas                                                              | Todos los huecos observados son de 2 horas o menos                         | Aplicada                                                  |

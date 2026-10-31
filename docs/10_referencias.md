@@ -1,4 +1,4 @@
-# Referencias
+﻿# Referencias
 
 Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., & Wirth, R. (2000). *CRISP-DM 1.0: Step-by-step data mining guide*. CRISP-DM Consortium.
 
@@ -46,17 +46,17 @@ van Wijk, J. J., & van Selow, E. R. (1999). Cluster and calendar based visualiza
 
 | Referencia | Afirmación que respalda |
 |---|---|
-| Hong y Fan (2016) | Importancia del pronóstico de la demanda eléctrica; revisión de métodos |
-| Mulla (2018); PJM Interconnection (s. f.) | Descripción del dataset y convención de hora de fin |
-| Cordova Pou; pranavsp108; panambY; Towards Data Science | Trabajos previos con el dataset |
+| Hong y Fan (2016) | Importancia del pronóstico de la demanda eléctrica, revisión de métodos |
+| Mulla (2018), PJM Interconnection (s. f.) | Descripción del dataset y convención de hora de fin |
+| Cordova Pou, pranavsp108, panambY, Towards Data Science | Trabajos previos con el dataset |
 | Chicco (2012) | Agrupamiento de curvas de carga y desempeño de los métodos |
 | van Wijk y van Selow (1999) | Agrupamiento de perfiles diarios con vista de calendario |
-| Cleveland y McGill (1984); Heer y Bostock (2010) | Precisión relativa de los canales visuales |
+| Cleveland y McGill (1984), Heer y Bostock (2010) | Precisión relativa de los canales visuales |
 | Munzner (2014) | Marco de datos, tarea y codificación para diseñar vistas |
-| Rousseeuw (1987); Kaufman y Rousseeuw (1990) | Silueta y su interpretación |
+| Rousseeuw (1987), Kaufman y Rousseeuw (1990) | Silueta y su interpretación |
 | Iglewicz y Hoaglin (1993) | Umbral de z modificado para valores atípicos |
 | Tukey (1977) | Regla de 1.5 veces el rango intercuartil para valores atípicos |
 | Cleveland et al. (1990) | Descomposición STL |
-| Hyndman y Koehler (2006); Hyndman y Athanasopoulos (2021) | Métricas de error, MASE y pronóstico ingenuo como referencia |
+| Hyndman y Koehler (2006), Hyndman y Athanasopoulos (2021) | Métricas de error, MASE y pronóstico ingenuo como referencia |
 | Chen y Guestrin (2016) | Algoritmo de pronóstico |
 | Chapman et al. (2000) | Estructura por fases del proyecto |

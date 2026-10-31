@@ -1,4 +1,4 @@
-# Guía de usuario
+﻿# Guía de usuario
 
 Esta guía explica cómo instalar el proyecto, obtener los datos y reproducir el análisis desde cero.
 
@@ -81,7 +81,7 @@ Los parámetros del pronóstico deben ser:
 HORIZONTE_HORAS = 24            # se pronostica con 24 horas de antelación
 REZAGOS_HORAS = [24, 48, 168]   # consumo de hace 1 día, 2 días y 1 semana
 VENTANAS_HORAS = [24, 168]      # ventanas de las medias móviles
-FECHA_CORTE = "2017-01-01"      # antes: entrenamiento; desde esta fecha: prueba
+FECHA_CORTE = "2017-01-01"      # antes: entrenamiento, desde esta fecha: prueba
 SEMILLA = 42                    # para que los resultados sean reproducibles
 ```
 
@@ -224,4 +224,4 @@ python -m ipykernel install --user --name energy-consumption --display-name "Pyt
 y seleccionarlo desde *Kernel → Change Kernel*.
 
 **El notebook 02 deja una región en `ERROR`.**
-La región no se guarda. La celda de diagnóstico muestra los vacíos que quedaron: si son un hueco de más de 2 horas seguidas, se puede subir `LIMITE_HORAS` o dejarlo vacío y documentarlo; si están en el primer o último registro, `recortar_extremos_vacios` debería eliminarlos.
+La región no se guarda. La celda de diagnóstico muestra los vacíos que quedaron: si son un hueco de más de 2 horas seguidas, se puede subir `LIMITE_HORAS` o dejarlo vacío y documentarlo, si están en el primer o último registro, `recortar_extremos_vacios` debería eliminarlos.

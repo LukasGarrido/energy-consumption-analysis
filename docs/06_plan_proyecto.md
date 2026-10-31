@@ -1,4 +1,4 @@
-# Plan del proyecto
+﻿# Plan del proyecto
 
 ## 1. Objetivos y alcance
 
@@ -14,14 +14,14 @@ Los objetivos y el alcance están en [01_objetivo.md](01_objetivo.md). Las decis
 | Tipos de día identificados | Silueta media ≥ 0.50 (razonable) o entre 0.26 y 0.50 (débil, reportada como tal), grupos de al menos el 5 % de los días e interpretables con el calendario | Implementado (notebook 05) |
 | Comparación entre regiones | Cada región caracterizada por su mezcla de tipos de día, en el historial completo y en el periodo común | Parcial |
 | Días atípicos detectados | z modificado del residuo > 3.5 y contraste con episodios externos, con fuente y fecha verificada | Implementado (notebook 06) |
-| Panel interactivo | Seis páginas, cada vista justificada por una tarea y un canal perceptual; filtros por región, fecha y estación | Tablas listas (notebook 07); panel por hacer |
+| Panel interactivo | Seis páginas, cada vista justificada por una tarea y un canal perceptual, filtros por región, fecha y estación | Tablas listas (notebook 07), panel por hacer |
 | Reproducibilidad | Un tercero reproduce el análisis con la guía de usuario | Por comprobar |
 
 ### Del agrupamiento
 
 | Métrica | Regla |
 |---|---|
-| Silueta media | Estructura razonable si es ≥ 0.50; débil entre 0.26 y 0.50, y se reporta como tal |
+| Silueta media | Estructura razonable si es ≥ 0.50, débil entre 0.26 y 0.50, y se reporta como tal |
 | Tamaño de los grupos | Ninguno con menos del 5 % de los días |
 | Estabilidad | Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado), reportada en el notebook 05. La repetición con distintas semillas queda por hacer |
 
@@ -68,9 +68,9 @@ Sin costo económico: las librerías son de código abierto y el dataset es de a
 |---|---|---|---|
 | Las regiones cubren periodos distintos | Comparaciones poco justas | Comparar las 10 regiones vigentes en su periodo común | Se materializó y está mitigado |
 | Horas duplicadas o faltantes por cambios de horario | Errores en agregaciones y en el modelo | Limpieza con reglas y validación | Se materializó y está resuelto |
-| La convención de hora de fin desplaza el día de la fila de las 00:00 | Pequeño (1 de cada 24 horas) | Día operativo (D1) en `features.py` | Mitigado en el código; falta repetir los notebooks 03 y 04 |
+| La convención de hora de fin desplaza el día de la fila de las 00:00 | Pequeño (1 de cada 24 horas) | Día operativo (D1) en `features.py` | Mitigado en el código, falta repetir los notebooks 03 y 04 |
 | Las cifras ya publicadas (horas, fin de semana, pronóstico) quedan desactualizadas | Medio | Marcarlas como por recalcular y reemplazarlas tras repetir los notebooks | Abierto |
-| Valores bajos candidatos a error en `DOM` y `PJMW` | Pequeño | Se conservan; regla del z modificado en la limpieza por hacer (D2) | Aceptado |
+| Valores bajos candidatos a error en `DOM` y `PJMW` | Pequeño | Se conservan, regla del z modificado en la limpieza por hacer (D2) | Aceptado |
 | `DEOK` con mínimos y lecturas duplicadas inconsistentes | Pequeño | Revisar con la tabla de valores aislados del notebook 01 | Abierto |
 | La hora de `COMED` y `NI` llega una hora más tarde que el resto | Medio: los tipos de día podrían separarse por la hora y no por la forma | Medir el desfase en el notebook 05 y alinear a hora central si hace falta (D7) | Abierto |
 | La estructura de los grupos resulta débil | Medio | Reportarla como tal y apoyarla con el calendario | Abierto |

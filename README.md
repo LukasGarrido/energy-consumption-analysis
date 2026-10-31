@@ -1,4 +1,4 @@
-# Análisis visual de la demanda eléctrica horaria de la red PJM
+﻿# Análisis visual de la demanda eléctrica horaria de la red PJM
 
 Análisis de la demanda eléctrica horaria de 12 regiones de la red PJM (Estados Unidos, 1998–2018): tipos de día, diferencias entre regiones y episodios atípicos, apoyado en aprendizaje automático y comunicado mediante visualizaciones.
 
@@ -30,6 +30,7 @@ El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda 
 - **Fuente:** [Hourly Energy Consumption (Kaggle)](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption), de Rob Mulla, con datos de PJM Interconnection.
 - **Contenido:** demanda horaria en MW de 12 regiones (AEP, COMED, DAYTON, DEOK, DOM, DUQ, EKPC, FE, NI, PJME, PJMW y PJM_Load), entre 1998-04-01 y 2018-08-03.
 - **Volumen:** 1,090,167 filas originales, 1,090,343 tras la limpieza.
+- **Convención horaria:** `Datetime` marca el **final** de la hora. Las variables de calendario se calculan desde `Datetime − 1 h` (día operativo).
 - **Periodo común:** no existe uno para las 12 regiones, 10 comparten 2013-06-01 → 2018-08-03.
 
 Los datos crudos **no se incluyen en el repositorio**, se descargan desde Kaggle (ver [inicio rápido](#inicio-rápido)).
@@ -38,14 +39,35 @@ Los datos crudos **no se incluyen en el repositorio**, se descargan desde Kaggle
 
 ## Resultados preliminares
 
+Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora de fin y se actualizan con el día operativo.
+
 | Hallazgo | Resultado |
 |---|---|
 | Calidad de los datos | Sin nulos, cobertura de 99.98 % a 99.99 %, 40 duplicados y 217 horas faltantes, casi todos por cambios de horario |
-| Limpieza | Las 12 regiones superan la validación, se interpoló el 0.02 % de las horas |
-| Ciclo diario | Mínimo hacia las 4–5 h y máximo entre las 18 y las 20 h |
-| Calendario | El fin de semana consume entre un 4 % y un 14 % menos que un laborable, un festivo, cerca de un 5 % menos |
+| Limpieza | Las 12 regiones superan la validación (1,090,343 filas), se interpoló el 0.02 % de las horas |
+| Convención horaria | `Datetime` marca el final de la hora, el calendario usa el día operativo |
+| Hora de `COMED` | Su curva llega una hora más tarde: es lo esperable si las series están en hora del este y `COMED` es una zona de hora central |
+| Ciclo diario | Mínimo hacia las 4–5 h y máximo entre las 18 y las 20 h (hora de fin, por recalcular) |
+| Calendario | El fin de semana consume entre un 4 % y un 14 % menos que un laborable, un festivo, cerca de un 5 % menos (por recalcular) |
 | Estacionalidad | Dos máximos anuales (verano e invierno), `EKPC` y `PJMW` son invernales, `COMED`, `DUQ`, `DEOK` y `PJME` veraniegas |
-| Pronóstico a 24 h (`PJME`) | XGBoost: MAE de 1,862 MW frente a 2,300 MW del modelo base (−19.0 %) |
+| Pronóstico a 24 h (`PJME`) | XGBoost: MAE de 1,862 MW frente a 2,300 MW del modelo base (−19.0 %) en una partición, la validación en ventana móvil y el MASE están implementados |
+| Tipos de día y anomalías | Notebooks 05 y 06 ejecutados, resultados por documentar |
+
+---
+
+## Estado del proyecto
+
+| Componente | Estado |
+|---|---|
+| Exploración y calidad de los datos (notebook 01) | Hecho |
+| Limpieza y validación (notebook 02) | Hecho |
+| Análisis descriptivo (notebook 03) | Hecho con el día operativo |
+| Pronóstico de referencia, MASE y ventana móvil (notebook 04) | Hecho |
+| Agrupamiento de perfiles diarios (notebook 05) | Ejecutado, resultados por documentar |
+| Detección de anomalías (notebook 06) | Ejecutado, resultados por documentar |
+| Exportación de tablas para el panel (notebook 07) | Ejecutado |
+| Panel interactivo en Power BI | Por hacer (las tablas están en `data/processed/powerbi/`) |
+| Documentación | En curso |
 
 ---
 
@@ -72,7 +94,7 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 jupyter lab
 ```
 
-Ejecuta los notebooks **en orden numérico**, con *Restart & Run All*. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/09_guia_usuario.md](docs/09_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
+Ejecuta los notebooks **en orden numérico (01 a 07)**, con *Restart & Run All*. Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el mismo valor en los notebooks 05 y 07. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/09_guia_usuario.md](docs/09_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
 
 ---
 
@@ -83,14 +105,15 @@ Ejecuta los notebooks **en orden numérico**, con *Restart & Run All*. La guía 
 │   ├── streamlit_app.py          # Prototipo en Streamlit (opcional)
 │   └── panel_pjm.pbix            # Panel en Power BI (por crear)
 ├── data/
-│   ├── raw/                      # Datos crudos (.gitkeep; excluidos por .gitignore)
-│   └── processed/                # Datos limpios y tablas para el panel (.gitkeep)
+│   ├── raw/                      # Datos crudos (.gitkeep, excluidos por .gitignore)
+│   └── processed/                # Datos limpios y resultados (.gitkeep)
+│       └── powerbi/              # Tablas CSV para el panel (generadas por el notebook 07)
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
 │   ├── 00_indice.md              # Índice general de la documentación
 │   ├── 01_objetivo.md            # Problema, preguntas y objetivos
 │   ├── 02_base_de_datos.md       # Dataset, calidad, reglas de preprocesamiento y limpieza
 │   ├── 03_metodos_y_herramientas.md # Herramientas y métodos de datos y de visualización
-│   ├── 04_metodologia_desarrollo.md # Fases del proyecto y flujo de notebooks
+│   ├── 04_metodologia_desarrollo.md # Fases, flujo de notebooks y decisiones de diseño
 │   ├── 05_resultados_esperados.md # Entregables y resultados obtenidos
 │   ├── 06_plan_proyecto.md       # Métricas, recursos, cronograma y riesgos
 │   ├── 07_casos_de_uso.md        # Historias de usuario y estado
@@ -99,26 +122,29 @@ Ejecuta los notebooks **en orden numérico**, con *Restart & Run All*. La guía 
 │   ├── 10_referencias.md         # Bibliografía y afirmaciones que respalda
 │   └── 11_conceptos.md           # Conceptos teóricos explicados para este proyecto
 ├── notebooks/                    # Cuadernos Jupyter en orden de ejecución
-│   ├── 01_exploracion.ipynb      # Exploración inicial (EDA) y calidad de datos
+│   ├── 01_exploracion.ipynb      # Exploración inicial (EDA), convención horaria y calidad de datos
 │   ├── 02_limpieza.ipynb         # Limpieza y tratamiento de series de tiempo
 │   ├── 03_analisis.ipynb         # Patrones, estacionalidad, regiones y picos
-│   ├── 04_modelado.ipynb         # Pronóstico de referencia a 24 horas
+│   ├── 04_modelado.ipynb         # Pronóstico de referencia a 24 horas, MASE y ventana móvil
 │   ├── 05_agrupamiento.ipynb     # Agrupamiento de perfiles diarios
-│   ├── 06_anomalias.ipynb        # Detección de días atípicos
+│   ├── 06_anomalias.ipynb        # Detección de días atípicos y contraste con episodios
 │   └── 07_exportacion.ipynb      # Tablas para el panel
+├── public/                       # Recursos estáticos y multimedia
+│   ├── templates/                # Plantillas y formatos de informes (PDF, documentos)
+│   └── power_electric_plant.png  # Ilustración conceptual del proyecto
 ├── reports/
-│   ├── figures/                  # Figuras y gráficos exportados
-│   └── templates/                # Plantillas y formatos de informes (PDF, documentos)
+│   └── figures/                  # Figuras y gráficos exportados
 ├── src/                          # Módulos Python reutilizables
 │   ├── __init__.py               # Inicialización del paquete
-│   ├── anomalies.py              # Residuos y días atípicos
+│   ├── anomalies.py              # Residuo diario, z modificado y contraste con episodios
 │   ├── cleaning.py               # Limpieza de datos
 │   ├── config.py                 # Rutas y parámetros del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
-│   ├── features.py               # Variables de calendario, rezagos y medias móviles
-│   ├── modeling.py               # División, modelos, métricas y comparación
+│   ├── features.py               # Día operativo, variables de calendario, rezagos y medias móviles
+│   ├── modeling.py               # División, modelos, métricas (MASE) y ventana móvil
 │   ├── plots.py                  # Utilidades y funciones de graficado
-│   └── profiles.py               # Perfiles diarios y agrupamiento
+│   └── profiles.py               # Perfiles diarios, elección de k y agrupamiento
+├── .env.example                  # Plantilla de variables de entorno
 ├── .gitignore                    # Configuración de exclusiones de Git
 ├── AGENTS.md                     # Directrices para agentes de IA y colaboradores
 ├── LICENSE                       # Licencia del proyecto
@@ -150,7 +176,7 @@ La documentación completa está en [`docs/`](docs/00_indice.md):
 
 ## Tecnologías
 
-Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels), Jupyter, Power BI, Matplotlib y Seaborn, GitHub y Obsidian. El detalle está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
+Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels, holidays, pyarrow), Jupyter, Power BI, Matplotlib y Seaborn, GitHub y Obsidian. El detalle está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
 
 ---
 
@@ -158,10 +184,12 @@ Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels), Jupyter, Power BI, M
 
 - El dataset no incluye temperatura, el principal determinante de la demanda: los episodios atípicos se interpretan por coincidencia con eventos.
 - Los tipos de día pueden resultar con una estructura débil, porque los perfiles diarios forman en parte un continuo.
+- El pronóstico y la detección de anomalías se hacen solo para `PJME`.
+- La curva de `COMED` llega una hora más tarde que la del resto, la comparación de formas de día entre regiones depende de si se alinea (parámetro `ALINEAR_HORA_CENTRAL`).
 - Los datos llegan hasta 2018 y pueden no representar la demanda actual.
 
 ---
 
 ## Licencia
 
-Este proyecto está bajo la licencia indicada en el archivo [LICENSE](LICENSE). Los datos pertenecen a PJM Interconnection y a sus autores. 
+Este proyecto está bajo la licencia indicada en el archivo [LICENSE](LICENSE). Los datos pertenecen a PJM Interconnection y a sus autores.

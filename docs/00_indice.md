@@ -22,7 +22,9 @@ Bienvenido a la documentación del proyecto **Análisis de Consumo Horario de En
    - Requisitos, instalación, obtención de datos, ejecución de notebooks y solución de problemas.
 10. [10. Referencias](10_referencias.md)
     - Bibliografía académica, técnica y fuentes citadas a lo largo del documento.
+11. [11. Conceptos Teóricos](11_conceptos.md)
+    - Compendio exhaustivo de conceptos teóricos, metodológicos y de dominio aplicados en el proyecto.
 
 ---
 
-*Nota para Obsidian:* En Obsidian también puedes vincular estas notas utilizando la sintaxis de wikilinks: `[[01_objetivo]]`, `[[02_base_de_datos]]`, `[[03_metodos_y_herramientas]]`, `[[04_metodologia_desarrollo]]`, `[[05_resultados_esperados]]`, `[[06_plan_proyecto]]`, `[[07_casos_de_uso]]`, `[[08_modelo]]`, `[[09_guia_usuario]]` y `[[10_referencias]]`.
+*Nota para Obsidian:* En Obsidian también puedes vincular estas notas utilizando la sintaxis de wikilinks: `[[01_objetivo]]`, `[[02_base_de_datos]]`, `[[03_metodos_y_herramientas]]`, `[[04_metodologia_desarrollo]]`, `[[05_resultados_esperados]]`, `[[06_plan_proyecto]]`, `[[07_casos_de_uso]]`, `[[08_modelo]]`, `[[09_guia_usuario]]`, `[[10_referencias]]` y `[[11_conceptos]]`.

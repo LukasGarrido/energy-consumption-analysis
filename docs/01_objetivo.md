@@ -1,4 +1,4 @@
-# Objetivo
+﻿# Objetivo
 
 ## Problema
 
@@ -22,10 +22,10 @@ Caracterizar, mediante análisis visual apoyado en aprendizaje automático, los 
 | N.º | Objetivo | Criterio de logro | Estado |
 |---|---|---|---|
 | OE1 | Preparar una base horaria regular y documentada | Las 12 regiones superan la validación (fechas sin repetir, una hora entre filas, sin vacíos) | Hecho |
-| OE2 | Identificar tipos de día agrupando los perfiles diarios | Silueta media ≥ 0.50; cada grupo con al menos el 5 % de los días; grupos interpretables con el calendario | Por hacer |
-| OE3 | Comparar las regiones por su mezcla de tipos de día y su estacionalidad | Cada región caracterizada por su distribución de tipos de día y por indicadores de variabilidad, razón invierno/verano y caída de fin de semana | Parcial: los indicadores están calculados; falta la mezcla de tipos de día |
-| OE4 | Detectar días atípicos respecto de la demanda esperada | Días con z modificado del residuo > 3.5; contraste con episodios externos | Por hacer |
-| OE5 | Diseñar y construir un panel interactivo | Cada vista justificada por una tarea y un canal perceptual; filtros por región, fecha y estación | Por hacer |
+| OE2 | Identificar tipos de día agrupando los perfiles diarios | Silueta media ≥ 0.50, cada grupo con al menos el 5 % de los días, grupos interpretables con el calendario | Por hacer |
+| OE3 | Comparar las regiones por su mezcla de tipos de día y su estacionalidad | Cada región caracterizada por su distribución de tipos de día y por indicadores de variabilidad, razón invierno/verano y caída de fin de semana | Parcial: los indicadores están calculados, falta la mezcla de tipos de día |
+| OE4 | Detectar días atípicos respecto de la demanda esperada | Días con z modificado del residuo > 3.5, contraste con episodios externos | Por hacer |
+| OE5 | Diseñar y construir un panel interactivo | Cada vista justificada por una tarea y un canal perceptual, filtros por región, fecha y estación | Por hacer |
 
 ## Alcance
 

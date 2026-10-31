@@ -1,4 +1,4 @@
-# Métodos y herramientas
+﻿# Métodos y herramientas
 
 ## Herramientas
 
@@ -67,7 +67,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 
 Filtros en todas las páginas: región, fecha y estación. La región y la estación actúan sobre todas las tablas la fecha, solo sobre las tablas diarias y horarias (las ya agregadas no responden a ella). El detalle del modelo de datos está en la sección 7 del notebook 07.
 
-Principios de diseño: el canal de codificación se elige según la tarea (la posición sobre una escala común es el más preciso), las vistas en paneles múltiples comparten escala cuando el objetivo es comparar; el color es secuencial de un solo matiz para magnitudes y categórico de pocos colores (k ≤ 8) para los tipos de día.
+Principios de diseño: el canal de codificación se elige según la tarea (la posición sobre una escala común es el más preciso), las vistas en paneles múltiples comparten escala cuando el objetivo es comparar, el color es secuencial de un solo matiz para magnitudes y categórico de pocos colores (k ≤ 8) para los tipos de día.
 
 ## Métodos considerados y descartados
 

@@ -1,10 +1,10 @@
-# Documentación del modelo
+﻿# Documentación del modelo
 
 Este documento describe los tres componentes analíticos del proyecto y cómo se evalúan.
 
 | Parte | Tema | Pregunta | Notebook | Estado |
 |---|---|---|---|---|
-| A | Pronóstico de referencia a 24 horas | P4 y base de P3 | 04 | Hecho; ampliación por hacer |
+| A | Pronóstico de referencia a 24 horas | P4 y base de P3 | 04 | Hecho, ampliación por hacer |
 | B | Agrupamiento de perfiles diarios | P1 y P2 | 05 | Por hacer |
 | C | Detección de días atípicos | P3 | 06 | Por hacer |
 
@@ -55,7 +55,7 @@ Las primeras 191 filas (24 + 168 − 1) se descartan porque no tienen historia s
 | Elemento | Decisión |
 |---|---|
 | Horizonte | 24 horas: para predecir la hora *t* solo se usa información hasta *t − 24* |
-| Entrenamiento | 2002-01-01 → 2016-12-31 (131,495 filas; 131,304 tras descartar las sin historia) |
+| Entrenamiento | 2002-01-01 → 2016-12-31 (131,495 filas, 131,304 tras descartar las sin historia) |
 | Prueba | 2017-01-01 → 2018-08-03 (13,897 filas, unos 19 meses) |
 | División | Cronológica, nunca al azar |
 | Modelos base | Consumo de hace 24 horas y de hace 168 horas |
@@ -159,8 +159,8 @@ Un MAPE de 5.89 % para un pronóstico con 24 horas de antelación es un resultad
 
 - **Sin temperatura.** Es el principal determinante de la demanda y el dataset no la incluye. Los picos extremos son los más difíciles de pronosticar.
 - **Los árboles no extrapolan.** Un modelo de árboles no predice valores fuera del rango que vio en el entrenamiento, lo que podría explicar los errores en olas de frío intensas (hipótesis).
-- **Una sola partición temporal.** Los resultados dependen del periodo de prueba (2017-01 a 2018-08); se corregirá con la ventana móvil.
-- **Una sola región.** El modelo se entrenó con `PJME`; para otras regiones hay que repetir el proceso. Los residuos fuera de muestra exigen entrenar un modelo por región y pliegue, por lo que se empieza con `PJME`.
+- **Una sola partición temporal.** Los resultados dependen del periodo de prueba (2017-01 a 2018-08), se corregirá con la ventana móvil.
+- **Una sola región.** El modelo se entrenó con `PJME`, para otras regiones hay que repetir el proceso. Los residuos fuera de muestra exigen entrenar un modelo por región y pliegue, por lo que se empieza con `PJME`.
 - **Festivos federales.** No se incluyen los festivos de cada estado.
 - **Hiperparámetros por defecto.** XGBoost no se ajustó con búsqueda de parámetros.
 - **Convención horaria.** `Datetime` marca el final de la hora. Para la fila de las 00:00, el día de la semana, el fin de semana y el festivo quedan desplazados un día (1 de cada 24 horas).
@@ -192,7 +192,7 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 | Algoritmos | K-medias y agrupamiento jerárquico (criterio de Ward) |
 | Rango de k | 2 a 10 |
 | Selección de k | Mayor silueta media |
-| Calidad de la estructura | Razonable si la silueta es ≥ 0.50; débil entre 0.26 y 0.50, y se reporta como tal |
+| Calidad de la estructura | Razonable si la silueta es ≥ 0.50, débil entre 0.26 y 0.50, y se reporta como tal |
 | Tamaño mínimo | Ningún grupo con menos del 5 % de los días |
 | Estabilidad | Se repite con distintas semillas y debe mantenerse la solución |
 | Interpretación | Cada grupo se describe con su curva media, su banda de dispersión (percentiles 10 a 90), su frecuencia y su relación con el calendario (día de la semana, mes y festivo) |
@@ -246,7 +246,7 @@ Un día es atípico si su demanda se aleja de lo esperable. Lo esperable lo da e
 ## 4. Limitaciones
 
 - Sin temperatura, las anomalías solo pueden interpretarse por coincidencia con eventos.
-- Un residuo grande también puede deberse a un error de los datos; por eso se revisan las horas vecinas antes de concluir.
+- Un residuo grande también puede deberse a un error de los datos, por eso se revisan las horas vecinas antes de concluir.
 - No hay verdad de referencia con la que medir la detección.
 
 ## 5. Reproducibilidad

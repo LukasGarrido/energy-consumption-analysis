@@ -1,4 +1,4 @@
-# 11 · Conceptos teóricos
+﻿# 11 · Conceptos teóricos
 
 Este documento reúne los conceptos usados en el proyecto y explica qué papel juega cada uno aquí. Cada concepto puede incluir cuatro apartados:
 
@@ -92,7 +92,7 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 | Nivel | Periodo | Qué se observa |
 |---|---|---|
-| Diaria | 24 horas | Valle de madrugada y pico entre las 18 y las 20 h; en varias regiones, un segundo pico hacia las 8 h |
+| Diaria | 24 horas | Valle de madrugada y pico entre las 18 y las 20 h, en varias regiones, un segundo pico hacia las 8 h |
 | Semanal | 7 días | El fin de semana consume entre un 4 % y un 14 % menos que un laborable |
 | Anual | 12 meses | Picos en verano e invierno y valles en abril y octubre |
 
@@ -161,7 +161,7 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 ### Horario de verano (cambio de hora)
 
-**Qué es.** Dos veces al año se adelanta o se retrasa el reloj una hora. En primavera una hora **no existe**; en otoño una hora **ocurre dos veces**.
+**Qué es.** Dos veces al año se adelanta o se retrasa el reloj una hora. En primavera una hora **no existe**, en otoño una hora **ocurre dos veces**.
 
 **En el proyecto.** Explica casi todas las horas faltantes y los duplicados. En `PJME`, 17 de las 30 horas faltantes son de primavera (siempre a las 03:00) y 12 de otoño (a las 02:00, de 2002 a 2013). Desde 2014 la hora de otoño aparece duplicada: 4 fechas repetidas por región (2014 a 2017).
 
@@ -237,7 +237,7 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 ### Error de medición frente a valor extremo real
 
-**Qué es.** Un valor extremo puede ser un error del medidor o consumo real. El criterio usado es la **continuidad**: varias horas seguidas extremas sugieren un evento real; un valor aislado entre horas normales sugiere un error.
+**Qué es.** Un valor extremo puede ser un error del medidor o consumo real. El criterio usado es la **continuidad**: varias horas seguidas extremas sugieren un evento real, un valor aislado entre horas normales sugiere un error.
 
 **En el proyecto.** Los picos altos forman una nube continua y se conservan. El 0 de `FE` (su primer registro) y los 1,253 MW de `DOM` (el siguiente mínimo es 5,518) son aislados y sospechosos.
 
@@ -275,7 +275,7 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 ### Formato largo y formato ancho
 
-**Qué es.** En el largo cada observación es una fila (`Datetime`, `region`, `MW`); en el ancho hay una columna por región.
+**Qué es.** En el largo cada observación es una fila (`Datetime`, `region`, `MW`), en el ancho hay una columna por región.
 
 **En el proyecto.** El análisis usa el formato largo porque facilita agrupar y comparar regiones. El archivo `pjm_hourly_est.csv` es ancho y no se utiliza.
 
@@ -291,13 +291,13 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 ### Media, mediana y desviación estándar
 
-**Qué es.** La media es el promedio; la mediana, el valor central; la desviación estándar mide cuánto se dispersan los datos alrededor de la media.
+**Qué es.** La media es el promedio, la mediana, el valor central, la desviación estándar mide cuánto se dispersan los datos alrededor de la media.
 
 **En el proyecto.** En `PJME`, la media es 32,080 MW y la mediana 31,421: la media es mayor porque los picos altos la arrastran hacia arriba (distribución asimétrica a la derecha).
 
 ### Cuartiles, percentiles y diagrama de caja
 
-**Qué es.** Los cuartiles dividen los datos ordenados en cuatro partes; los percentiles generalizan la idea (el percentil 10 deja el 10 % de los datos por debajo). El diagrama de caja dibuja el 50 % central (la caja), la mediana (la línea) y los valores atípicos (los puntos).
+**Qué es.** Los cuartiles dividen los datos ordenados en cuatro partes, los percentiles generalizan la idea (el percentil 10 deja el 10 % de los datos por debajo). El diagrama de caja dibuja el 50 % central (la caja), la mediana (la línea) y los valores atípicos (los puntos).
 
 **En el proyecto.** El diagrama de caja se usó para comparar la distribución de las 12 regiones. Los percentiles 10 y 90 delimitarán la banda de dispersión de cada tipo de día.
 
@@ -331,7 +331,7 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 ### Correlación de Pearson
 
-**Qué es.** Medida entre −1 y 1 de cuánto suben y bajan juntas dos series. Cerca de 1, se mueven en la misma dirección; cerca de 0, no hay relación lineal.
+**Qué es.** Medida entre −1 y 1 de cuánto suben y bajan juntas dos series. Cerca de 1, se mueven en la misma dirección, cerca de 0, no hay relación lineal.
 
 **En el proyecto.** Se calcula sobre el promedio diario de las 10 regiones vigentes. Los valores van de 0.56 (`EKPC`–`COMED`) a 0.96 (`AEP`–`PJMW`, `DAYTON`–`FE`).
 
@@ -377,7 +377,7 @@ Los conceptos de componentes que aún no tienen resultados (agrupamiento, anomal
 
 **Qué es.** En el aprendizaje **supervisado** hay una variable objetivo conocida que el modelo aprende a predecir (el pronóstico). En el **no supervisado** no hay objetivo: el algoritmo busca estructura en los datos por sí solo (el agrupamiento).
 
-**En el proyecto.** El pronóstico (sección 9) es supervisado; el agrupamiento de perfiles diarios es no supervisado y responde a P1 y P2.
+**En el proyecto.** El pronóstico (sección 9) es supervisado, el agrupamiento de perfiles diarios es no supervisado y responde a P1 y P2.
 
 ### Perfil diario
 
@@ -438,7 +438,7 @@ El algoritmo minimiza la suma de las distancias al cuadrado entre cada perfil y 
 
 **Qué es.** Medida de qué tan bien separado está cada perfil de los demás grupos.
 
-**Cómo funciona.** Para cada perfil, `s = (b − a) / max(a, b)`, donde *a* es la distancia media a los perfiles de su propio grupo y *b* la distancia media al grupo vecino más cercano. Va de −1 a 1: cerca de 1, el perfil está bien asignado; cerca de 0, está en la frontera entre dos grupos; negativo, probablemente está en el grupo equivocado. La silueta media es el promedio de todos los perfiles (Rousseeuw, 1987).
+**Cómo funciona.** Para cada perfil, `s = (b − a) / max(a, b)`, donde *a* es la distancia media a los perfiles de su propio grupo y *b* la distancia media al grupo vecino más cercano. Va de −1 a 1: cerca de 1, el perfil está bien asignado, cerca de 0, está en la frontera entre dos grupos, negativo, probablemente está en el grupo equivocado. La silueta media es el promedio de todos los perfiles (Rousseeuw, 1987).
 
 **Cómo se interpreta.** Siguiendo a Kaufman y Rousseeuw (1990), una silueta media de 0.51 a 0.70 indica una estructura razonable, de 0.26 a 0.50 una estructura débil que podría ser artificial, y menor de 0.25 que no hay estructura sustancial. El proyecto usa el umbral de 0.50 y reporta como "débil" lo que quede entre 0.26 y 0.50.
 
@@ -486,7 +486,7 @@ El algoritmo minimiza la suma de las distancias al cuadrado entre cada perfil y 
 | Día atípico o anomalía | Un día cuyo comportamiento se aleja de lo esperable dado su contexto | Este apartado |
 | Error de datos | Un valor erróneo por falla de medición o registro | Limpieza |
 
-**En el proyecto.** Un día atípico puede deberse a un evento real (ola de calor, huracán) o a un error; por eso se revisan las horas vecinas antes de concluir.
+**En el proyecto.** Un día atípico puede deberse a un evento real (ola de calor, huracán) o a un error, por eso se revisan las horas vecinas antes de concluir.
 
 ### Demanda esperada y residuo
 
@@ -516,7 +516,7 @@ El algoritmo minimiza la suma de las distancias al cuadrado entre cada perfil y 
 
 **Ejemplo ilustrativo.** Con una mediana de residuos de 1,500 MW y un MAD de 600 MW, un día con un residuo de 5,000 MW tiene `z = 0.6745 · (5,000 − 1,500) / 600 ≈ 3.9`, mayor que 3.5, así que se marca. Las cifras son inventadas para ilustrar el cálculo.
 
-**Cuidado.** El umbral es una convención. Un valor más bajo marca más días, con más falsos positivos; uno más alto marca menos, con más falsos negativos.
+**Cuidado.** El umbral es una convención. Un valor más bajo marca más días, con más falsos positivos, uno más alto marca menos, con más falsos negativos.
 
 ### Validación sin etiquetas
 
@@ -544,7 +544,7 @@ El algoritmo minimiza la suma de las distancias al cuadrado entre cada perfil y 
 
 ### Variable objetivo y variables explicativas
 
-**Qué es.** La objetivo es lo que se quiere predecir; las explicativas (*features*) son los datos con los que se predice.
+**Qué es.** La objetivo es lo que se quiere predecir, las explicativas (*features*) son los datos con los que se predice.
 
 **En el proyecto.** La objetivo es `MW`. Las explicativas son el calendario, los rezagos y las medias móviles.
 
@@ -580,7 +580,7 @@ El algoritmo minimiza la suma de las distancias al cuadrado entre cada perfil y 
 
 ### División cronológica entrenamiento/prueba
 
-**Qué es.** El conjunto de entrenamiento se usa para que el modelo aprenda; el de prueba, para evaluarlo con datos que no ha visto. En series de tiempo, la división respeta el orden: el entrenamiento es anterior a la prueba.
+**Qué es.** El conjunto de entrenamiento se usa para que el modelo aprenda, el de prueba, para evaluarlo con datos que no ha visto. En series de tiempo, la división respeta el orden: el entrenamiento es anterior a la prueba.
 
 **En el proyecto.** Se entrena con 2002-01-01 → 2016-12-31 (131,495 filas) y se prueba con 2017-01-01 → 2018-08-03 (13,897 filas). Una división al azar mezclaría horas contiguas y produciría una fuga.
 
@@ -590,7 +590,7 @@ El algoritmo minimiza la suma de las distancias al cuadrado entre cada perfil y 
 
 **Qué es.** Repetir la evaluación con varias particiones cronológicas: el modelo se entrena con el pasado hasta un punto, se evalúa en el periodo siguiente, y el punto de corte avanza para el pliegue siguiente.
 
-**Cómo funciona.** Por ejemplo, con pliegues por año: entrenar hasta 2014 y evaluar 2015; entrenar hasta 2015 y evaluar 2016; y así sucesivamente. El entrenamiento crece en cada pliegue (ventana expansiva).
+**Cómo funciona.** Por ejemplo, con pliegues por año: entrenar hasta 2014 y evaluar 2015, entrenar hasta 2015 y evaluar 2016, y así sucesivamente. El entrenamiento crece en cada pliegue (ventana expansiva).
 
 **En el proyecto.** Cumple dos funciones: dar una evaluación más estable que una sola partición (al menos 3 pliegues, y el modelo debe superar al base en todos) y producir residuos fuera de muestra para todo el historial, que alimentan la detección de anomalías.
 
@@ -652,7 +652,7 @@ No se ajustaron con una búsqueda de parámetros.
 
 ### Pronóstico puntual y probabilístico
 
-**Qué es.** Un pronóstico puntual entrega un solo valor por hora; uno probabilístico entrega una distribución o un intervalo (Hong y Fan, 2016).
+**Qué es.** Un pronóstico puntual entrega un solo valor por hora, uno probabilístico entrega una distribución o un intervalo (Hong y Fan, 2016).
 
 **En el proyecto.** El pronóstico es puntual. El intervalo queda fuera del alcance.
 
@@ -694,7 +694,7 @@ No se ajustaron con una búsqueda de parámetros.
 
 **Qué es.** El MAE del modelo dividido entre el MAE del pronóstico ingenuo calculado sobre los datos de entrenamiento (Hyndman y Koehler, 2006).
 
-**Cómo se interpreta.** Un MASE menor que 1 significa que el modelo supera al pronóstico ingenuo; mayor que 1, que lo empeora. No depende de la escala, así que sirve para comparar entre regiones.
+**Cómo se interpreta.** Un MASE menor que 1 significa que el modelo supera al pronóstico ingenuo, mayor que 1, que lo empeora. No depende de la escala, así que sirve para comparar entre regiones.
 
 **En el proyecto.** Se exigirá MASE < 1 en todos los pliegues de la ventana móvil, tomando como referencia el pronóstico de "ayer a la misma hora".
 
@@ -788,7 +788,7 @@ No se ajustaron con una búsqueda de parámetros.
 
 **Qué es.** Principio de interacción: se muestra primero una vista general y el detalle aparece al filtrar o seleccionar.
 
-**En el proyecto.** El panel tiene una página de resumen y filtros por región, fecha y estación; el perfil real y el esperado de un día atípico se muestran al seleccionarlo.
+**En el proyecto.** El panel tiene una página de resumen y filtros por región, fecha y estación, el perfil real y el esperado de un día atípico se muestran al seleccionarlo.
 
 ---
 
@@ -804,11 +804,11 @@ No se ajustaron con una búsqueda de parámetros.
 
 **Qué es.** Una función que se usa en varios notebooks se mueve a un archivo `.py` en `src/` y se importa. Con `pip install -e .` y el archivo `pyproject.toml`, esa carpeta se registra como un paquete y se puede importar desde cualquier lugar.
 
-**En el proyecto.** `src/` contiene `config.py` (rutas y parámetros), `data_loader.py`, `cleaning.py`, `features.py` y `modeling.py`; `profiles.py` y `anomalies.py` están por crear.
+**En el proyecto.** `src/` contiene `config.py` (rutas y parámetros), `data_loader.py`, `cleaning.py`, `features.py` y `modeling.py`, `profiles.py` y `anomalies.py` están por crear.
 
 ### Entorno virtual y dependencias
 
-**Qué es.** Un entorno virtual aísla las librerías del proyecto; `requirements.txt` lista cuáles son.
+**Qué es.** Un entorno virtual aísla las librerías del proyecto, `requirements.txt` lista cuáles son.
 
 **En el proyecto.** `python -m venv .venv` y `pip install -r requirements.txt`.
 
