@@ -9,15 +9,18 @@ matplotlib
 seaborn
 plotly
 
-# --- Series de tiempo y pronóstico ---
+# --- Series de tiempo, agrupamiento y pronóstico ---
 statsmodels
 scikit-learn
 xgboost
-prophet
 
-# --- Utilidades y API ---
+# --- Utilidades ---
 holidays
 kagglehub
 
-# --- Visualización final ---
+# --- Notebooks ---
+jupyterlab
+ipykernel
+
+# --- Prototipo opcional ---
 streamlit
