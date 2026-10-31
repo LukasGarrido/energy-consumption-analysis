@@ -4,15 +4,15 @@ Este documento describe los tres componentes analíticos del proyecto y cómo se
 
 | Parte | Tema | Pregunta | Notebook | Estado |
 |---|---|---|---|---|
-| A | Pronóstico de referencia a 24 horas | P4 y base de P3 | 04 | Hecho, ampliación por hacer |
-| B | Agrupamiento de perfiles diarios | P1 y P2 | 05 | Por hacer |
-| C | Detección de días atípicos | P3 | 06 | Por hacer |
+| A | Pronóstico de referencia a 24 horas | P4 y base de P3 | 04 | Hecho, con ventana móvil y MASE |
+| B | Agrupamiento de perfiles diarios | P1 y P2 | 05 | Implementado, resultados por documentar |
+| C | Detección de días atípicos | P3 | 06 | Implementado, resultados por documentar |
 
 ---
 
 # Parte A. Pronóstico de referencia
 
-> Las cifras de esta parte corresponden a la versión actual, con las variables de calendario calculadas desde `Datetime` tal como viene. Si se adopta el día operativo (`Datetime` − 1 h), hay que repetir el notebook 04 y actualizar estos valores.
+> Las cifras de la sección 5 se calcularon con las variables de calendario desde `Datetime` tal como viene (hora de fin). El notebook 04 ya usa el día operativo (`Datetime − 1 h`): sustituir estas cifras por las salidas nuevas. Mientras tanto, se marcan como **por recalcular**.
 
 ## 1. Datos de entrada
 
@@ -34,6 +34,7 @@ Se eligió `PJME` por ser la región con el historial más largo (16 años compl
 
 | Variable | Tipo | Descripción |
 |---|---|---|
+| `fecha` | Calendario | Día operativo (`Datetime − 1 h`), no entra al modelo, sirve para agrupar por día |
 | `hora` | Calendario | Hora del día (0 a 23) |
 | `dia_semana` | Calendario | 0 = lunes, 6 = domingo |
 | `mes` | Calendario | 1 a 12 |
@@ -41,6 +42,8 @@ Se eligió `PJME` por ser la región con el historial más largo (16 años compl
 | `es_festivo` | Calendario | Festivo federal de EE. UU. |
 | `MW_lag_24`, `MW_lag_48`, `MW_lag_168` | Historia | Consumo de hace 1 día, 2 días y 1 semana |
 | `MW_media_24h`, `MW_media_168h` | Historia | Promedio de las 24 y 168 horas previas, desplazado 24 horas |
+
+Todas las variables de calendario se calculan con el día operativo: `hora` va de 0 (00:00–01:00) a 23 (23:00–24:00).
 
 **Variables excluidas:**
 
@@ -55,15 +58,19 @@ Las primeras 191 filas (24 + 168 − 1) se descartan porque no tienen historia s
 | Elemento | Decisión |
 |---|---|
 | Horizonte | 24 horas: para predecir la hora *t* solo se usa información hasta *t − 24* |
-| Entrenamiento | 2002-01-01 → 2016-12-31 (131,495 filas, 131,304 tras descartar las sin historia) |
-| Prueba | 2017-01-01 → 2018-08-03 (13,897 filas, unos 19 meses) |
+| Entrenamiento | 2002-01-01 → 2016-12-31 (131,495 filas, 131,304 tras descartar las sin historia), por recalcular |
+| Prueba | 2017-01-01 → 2018-08-03 (13,897 filas, unos 19 meses), por recalcular |
 | División | Cronológica, nunca al azar |
 | Modelos base | Consumo de hace 24 horas y de hace 168 horas |
+| Validación | Ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3) |
+| Métrica de escala | MASE con la escala del pronóstico ingenuo estacional de 24 h |
 | Semilla | 42 |
 
 **Control de fuga de datos.** Todos los rezagos son de 24 horas o más, y las medias móviles se desplazan 24 horas. `agregar_rezagos` lanza un error si algún rezago es menor que el horizonte. Los rezagos se calcularon antes de dividir, de modo que las primeras horas de la prueba usan el final del entrenamiento, información que existiría en la práctica.
 
-**Ampliación prevista (por hacer).** La partición única (2017-01-01) se amplía a una validación en ventana móvil por años, con al menos 3 pliegues. El modelo debe superar al base en todos los pliegues. Se añade el MASE (error escalado por el pronóstico ingenuo), que debe ser menor que 1. Los residuos fuera de muestra de todo el historial alimentan la Parte C.
+Con la hora de fin, la prueba de la partición única empieza en `2017-01-01 00:00`, que es la hora 23 del 2016-12-31. Ese primer día queda incompleto y se excluye del análisis por día.
+
+**Validación en ventana móvil (implementada).** Los pliegues son bloques consecutivos de 12 meses que terminan el 2018-08-03: en cada uno se entrena con todo lo anterior y se prueba en el bloque. Los bloques no se solapan, así que cada hora se predice una sola vez fuera de muestra. Con 6 pliegues, los residuos cubren **2012-08 → 2018-08**, que incluye el huracán Sandy, el vórtice polar de 2014 y el frío de 2015. Criterio: XGBoost supera al base en todos los pliegues y su MASE es menor que 1. Los residuos (`real − predicción`) se guardan en `data/processed/residuos_PJME.parquet` y alimentan la Parte C.
 
 ## 4. Algoritmos
 
@@ -77,13 +84,23 @@ Se descartaron Prophet y los modelos ARIMA: con datos horarios y varias estacion
 
 ## 5. Métricas y resultados
 
-Métricas definidas en `06_plan_proyecto.md`: MAE y RMSE (en MW) y MAPE (en %), evaluadas sobre los 13,897 registros de la prueba.
+Métricas definidas en `06_plan_proyecto.md`: MAE y RMSE (en MW), MAPE (en %) y MASE, evaluadas sobre los 13,897 registros de la prueba (partición única). **Cifras por recalcular con el día operativo.**
 
 | Modelo | MAE (MW) | RMSE (MW) | MAPE (%) |
 |---|---|---|---|
 | Base 24 h | 2,300.08 | 3,134.18 | 7.32 |
 | Base 168 h | 3,511.18 | 4,793.98 | 10.99 |
 | **XGBoost** | **1,862.27** | **2,513.11** | **5.89** |
+
+**MASE (partición única)**
+
+| Modelo | MASE |
+|---|---|
+| Base 24 h | `[completar]` |
+| Base 168 h | `[completar]` |
+| XGBoost | `[completar]` |
+
+El MASE se calcula con la escala del pronóstico ingenuo de 24 h incluso para el modelo base de 168 h. Menor que 1 significa que el modelo se equivoca menos que ese pronóstico ingenuo.
 
 **Mejora de XGBoost**
 
@@ -93,6 +110,14 @@ Métricas definidas en `06_plan_proyecto.md`: MAE y RMSE (en MW) y MAPE (en %), 
 | Base 168 h | −47.0 % | −47.6 % | −46.4 % |
 
 El MAE de XGBoost equivale a cerca del 6 % del consumo medio de `PJME` (≈ 31 500 MW en el periodo 2013-06 a 2018-08).
+
+**Validación en ventana móvil (6 pliegues de 12 meses)**
+
+| Pliegue | Prueba | MAE XGBoost (MW) | MAE base (MW) | Mejora (%) | MASE XGBoost |
+|---|---|---|---|---|---|
+| 1 a 6 | `[completar]` | `[completar]` | `[completar]` | `[completar]` | `[completar]` |
+
+¿XGBoost supera al base en todos los pliegues? `[completar]`
 
 **Error por tipo de día (MAE en MW)**
 
@@ -107,6 +132,8 @@ El MAE de XGBoost equivale a cerca del 6 % del consumo medio de `PJME` (≈ 31 5
 - El error de XGBoost es menor de madrugada y por la mañana (≈ 1,500–1,700 MW entre las 0 y las 10 h) y mayor por la tarde-noche (hasta ≈ 2,340 MW hacia las 18 h).
 - El modelo base tiene un máximo marcado hacia las 8 h (≈ 2,830 MW): al usar el día anterior, falla en la transición entre laborables y fines de semana. XGBoost casi lo elimina (≈ 1,680 MW).
 - Por la tarde ambos modelos mantienen errores altos.
+
+Las horas de esta lectura estaban en hora de fin y deben desplazarse 1 h al recalcular con el día operativo.
 
 **Error por mes.** Lecturas aproximadas de la gráfica:
 
@@ -159,19 +186,19 @@ Un MAPE de 5.89 % para un pronóstico con 24 horas de antelación es un resultad
 
 - **Sin temperatura.** Es el principal determinante de la demanda y el dataset no la incluye. Los picos extremos son los más difíciles de pronosticar.
 - **Los árboles no extrapolan.** Un modelo de árboles no predice valores fuera del rango que vio en el entrenamiento, lo que podría explicar los errores en olas de frío intensas (hipótesis).
-- **Una sola partición temporal.** Los resultados dependen del periodo de prueba (2017-01 a 2018-08), se corregirá con la ventana móvil.
-- **Una sola región.** El modelo se entrenó con `PJME`, para otras regiones hay que repetir el proceso. Los residuos fuera de muestra exigen entrenar un modelo por región y pliegue, por lo que se empieza con `PJME`.
+- **Pliegues de 12 meses.** La ventana móvil reduce la dependencia de un solo periodo, pero cada pliegue es un año concreto con su clima, y los primeros entrenan con menos historia que los últimos.
+- **Una sola región.** El modelo y los residuos son de `PJME`, para otras regiones hay que repetir el proceso, y entrenar un modelo por región y pliegue es lento.
 - **Festivos federales.** No se incluyen los festivos de cada estado.
 - **Hiperparámetros por defecto.** XGBoost no se ajustó con búsqueda de parámetros.
-- **Convención horaria.** `Datetime` marca el final de la hora. Para la fila de las 00:00, el día de la semana, el fin de semana y el festivo quedan desplazados un día (1 de cada 24 horas).
+- **Convención horaria.** `Datetime` marca el final de la hora. Se resolvió con el día operativo (decisión D1), las cifras de esta parte deben recalcularse con él.
 
 ## 7. Reproducibilidad
 
-El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/features.py`. Los parámetros del experimento están en `src/config.py` (`HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA`). Los pasos para ejecutarlo están en la [guía de usuario](09_guia_usuario.md).
+El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/features.py`. Los parámetros del experimento están en `src/config.py` (`HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `N_PLIEGUES`, `MESES_PLIEGUE`, `SEMILLA`). Salidas: `residuos_PJME.parquet` y `metricas_ventana_movil_PJME.parquet` en `data/processed/`. Los pasos para ejecutarlo están en la [guía de usuario](09_guia_usuario.md).
 
 ---
 
-# Parte B. Agrupamiento de perfiles diarios (por hacer)
+# Parte B. Agrupamiento de perfiles diarios
 
 > No confundir con la variable `tipo_dia` de los notebooks 03 y 04 (laborable, fin de semana, festivo), que se define por el calendario. Aquí el tipo de día lo descubre el agrupamiento a partir de la forma de la curva.
 
@@ -180,22 +207,25 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 | Elemento | Detalle |
 |---|---|
 | Unidad de análisis | Un día de una región (unos 45,000 perfiles) |
-| Perfil | 24 valores, uno por hora, del día operativo |
+| Perfil | 24 valores, uno por hora, del día operativo (`Datetime − 1 h`) |
 | Normalización | Cada valor se divide entre el promedio de su día, para capturar la forma y no el tamaño |
-| Magnitud | El consumo medio diario se analiza aparte |
+| Magnitud | El consumo medio diario (`MW_medio_dia`) se guarda aparte |
 | Días incluidos | Solo días completos (24 horas) |
+| Alcance | Las 12 regiones juntas, de modo que los tipos de día son los mismos y se puede construir la matriz región por tipo de día |
 
 ## 2. Diseño del experimento
 
 | Elemento | Decisión |
 |---|---|
 | Algoritmos | K-medias y agrupamiento jerárquico (criterio de Ward) |
-| Rango de k | 2 a 10 |
-| Selección de k | Mayor silueta media |
-| Calidad de la estructura | Razonable si la silueta es ≥ 0.50, débil entre 0.26 y 0.50, y se reporta como tal |
-| Tamaño mínimo | Ningún grupo con menos del 5 % de los días |
-| Estabilidad | Se repite con distintas semillas y debe mantenerse la solución |
-| Interpretación | Cada grupo se describe con su curva media, su banda de dispersión (percentiles 10 a 90), su frecuencia y su relación con el calendario (día de la semana, mes y festivo) |
+| Rango de k | 2 a 10 (`K_MIN`, `K_MAX`) |
+| Muestra | La silueta y Ward se calculan sobre una muestra reproducible de 10,000 días (`MUESTRA_AGRUPAMIENTO`), porque escalan de forma cuadrática. Ward asigna el resto de los días al centro más cercano, k-medias usa todos |
+| Selección de k | Mayor silueta media entre las combinaciones en que ningún grupo baja del 5 % de los días |
+| Calidad de la estructura | Kaufman y Rousseeuw: 0.71 o más, fuerte, 0.51 a 0.70, razonable, 0.26 a 0.50, débil, 0.25 o menos, sin estructura sustancial. Se reporta tal como sale |
+| Estabilidad | Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado). La repetición con distintas semillas queda por hacer |
+| Alineación horaria | Parámetro `ALINEAR_HORA_CENTRAL`: la curva de `COMED` (y quizá `NI`) llega una hora más tarde, con `True` se les resta 1 h antes de calcular el día operativo. El notebook mide el desfase de cada región para decidir (decisión D7) |
+| Interpretación | Curva media de cada grupo con banda de percentiles 10 a 90, frecuencia y composición por día de la semana, mes, estación y festivo |
+| Días que no encajan | Distancia de cada día al centro de su grupo (`distancia_centroide`), insumo del notebook 06 |
 
 ## 3. Resultados
 
@@ -203,52 +233,68 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 |---|---|
 | Algoritmo elegido | `[completar]` |
 | k elegido | `[completar]` |
-| Silueta media | `[completar]` |
-| Descripción de cada grupo | `[completar]` |
-| Mezcla de tipos de día por región | `[completar]` |
+| Silueta media (muestra) y su interpretación | `[completar]` |
+| Concordancia entre k-medias y Ward (Rand ajustado) | `[completar]` |
+| Descripción de cada grupo (nombre, curva, hora pico, calendario) | `[completar]` |
+| Mezcla de tipos de día por región (historial completo y periodo común) | `[completar]` |
+| Alineación de `COMED` y `NI` | `[completar]` |
+
+**Salidas** (`data/processed/`): `tipos_de_dia.parquet`, `tipos_de_dia_curvas.parquet`, `tipos_de_dia_resumen.parquet`, `tipos_de_dia_mezcla_region.parquet` y `tipos_de_dia_silueta_k.parquet`.
 
 ## 4. Limitaciones
 
-- K-medias asume grupos compactos con distancia euclidiana, y los perfiles diarios forman en parte un continuo: la estructura puede resultar débil.
+- K-medias asume grupos compactos con distancia euclidiana, y los perfiles diarios forman en parte un continuo: la estructura puede resultar débil. Con frecuencia k = 2 gana en silueta, si ocurre, se justifica la elección de un k mayor por interpretabilidad.
 - Al normalizar por el promedio del día se pierde la información de magnitud.
-- La definición del día depende de la convención horaria adoptada.
+- Las regiones cubren periodos distintos, y eso afecta a su mezcla de tipos de día, por eso se compara también en el periodo común.
+- Si `COMED` y `NI` no se alinean a hora central, su curva puede separarse por la hora y no por la forma.
+- La silueta y Ward se calculan sobre una muestra de días.
 
 ## 5. Reproducibilidad
 
-El código estará en `notebooks/05_agrupamiento.ipynb` y `src/profiles.py` (por crear). Los parámetros (`K_RANGO`, `TAMANO_MIN_GRUPO`, `SEMILLA`) estarán en `src/config.py`.
+El código está en `notebooks/05_agrupamiento.ipynb` y `src/profiles.py`. Los parámetros (`K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO`, `SEMILLA`) están en `src/config.py`.
 
 ---
 
-# Parte C. Detección de días atípicos (por hacer)
+# Parte C. Detección de días atípicos
 
 ## 1. Definición
 
-Un día es atípico si su demanda se aleja de lo esperable. Lo esperable lo da el modelo de pronóstico de la Parte A, evaluado fuera de muestra en todo el historial mediante la ventana móvil.
+Un día es atípico si su demanda se aleja de lo esperable. Lo esperable lo da el modelo de pronóstico de la Parte A, evaluado fuera de muestra con la ventana móvil (2012-08 → 2018-08).
 
 ## 2. Diseño
 
 | Elemento | Decisión |
 |---|---|
-| Residuo | Diferencia entre la demanda observada y la pronosticada |
-| Residuo diario | Error absoluto medio de las 24 horas del día |
-| Umbral | z modificado del residuo diario > 3.5, con z = 0.6745 · (x − mediana) / MAD, donde MAD es la mediana de las desviaciones absolutas respecto de la mediana |
-| Validación | Contraste con episodios externos (olas de calor o frío, huracanes). Los datos no traen etiquetas de anomalías |
-| Complemento | Distancia de cada día al centro de su grupo (Parte B) |
+| Residuo | `real − predicción`: positivo es demanda por encima de lo esperable (dirección `alta`), negativo, por debajo (`baja`) |
+| Residuo diario | Residuo medio de las 24 horas, con signo, en % de la predicción media del día (`residuo_pct`), solo días completos |
+| Regla | z modificado del residuo diario > 3.5 en valor absoluto, con z = 0.6745 · (x − mediana) / MAD, donde MAD es la mediana de las desviaciones absolutas respecto de la mediana (Iglewicz y Hoaglin, 1993) |
+| Comprobaciones | Sensibilidad al umbral (3, 3.5, 4 y 5), concentración de atípicos por estación y pliegue, y tasa en festivos. Opción `Z_POR_ESTACION` |
+| Validación | Contraste con episodios externos (olas de calor o frío, huracán Sandy), cada uno con su fuente y marca de verificación. Los episodios fuera del rango de los residuos se marcan como no evaluados. Los datos no traen etiquetas de anomalías |
+| Dirección esperada | Frío o calor extremo: residuos positivos, huracán Sandy: negativos |
+| Complemento | Relación con la distancia de cada día al centro de su grupo (Parte B) |
 
 ## 3. Resultados
 
 | Concepto | Valor |
 |---|---|
-| Número de días atípicos | `[completar]` |
-| Episodios recuperados | `[completar]` |
-| Días atípicos compartidos entre regiones | `[completar]` |
+| Número de días atípicos (altos y bajos) | `[completar]` |
+| Sensibilidad al umbral | `[completar]` |
+| Episodios recuperados y dirección coincidente | `[completar]` |
+| Atípicos sin episodio conocido | `[completar]` |
+| Relación con la forma del día | `[completar]` |
+
+**Salidas** (`data/processed/`): `anomalias_PJME_diario.parquet`, `anomalias_PJME_lista.parquet` y `anomalias_PJME_episodios.parquet`.
 
 ## 4. Limitaciones
 
-- Sin temperatura, las anomalías solo pueden interpretarse por coincidencia con eventos.
+- Sin temperatura, las anomalías solo pueden interpretarse por coincidencia con eventos. Un día extremo por clima puede no salir atípico si los rezagos y medias móviles del modelo ya lo incorporaban.
+- Lo atípico depende del modelo: otro pronóstico daría otros residuos y otra lista.
 - Un residuo grande también puede deberse a un error de los datos, por eso se revisan las horas vecinas antes de concluir.
+- Solo hay residuos de `PJME`, y cubren los últimos seis años, los episodios anteriores (2006, 2011) quedan fuera de rango.
+- El umbral de 3.5 se calibró para datos normales, los residuos no lo son, por eso se muestra la sensibilidad.
+- Los días de cambio de horario tienen una hora estimada o promediada en la limpieza.
 - No hay verdad de referencia con la que medir la detección.
 
 ## 5. Reproducibilidad
 
-El código estará en `notebooks/06_anomalias.ipynb` y `src/anomalies.py` (por crear). El umbral (`UMBRAL_Z_MODIFICADO`) estará en `src/config.py`.
+El código está en `notebooks/06_anomalias.ipynb` y `src/anomalies.py`. Los parámetros (`UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS`) están en `src/config.py`. La tabla de episodios, con sus fuentes, está en el notebook 06.
