@@ -1,5 +1,9 @@
 ﻿# Análisis visual de la demanda eléctrica horaria de la red PJM
 
+<p align="center">
+  <img src="public/power_electric_plant.png" alt="Análisis visual de la demanda eléctrica - Red PJM" width="100%">
+</p>
+
 Análisis de la demanda eléctrica horaria de 12 regiones de la red PJM (Estados Unidos, 1998–2018): tipos de día, diferencias entre regiones y episodios atípicos, apoyado en aprendizaje automático y comunicado mediante visualizaciones.
 
 ---
