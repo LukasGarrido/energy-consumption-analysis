@@ -1,4 +1,4 @@
-# Índice de Documentación
+﻿# Índice de Documentación
 
 Bienvenido a la documentación del proyecto **Análisis de Consumo Horario de Energía**. A continuación se listan las distintas secciones temáticas del proyecto:
 
@@ -24,7 +24,9 @@ Bienvenido a la documentación del proyecto **Análisis de Consumo Horario de En
     - Bibliografía académica, técnica y fuentes citadas a lo largo del documento.
 11. [11. Conceptos Teóricos](11_conceptos.md)
     - Compendio exhaustivo de conceptos teóricos, metodológicos y de dominio aplicados en el proyecto.
+12. [12. Bitácora de Decisiones](12_bitacora_decisiones.md)
+    - Registro histórico de decisiones metodológicas, de datos, modelado y diseño visual (D1 a D33).
 
 ---
 
-*Nota para Obsidian:* En Obsidian también puedes vincular estas notas utilizando la sintaxis de wikilinks: `[[01_objetivo]]`, `[[02_base_de_datos]]`, `[[03_metodos_y_herramientas]]`, `[[04_metodologia_desarrollo]]`, `[[05_resultados_esperados]]`, `[[06_plan_proyecto]]`, `[[07_casos_de_uso]]`, `[[08_modelo]]`, `[[09_guia_usuario]]`, `[[10_referencias]]` y `[[11_conceptos]]`.
+*Nota para Obsidian:* En Obsidian también puedes vincular estas notas utilizando la sintaxis de wikilinks: `[[01_objetivo]]`, `[[02_base_de_datos]]`, `[[03_metodos_y_herramientas]]`, `[[04_metodologia_desarrollo]]`, `[[05_resultados_esperados]]`, `[[06_plan_proyecto]]`, `[[07_casos_de_uso]]`, `[[08_modelo]]`, `[[09_guia_usuario]]`, `[[10_referencias]]`, `[[11_conceptos]]` y `[[12_bitacora_decisiones]]`.

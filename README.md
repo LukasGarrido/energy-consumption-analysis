@@ -124,7 +124,8 @@ Ejecuta los notebooks **en orden numérico (01 a 07)**, con *Restart & Run All*.
 │   ├── 08_modelo.md              # Pronóstico, agrupamiento y detección de anomalías
 │   ├── 09_guia_usuario.md        # Guía paso a paso de uso y reproducción
 │   ├── 10_referencias.md         # Bibliografía y afirmaciones que respalda
-│   └── 11_conceptos.md           # Conceptos teóricos explicados para este proyecto
+│   ├── 11_conceptos.md           # Conceptos teóricos explicados para este proyecto
+│   └── 12_bitacora_decisiones.md # Registro histórico de decisiones del proyecto
 ├── notebooks/                    # Cuadernos Jupyter en orden de ejecución
 │   ├── 01_exploracion.ipynb      # Exploración inicial (EDA), convención horaria y calidad de datos
 │   ├── 02_limpieza.ipynb         # Limpieza y tratamiento de series de tiempo
@@ -175,6 +176,7 @@ La documentación completa está en [`docs/`](docs/00_indice.md):
 - [09. Guía de usuario](docs/09_guia_usuario.md)
 - [10. Referencias](docs/10_referencias.md)
 - [11. Conceptos teóricos](docs/11_conceptos.md)
+- [12. Bitácora de decisiones](docs/12_bitacora_decisiones.md)
 
 ---
 
