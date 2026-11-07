@@ -1,4 +1,4 @@
-﻿# Análisis visual de la demanda eléctrica horaria de la red PJM
+# Análisis visual de la demanda eléctrica horaria de la red PJM
 
 <p align="center">
   <img src="public/power_electric_plant.png" alt="Análisis visual de la demanda eléctrica - Red PJM" width="100%">
@@ -25,7 +25,7 @@ El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda 
 
 1. **De pronosticar a caracterizar:** el aprendizaje automático (agrupamiento de perfiles diarios y detección de anomalías) se usa para obtener información, no solo precisión de pronóstico.
 2. **Comparación entre 12 regiones con calidad de datos documentada:** periodos desiguales, hora de fin de intervalo, cambios de horario y continuidad entre regiones.
-3. **Diseño de visualización justificado:** cada gráfico se asocia a una tarea y a un canal perceptual, y se entrega en un panel interactivo en Power BI.
+3. **Diseño de visualización justificado:** cada gráfico se asocia a una tarea y a un canal perceptual, y se entrega en un panel interactivo en Power BI complementado por un prototipo en Streamlit.
 
 ---
 
@@ -50,7 +50,7 @@ Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora
 | Calidad de los datos | Sin nulos, cobertura de 99.98 % a 99.99 %, 40 duplicados y 217 horas faltantes, casi todos por cambios de horario |
 | Limpieza | Las 12 regiones superan la validación (1,090,343 filas), se interpoló el 0.02 % de las horas |
 | Convención horaria | `Datetime` marca el final de la hora, el calendario usa el día operativo |
-| Hora de `COMED` | Su curva llega una hora más tarde: es lo esperable si las series están en hora del este y `COMED` es una zona de hora central |
+| Hora de `COMED` | Su curva llega una hora más tarde que la del resto: es lo esperable si las series están en hora del este y `COMED` es una zona de hora central |
 | Ciclo diario | Mínimo hacia las 4–5 h y máximo entre las 18 y las 20 h (hora de fin, por recalcular) |
 | Calendario | El fin de semana consume entre un 4 % y un 14 % menos que un laborable, un festivo, cerca de un 5 % menos (por recalcular) |
 | Estacionalidad | Dos máximos anuales (verano e invierno), `EKPC` y `PJMW` son invernales, `COMED`, `DUQ`, `DEOK` y `PJME` veraniegas |
@@ -71,6 +71,7 @@ Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora
 | Detección de anomalías (notebook 06) | Ejecutado, resultados por documentar |
 | Exportación de tablas para el panel (notebook 07) | Ejecutado |
 | Panel interactivo en Power BI | Por hacer (las tablas están en `data/processed/powerbi/`) |
+| Prototipo interactivo en Streamlit | Hecho (rama `feat/app-streamlit`) |
 | Documentación | En curso |
 
 ---
@@ -100,18 +101,40 @@ jupyter lab
 
 Ejecuta los notebooks **en orden numérico (01 a 07)**, con *Restart & Run All*. Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el mismo valor en los notebooks 05 y 07. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/09_guia_usuario.md](docs/09_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
 
+### Ejecutar el prototipo de Streamlit
+
+Una vez ejecutados los notebooks (01 a 07), la app puede levantarse directamente desde la raíz del proyecto:
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar el notebook 07.
+
 ---
 
 ## Estructura del repositorio
 
 ```text
 ├── app/
-│   ├── streamlit_app.py          # Prototipo en Streamlit (opcional)
+│   ├── streamlit_app.py          # Punto de entrada del prototipo Streamlit
+│   ├── config.py                 # Constantes, paleta Okabe-Ito y resolución de rutas
+│   ├── data_loader.py            # Carga con caché y conversiones de tipo
+│   ├── filtros.py                # Helpers de filtrado por región, estación y fecha
+│   ├── graficos.py               # Helpers de color y compatibilidad de API de Streamlit
+│   ├── paginas/
+│   │   ├── __init__.py
+│   │   ├── resumen.py            # Tarjetas de indicadores y tendencia anual
+│   │   ├── patrones.py           # Mapa de calor, curvas por tipo y estacionalidad mensual
+│   │   ├── tipos_de_dia.py       # Curvas con bandas, calendario, barras y silueta
+│   │   ├── regiones.py           # Barras apiladas y dispersión de indicadores
+│   │   ├── anomalias.py          # Línea de tiempo, episodios y caso hora a hora
+│   │   └── pronostico.py         # Métricas, error desglosado y real vs. pronóstico
 │   └── panel_pjm.pbix            # Panel en Power BI (por crear)
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep, excluidos por .gitignore)
 │   └── processed/                # Datos limpios y resultados (.gitkeep)
-│       └── powerbi/              # Tablas CSV para el panel (generadas por el notebook 07)
+│       └── powerbi/              # 17 tablas CSV para el panel (generadas por el notebook 07)
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
 │   ├── 00_indice.md              # Índice general de la documentación
 │   ├── 01_objetivo.md            # Problema, preguntas y objetivos
@@ -139,7 +162,7 @@ Ejecuta los notebooks **en orden numérico (01 a 07)**, con *Restart & Run All*.
 │   └── power_electric_plant.png  # Ilustración conceptual del proyecto
 ├── reports/
 │   └── figures/                  # Figuras y gráficos exportados
-├── src/                          # Módulos Python reutilizables
+├── src/                          # Módulos Python reutilizables por los notebooks
 │   ├── __init__.py               # Inicialización del paquete
 │   ├── anomalies.py              # Residuo diario, z modificado y contraste con episodios
 │   ├── cleaning.py               # Limpieza de datos
@@ -182,7 +205,7 @@ La documentación completa está en [`docs/`](docs/00_indice.md):
 
 ## Tecnologías
 
-Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels, holidays, pyarrow), Jupyter, Power BI, Matplotlib y Seaborn, GitHub y Obsidian. El detalle está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
+Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels, holidays, pyarrow), Jupyter, Power BI, Streamlit, Plotly, Matplotlib y Seaborn, GitHub y Obsidian. El detalle está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
 
 ---
 
