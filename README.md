@@ -59,23 +59,6 @@ Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora
 
 ---
 
-## Estado del proyecto
-
-| Componente | Estado |
-|---|---|
-| Exploración y calidad de los datos (notebook 01) | Hecho |
-| Limpieza y validación (notebook 02) | Hecho |
-| Análisis descriptivo (notebook 03) | Hecho con el día operativo |
-| Pronóstico de referencia, MASE y ventana móvil (notebook 04) | Hecho |
-| Agrupamiento de perfiles diarios (notebook 05) | Ejecutado, resultados por documentar |
-| Detección de anomalías (notebook 06) | Ejecutado, resultados por documentar |
-| Exportación de tablas para el panel (notebook 07) | Ejecutado |
-| Panel interactivo en Power BI | Por hacer (las tablas están en `data/processed/powerbi/`) |
-| Prototipo interactivo en Streamlit | Hecho (rama `feat/app-streamlit`) |
-| Documentación | En curso |
-
----
-
 ## Inicio rápido
 
 ```bash
