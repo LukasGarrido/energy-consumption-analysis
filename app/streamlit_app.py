@@ -10,6 +10,14 @@ Para ejecutar la app:
     streamlit run app/streamlit_app.py
 """
 
+import sys
+from pathlib import Path
+
+# Asegurar que la raíz del proyecto esté en sys.path para imports del paquete 'app' y 'src'
+_RAIZ_PROYECTO = Path(__file__).resolve().parents[1]
+if str(_RAIZ_PROYECTO) not in sys.path:
+    sys.path.insert(0, str(_RAIZ_PROYECTO))
+
 import pandas as pd
 import streamlit as st
 
