@@ -102,6 +102,7 @@ def _convertir_numericos(tablas: dict[str, pd.DataFrame]) -> None:
     """Convierte a numérico las columnas que llegan como texto en cada tabla."""
     mapa: dict[str, list[str]] = {
         "pronostico_metricas":    ["MAE", "RMSE", "MAPE_pct", "MASE", "mejora_MAE_pct"],
+        "pronostico_horario":     ["real", "prediccion", "residuo", "error_abs", "error_pct", "hora", "mes"],
         "anomalias_dias":         ["residuo_pct", "z_mod"],
         "silueta_k":              ["silueta", "k"],
         "dim_tipo_dia":           ["n_dias", "pct_dias", "hora_pico", "amplitud", "pct_fin_de_semana"],

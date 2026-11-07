@@ -116,6 +116,7 @@ def _error_desglosado(
         horizontal=True,
         key="metrica_error",
     )
+    col_error = "error_abs" if metrica_sel == "MAE" else "error_pct"
     etiqueta = "MAE (MW)" if metrica_sel == "MAE" else "MAPE (%)"
 
     ph = filtros.por_fecha(
@@ -128,14 +129,14 @@ def _error_desglosado(
 
     # Por hora
     st.markdown("**Por hora del dia**")
-    err_hora = ph.groupby("hora")[metrica_sel].mean().reset_index()
+    err_hora = ph.groupby("hora")[col_error].mean().reset_index()
     if not filtros.verificar_vacio(err_hora):
         fig_h = px.bar(
             err_hora,
             x="hora",
-            y=metrica_sel,
+            y=col_error,
             title=f"{etiqueta} medio por hora del dia",
-            labels={"hora": "Hora de inicio (0–23)", metrica_sel: etiqueta},
+            labels={"hora": "Hora de inicio (0–23)", col_error: etiqueta},
         )
         mostrar_grafico(fig_h)
         st.caption(
@@ -145,14 +146,14 @@ def _error_desglosado(
 
     # Por mes
     st.markdown("**Por mes**")
-    err_mes = ph.groupby("mes")[metrica_sel].mean().reset_index()
+    err_mes = ph.groupby("mes")[col_error].mean().reset_index()
     if not filtros.verificar_vacio(err_mes):
         fig_m = px.bar(
             err_mes,
             x="mes",
-            y=metrica_sel,
+            y=col_error,
             title=f"{etiqueta} medio por mes",
-            labels={"mes": "Mes (1–12)", metrica_sel: etiqueta},
+            labels={"mes": "Mes (1–12)", col_error: etiqueta},
         )
         mostrar_grafico(fig_m)
         st.caption(
@@ -163,14 +164,14 @@ def _error_desglosado(
     # Por tipo de dia
     st.markdown("**Por tipo de dia**")
     ph_ng = ph.dropna(subset=["nombre_grupo"])
-    err_tipo = ph_ng.groupby("nombre_grupo")[metrica_sel].mean().reset_index()
+    err_tipo = ph_ng.groupby("nombre_grupo")[col_error].mean().reset_index()
     if not filtros.verificar_vacio(err_tipo):
         fig_t = px.bar(
             err_tipo,
             x="nombre_grupo",
-            y=metrica_sel,
+            y=col_error,
             title=f"{etiqueta} medio por tipo de dia",
-            labels={"nombre_grupo": "Tipo de dia", metrica_sel: etiqueta},
+            labels={"nombre_grupo": "Tipo de dia", col_error: etiqueta},
         )
         mostrar_grafico(fig_t)
         st.caption(
