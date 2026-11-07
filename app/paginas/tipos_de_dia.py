@@ -51,10 +51,7 @@ def mostrar(
     _tabla_resumen(tablas)
 
 
-# ---------------------------------------------------------------------------
 # Subgráficos
-# ---------------------------------------------------------------------------
-
 def _curvas_medias(tablas: dict[str, pd.DataFrame]) -> None:
     """Curvas medias de consumo relativo con banda inter-percentil."""
     st.subheader("Curvas medias de consumo relativo por tipo de dia")

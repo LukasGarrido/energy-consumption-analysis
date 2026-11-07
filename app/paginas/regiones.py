@@ -51,10 +51,7 @@ def mostrar(
     _dispersion_indicadores(tablas, regiones)
 
 
-# ---------------------------------------------------------------------------
 # Subgráficos
-# ---------------------------------------------------------------------------
-
 def _barras_apiladas(
     tablas: dict[str, pd.DataFrame],
     regiones: list[str],

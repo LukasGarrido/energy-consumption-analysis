@@ -55,10 +55,7 @@ def mostrar(
     _real_vs_pronostico(tablas, fecha_inicio, fecha_fin, estaciones)
 
 
-# ---------------------------------------------------------------------------
 # Subgráficos
-# ---------------------------------------------------------------------------
-
 def _tabla_metricas(met: pd.DataFrame) -> None:
     """Tabla de MAE, RMSE, MAPE y MASE por pliegue y modelo."""
     st.subheader("Métricas por pliegue de validación")

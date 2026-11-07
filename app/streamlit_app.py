@@ -113,9 +113,7 @@ def main() -> None:
     if "estaciones_sel" not in st.session_state:
         st.session_state["estaciones_sel"] = ESTACIONES
 
-    # -------------------------------------------------------------------------
     # Barra lateral
-    # -------------------------------------------------------------------------
     with st.sidebar:
         st.header("Navegación y filtros")
 
@@ -169,9 +167,7 @@ def main() -> None:
 
     fecha_inicio, fecha_fin = _normalizar_rango_fecha(fecha_rango, fecha_global_max_ts)
 
-    # -------------------------------------------------------------------------
     # Despacho de páginas
-    # -------------------------------------------------------------------------
     if pagina == "Resumen":
         resumen.mostrar(tablas, regiones_sel, fecha_inicio, fecha_fin, estaciones_sel)
 

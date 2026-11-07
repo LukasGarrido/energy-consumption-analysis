@@ -8,10 +8,8 @@ se definen una sola vez para garantizar consistencia visual y de rutas.
 
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
 # Paleta Okabe-Ito (máximo 8 colores, apta para daltonismo)
 # Referencia: Okabe & Ito (2002) "Color Universal Design"
-# ---------------------------------------------------------------------------
 OKABE_ITO: list[str] = [
     "#E69F00",  # naranja
     "#56B4E9",  # azul cielo
@@ -39,9 +37,7 @@ COLORES_REGION: dict[str, str] = {
     "PJM_Load": "#A52A2A",
 }
 
-# ---------------------------------------------------------------------------
 # Tablas que el notebook 07 debe haber exportado
-# ---------------------------------------------------------------------------
 TABLAS_REQUERIDAS: list[str] = [
     "dim_region",
     "dim_fecha",
@@ -79,10 +75,7 @@ PAGINAS: list[str] = [
 ]
 
 
-# ---------------------------------------------------------------------------
 # Resolución de la ruta a los CSV de Power BI
-# ---------------------------------------------------------------------------
-
 def resolver_directorio_powerbi() -> Path:
     """
     Devuelve la ruta absoluta a data/processed/powerbi/.

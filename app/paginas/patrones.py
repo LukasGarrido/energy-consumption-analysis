@@ -59,10 +59,7 @@ def mostrar(
     _estacionalidad_mensual(tablas, regiones)
 
 
-# ---------------------------------------------------------------------------
 # Subgráficos
-# ---------------------------------------------------------------------------
-
 def _mapa_de_calor(
     tablas: dict[str, pd.DataFrame],
     regiones: list[str],

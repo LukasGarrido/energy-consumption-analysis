@@ -58,10 +58,7 @@ def cargar_datos() -> dict[str, pd.DataFrame]:
     return tablas
 
 
-# ---------------------------------------------------------------------------
 # Conversiones internas
-# ---------------------------------------------------------------------------
-
 def _convertir_fechas(tablas: dict[str, pd.DataFrame]) -> None:
     """Convierte columnas de fecha a ``datetime64`` en las tablas indicadas."""
     mapa: dict[str, list[str]] = {

@@ -72,10 +72,7 @@ def mostrar(
     _caso_hora_a_hora(ad, tablas)
 
 
-# ---------------------------------------------------------------------------
 # Helpers internos
-# ---------------------------------------------------------------------------
-
 def _preparar_anomalias(
     tablas: dict[str, pd.DataFrame],
     fecha_inicio: pd.Timestamp,

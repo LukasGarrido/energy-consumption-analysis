@@ -12,10 +12,7 @@ import streamlit as st
 from app.config import COLORES_REGION, OKABE_ITO
 
 
-# ---------------------------------------------------------------------------
 # Compatibilidad de API de st.plotly_chart entre versiones de Streamlit
-# ---------------------------------------------------------------------------
-
 def _tiene_param_width() -> bool:
     """
     Detecta si la versión instalada de Streamlit acepta el parámetro
@@ -48,10 +45,7 @@ def mostrar_grafico(fig: go.Figure) -> None:
         st.plotly_chart(fig, use_container_width=True)
 
 
-# ---------------------------------------------------------------------------
 # Utilidades de color
-# ---------------------------------------------------------------------------
-
 def color_region(region: str) -> str:
     """
     Devuelve el color hexadecimal asignado a una región PJM.
