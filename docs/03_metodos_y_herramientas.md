@@ -25,18 +25,19 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Método | Descripción | Estado |
 |---|---|---|
 | Limpieza de series de tiempo | Unificación de horas repetidas (promedio), reindexado a calendario horario, recorte de extremos, interpolación lineal de huecos de hasta 2 horas y validación (`src/cleaning.py`) | Hecho |
-| Detección de valores atípicos aislados | z modificado de la desviación respecto del patrón esperado (> 3.5) con criterio de continuidad. Los valores de `DOM` y `PJMW` se conservan (decisión D2) | Por hacer |
-| Análisis exploratorio | Estadística descriptiva, cobertura, duplicados, horas faltantes (con su causa), valores aislados frente a rachas y distribución | Hecho |
+| Detección de valores atípicos aislados | z modificado de la desviación respecto del patrón esperado (> 3.5) con criterio de continuidad. Los valores aislados de `DOM` y `PJMW` se conservan (decisión D2) | Por hacer |
+| Análisis exploratorio | Estadística descriptiva, cobertura, duplicados, horas faltantes (con su causa) y valores aislados frente a rachas y distribución | Hecho |
 | Variables de calendario | Día operativo (`Datetime − 1 h`): fecha, hora (0 a 23), día de la semana, mes, estación, fin de semana y festivo (`src/features.py`, decisión D1) | Hecho |
 | Normalización relativa | Consumo dividido entre el promedio de su región (`MW_rel`), para comparar formas | Hecho |
-| Tendencia y estacionalidad | Media móvil de 365 días y descomposición STL | Hecho |
+| Tendencia y estacionalidad | Media móvil de 365 días y descomposición STL (`period = 365` sobre la serie diaria, por lo que el componente estacional es aproximado y el tramo final de la tendencia no se interpreta por el efecto de borde) | Hecho |
 | Correlación entre regiones | Correlación de Pearson sobre el promedio diario (solo días de 24 horas) | Hecho |
-| Agrupamiento de perfiles diarios | Cada día se representa con 24 valores divididos entre el promedio del día. Se comparan k-medias y Ward para k entre 2 y 10, con la silueta media sobre una muestra reproducible de 10,000 días. Se elige la mayor silueta entre las combinaciones con grupos de al menos el 5 % de los días. Se reporta la concordancia entre ambos métodos (índice de Rand ajustado) y la distancia de cada día al centro de su grupo (`src/profiles.py`) | Implementado (notebook 05), por ejecutar |
-| Detección de días atípicos | Residuo diario en % de la predicción, a partir de los residuos fuera de muestra del pronóstico, se marca el día con z modificado > 3.5 (0.6745 · (x − mediana) / MAD). Incluye sensibilidad al umbral, comparación por estación y pliegue, y contraste con episodios con fuente (`src/anomalies.py`) | Implementado (notebook 06),por ejecutar |
+| Continuidad entre regiones | Comparación de las medias de 30 días a cada lado del empalme (`NI` → `COMED`, `PJM_Load` → `PJME` y `PJMW`) y medición del desfase horario de cada región entre −3 y +3 h | Hecho (notebooks 03 y 05) |
+| Agrupamiento de perfiles diarios | Cada día se representa con 24 valores divididos entre el promedio del día. Se comparan k-medias y Ward para k entre 2 y 10, con la silueta media sobre una muestra reproducible de 10,000 días. Se elige la mayor silueta entre las combinaciones con grupos de al menos el 5 % de los días. Se reporta la concordancia entre ambos métodos (índice de Rand ajustado) y la distancia de cada día al centro de su grupo (`src/profiles.py`) | Hecho (notebook 05): k-medias con k = 2, silueta 0.413 |
+| Detección de días atípicos | Residuo diario en % de la predicción, a partir de los residuos fuera de muestra del pronóstico, se marca el día con z modificado > 3.5 (0.6745 · (x − mediana) / MAD). Incluye sensibilidad al umbral, comparación por estación y pliegue, y contraste con episodios con fuente (`src/anomalies.py`) | Hecho (notebook 06): 22 días atípicos |
 | Pronóstico a 24 horas | XGBoost con variables de calendario, rezagos (24, 48 y 168 h) y medias móviles desplazadas, frente a dos modelos base | Hecho |
-| Validación | División cronológica con control de fuga de datos y ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3), sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra | Implementada (notebook 04), por ejecutar |
-| Métricas | MAE, RMSE y MAPE, MASE con la escala del pronóstico ingenuo estacional de 24 h (Hyndman y Koehler), menor que 1 si el modelo mejora al ingenuo | Implementadas |
-| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 04 a 06) con validación de claves y diccionario de datos | Implementada (notebook 07), por ejecutar |
+| Validación | División cronológica con control de fuga de datos y ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3), sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra | Hecho (notebook 04) |
+| Métricas | MAE, RMSE y MAPE, MASE con la escala del pronóstico ingenuo estacional de 24 h (Hyndman y Koehler), menor que 1 si el modelo mejora al ingenuo | Hecho |
+| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 04 a 06) con validación de claves y diccionario de datos | Implementada (notebook 07), por verificar |
 
 ## Métodos de visualización
 
@@ -65,7 +66,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Anomalías | P3 | Línea de tiempo, tabla de episodios y lista de días atípicos |
 | Pronóstico | P4 | Error por hora, mes y tipo de día, y métricas por pliegue |
 
-Filtros en todas las páginas: región, fecha y estación. La región y la estación actúan sobre todas las tablas la fecha, solo sobre las tablas diarias y horarias (las ya agregadas no responden a ella). El detalle del modelo de datos está en la sección 7 del notebook 07.
+Filtros en todas las páginas: región, fecha y estación. La región y la estación actúan sobre todas las tablas; la fecha, solo sobre las tablas diarias y horarias (las ya agregadas no responden a ella). El detalle del modelo de datos está en la sección 7 del notebook 07.
 
 Principios de diseño: el canal de codificación se elige según la tarea (la posición sobre una escala común es el más preciso), las vistas en paneles múltiples comparten escala cuando el objetivo es comparar, el color es secuencial de un solo matiz para magnitudes y categórico de pocos colores (k ≤ 8) para los tipos de día.
 
