@@ -12,6 +12,7 @@ import streamlit as st
 from app.config import COLORES_REGION
 from app import filtros
 from app.graficos import mostrar_grafico
+from app.estilos import renderizar_hero_banner
 
 
 # Orden canónico de días de la semana para el mapa de calor
@@ -31,26 +32,15 @@ _HEATMAP_ZMIN = 0.75
 _HEATMAP_ZMAX = 1.25
 
 
-def mostrar(
-    tablas: dict[str, pd.DataFrame],
-    regiones: list[str],
-    estaciones: list[str],
-) -> None:
+def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Renderiza la página de Patrones.
-
-    Incluye tres gráficos:
-    - Mapa de calor 7 × 24 de consumo relativo (una región a la vez).
-    - Líneas de perfil diario por tipo de calendario.
-    - Líneas de estacionalidad mensual.
-
-    Parámetros
-    ----------
-    tablas : dict[str, pd.DataFrame]
-    regiones : list[str]
-    estaciones : list[str]
+    Renderiza el módulo del estudio de Patrones.
     """
-    st.header("Patrones de consumo")
+    renderizar_hero_banner("Patrones de Consumo y Estacionalidad")
+
+    regiones, _, _, estaciones = filtros.selector_filtros_modulo(
+        tablas, "patrones", con_fechas=False
+    )
 
     _mapa_de_calor(tablas, regiones, estaciones)
     st.divider()

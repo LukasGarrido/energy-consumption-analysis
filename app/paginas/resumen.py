@@ -1,6 +1,6 @@
 """
 app/paginas/resumen.py
-Página 'Resumen': tarjetas de indicadores clave y tendencia anual por región.
+Módulo 'Resumen': tarjetas de indicadores clave y tendencia anual por región.
 """
 
 import pandas as pd
@@ -10,36 +10,18 @@ import streamlit as st
 from app.config import COLORES_REGION, UMBRAL_Z_DEFECTO
 from app import filtros
 from app.graficos import mostrar_grafico
+from app.estilos import renderizar_hero_banner
 
 
-def mostrar(
-    tablas: dict[str, pd.DataFrame],
-    regiones: list[str],
-    fecha_inicio: pd.Timestamp,
-    fecha_fin: pd.Timestamp,
-    estaciones: list[str],
-) -> None:
+def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Renderiza la página de Resumen.
-
-    Muestra seis tarjetas de métricas globales calculadas sobre el filtro
-    actual, un aviso con días atípicos de PJME (si está seleccionada) y
-    una línea de tendencia anual para los años con datos completos.
-
-    Parámetros
-    ----------
-    tablas : dict[str, pd.DataFrame]
-        Diccionario con todas las tablas cargadas.
-    regiones : list[str]
-        Regiones seleccionadas en la barra lateral.
-    fecha_inicio : pd.Timestamp
-        Límite inferior del filtro de fecha.
-    fecha_fin : pd.Timestamp
-        Límite superior del filtro de fecha.
-    estaciones : list[str]
-        Estaciones seleccionadas en la barra lateral.
+    Renderiza el módulo del estudio de Resumen.
     """
-    st.header("Resumen del panel")
+    renderizar_hero_banner("Resumen Ejecutivo y KPIs")
+
+    regiones, fecha_inicio, fecha_fin, estaciones = filtros.selector_filtros_modulo(
+        tablas, "resumen", con_fechas=True
+    )
 
     # Datos filtrados para las tarjetas
     hd = filtros.por_region(tablas["hechos_diario"], regiones)
@@ -61,7 +43,7 @@ def mostrar(
 
     col1, col2, col3, col4, col5, col6 = st.columns(6)
     col1.metric("Regiones", len(regiones))
-    col2.metric("Dias en el filtro", f"{hd['fecha'].nunique():,}")
+    col2.metric("Dias filtrados", f"{hd['fecha'].nunique():,}")
     col3.metric("Consumo medio (MW)", consumo_str)
     col4.metric("Tipos de dia", n_tipos)
     col5.metric("MAE medio (MW)", mae_str)

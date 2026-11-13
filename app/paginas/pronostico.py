@@ -11,6 +11,7 @@ import streamlit as st
 
 from app import filtros
 from app.graficos import mostrar_grafico
+from app.estilos import renderizar_hero_banner
 
 
 # Número máximo de días a mostrar en el gráfico hora a hora para mantener
@@ -18,31 +19,15 @@ from app.graficos import mostrar_grafico
 _MAX_DIAS_DETALLE = 28
 
 
-def mostrar(
-    tablas: dict[str, pd.DataFrame],
-    regiones: list[str],
-    fecha_inicio: pd.Timestamp,
-    fecha_fin: pd.Timestamp,
-    estaciones: list[str],
-) -> None:
+def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Renderiza la página de Pronóstico (modelo XGBoost de PJME).
-
-    Incluye:
-    - Tabla de métricas por pliegue de validación.
-    - Barras del MAE por pliegue y modelo.
-    - Selector MAE / MAPE para las barras de error por hora, mes y tipo.
-    - Gráfico hora a hora de real vs. pronóstico en el periodo filtrado.
-
-    Parámetros
-    ----------
-    tablas : dict[str, pd.DataFrame]
-    regiones : list[str]
-    fecha_inicio : pd.Timestamp
-    fecha_fin : pd.Timestamp
-    estaciones : list[str]
+    Renderiza el módulo del estudio de Pronóstico y Validación.
     """
-    st.header("Pronóstico de referencia (PJME — XGBoost)")
+    renderizar_hero_banner("Pronostico y Validacion de Modelos (XGBoost)")
+
+    regiones, fecha_inicio, fecha_fin, estaciones = filtros.selector_filtros_modulo(
+        tablas, "pronostico", con_fechas=True
+    )
 
     met = tablas["pronostico_metricas"].copy()
 

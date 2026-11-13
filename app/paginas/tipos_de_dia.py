@@ -11,34 +11,18 @@ import streamlit as st
 
 from app import filtros
 from app.graficos import color_grupo, hex_a_rgba, mapa_colores_grupos, mostrar_grafico
+from app.estilos import renderizar_hero_banner
 
 
-def mostrar(
-    tablas: dict[str, pd.DataFrame],
-    regiones: list[str],
-    fecha_inicio: pd.Timestamp,
-    fecha_fin: pd.Timestamp,
-    estaciones: list[str],
-) -> None:
+def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Renderiza la página de Tipos de dia.
-
-    Incluye cuatro visualizaciones:
-    - Curvas medias con banda inferior-superior por tipo de dia.
-    - Calendario de color (año × día del año, color por tipo).
-    - Barras del porcentaje de dias por tipo.
-    - Curva de silueta frente a k con umbrales de referencia.
-    - Tabla resumen de ``dim_tipo_dia``.
-
-    Parámetros
-    ----------
-    tablas : dict[str, pd.DataFrame]
-    regiones : list[str]
-    fecha_inicio : pd.Timestamp
-    fecha_fin : pd.Timestamp
-    estaciones : list[str]
+    Renderiza el módulo del estudio de Tipos de dia.
     """
-    st.header("Tipos de dia")
+    renderizar_hero_banner("Tipos de Dia y Clasificacion de Perfiles")
+
+    regiones, fecha_inicio, fecha_fin, estaciones = filtros.selector_filtros_modulo(
+        tablas, "tipos_de_dia", con_fechas=True
+    )
 
     _curvas_medias(tablas)
     st.divider()

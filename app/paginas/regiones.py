@@ -12,31 +12,18 @@ import streamlit as st
 from app.config import COLORES_REGION
 from app import filtros
 from app.graficos import color_grupo, mostrar_grafico
+from app.estilos import renderizar_hero_banner
 
 
-def mostrar(
-    tablas: dict[str, pd.DataFrame],
-    regiones: list[str],
-    estaciones: list[str],
-) -> None:
+def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Renderiza la página de comparativa entre regiones.
-
-    Incluye:
-    - Interruptor entre historial completo y periodo comun.
-    - Barras apiladas al 100 % ordenadas por el peso del grupo 1.
-    - Dispersión de razón invierno/verano frente a amplitud diaria.
-
-    Parámetros
-    ----------
-    tablas : dict[str, pd.DataFrame]
-    regiones : list[str]
-    estaciones : list[str]
-        Parámetro recibido por simetría con las demás páginas;
-        ninguna tabla de esta página filtra por estación porque los
-        indicadores son promedios del periodo completo o comun.
+    Renderiza el módulo del estudio de comparativa entre regiones.
     """
-    st.header("Comparativa entre regiones")
+    renderizar_hero_banner("Comparativa Estructural entre Regiones")
+
+    regiones, _, _, _ = filtros.selector_filtros_modulo(
+        tablas, "regiones", con_fechas=False
+    )
 
     modo = st.radio(
         "Periodo de referencia",
