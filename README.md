@@ -1,9 +1,5 @@
 # Análisis visual de la demanda eléctrica horaria de la red PJM
 
-<p align="center">
-  <img src="public/power_electric_plant.png" alt="Análisis visual de la demanda eléctrica - Red PJM" width="100%">
-</p>
-
 Análisis de la demanda eléctrica horaria de 12 regiones de la red PJM (Estados Unidos, 1998–2018): tipos de día, diferencias entre regiones y episodios atípicos, apoyado en aprendizaje automático y comunicado mediante visualizaciones.
 
 ---
@@ -103,7 +99,8 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── streamlit_app.py          # Punto de entrada del prototipo Streamlit
 │   ├── config.py                 # Constantes, paleta Okabe-Ito y resolución de rutas
 │   ├── data_loader.py            # Carga con caché y conversiones de tipo
-│   ├── filtros.py                # Helpers de filtrado por región, estación y fecha
+│   ├── estilos.py                # Mejoras visuales y diseño adaptativo (modo claro/oscuro)
+│   ├── filtros.py                # Helpers de filtrado local y por módulo
 │   ├── graficos.py               # Helpers de color y compatibilidad de API de Streamlit
 │   ├── paginas/
 │   │   ├── __init__.py
