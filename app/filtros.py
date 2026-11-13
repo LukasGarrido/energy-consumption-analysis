@@ -7,6 +7,8 @@ de la barra lateral (región, estación y rango de fechas).
 import pandas as pd
 import streamlit as st
 
+from app.config import ESTACIONES
+
 
 def por_region(df: pd.DataFrame, regiones: list[str]) -> pd.DataFrame:
     """
@@ -98,3 +100,67 @@ def verificar_vacio(df: pd.DataFrame) -> bool:
         st.info("Sin datos con estos filtros.")
         return True
     return False
+
+
+def selector_filtros_modulo(
+    tablas: dict[str, pd.DataFrame],
+    key_sufijo: str,
+    con_fechas: bool = True,
+) -> tuple[list[str], pd.Timestamp, pd.Timestamp, list[str]]:
+    """
+    Renderiza un panel de filtros integrado en el módulo actual para el estudio,
+    permitiendo filtrar datos de forma local y limpia sin sobrecargar el menú lateral.
+    """
+    todas_las_regiones = sorted(tablas["dim_region"]["region"].unique().tolist())
+    hd_fechas = tablas["hechos_diario"]["fecha"].dropna()
+    fecha_global_min = hd_fechas.min().date()
+    fecha_global_max = hd_fechas.max().date()
+    fecha_global_max_ts = pd.Timestamp(fecha_global_max)
+
+    k_regiones = f"regiones_{key_sufijo}"
+    k_estaciones = f"estaciones_{key_sufijo}"
+    k_fechas = f"fecha_rango_{key_sufijo}"
+
+    if k_regiones not in st.session_state:
+        st.session_state[k_regiones] = todas_las_regiones
+    if k_estaciones not in st.session_state:
+        st.session_state[k_estaciones] = ESTACIONES
+    if k_fechas not in st.session_state:
+        st.session_state[k_fechas] = (fecha_global_min, fecha_global_max)
+
+    with st.expander("Filtros y parametros del modulo", expanded=False):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            regiones_sel = st.multiselect(
+                "Regiones",
+                options=todas_las_regiones,
+                key=k_regiones,
+            )
+        with col2:
+            estaciones_sel = st.multiselect(
+                "Estaciones",
+                options=ESTACIONES,
+                key=k_estaciones,
+            )
+        with col3:
+            if con_fechas:
+                fecha_rango = st.date_input(
+                    "Rango de fechas",
+                    min_value=fecha_global_min,
+                    max_value=fecha_global_max,
+                    key=k_fechas,
+                )
+            else:
+                fecha_rango = (fecha_global_min, fecha_global_max)
+
+    if con_fechas:
+        if isinstance(fecha_rango, (list, tuple)) and len(fecha_rango) == 2:
+            f_inicio, f_fin = pd.Timestamp(fecha_rango[0]), pd.Timestamp(fecha_rango[1])
+        elif isinstance(fecha_rango, (list, tuple)) and len(fecha_rango) == 1:
+            f_inicio, f_fin = pd.Timestamp(fecha_rango[0]), fecha_global_max_ts
+        else:
+            f_inicio, f_fin = pd.Timestamp(fecha_rango), fecha_global_max_ts
+    else:
+        f_inicio, f_fin = pd.Timestamp(fecha_global_min), fecha_global_max_ts
+
+    return regiones_sel, f_inicio, f_fin, estaciones_sel

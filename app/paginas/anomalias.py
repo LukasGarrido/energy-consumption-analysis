@@ -13,39 +13,23 @@ import streamlit as st
 from app import filtros
 from app.graficos import mostrar_grafico
 from app.config import UMBRAL_Z_DEFECTO
+from app.estilos import renderizar_hero_banner
 
 
-def mostrar(
-    tablas: dict[str, pd.DataFrame],
-    regiones: list[str],
-    fecha_inicio: pd.Timestamp,
-    fecha_fin: pd.Timestamp,
-    estaciones: list[str],
-) -> None:
+def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Renderiza la página de Anomalias.
-
-    Incluye:
-    - Deslizador de umbral que recalcula ``es_atipico`` en la vista.
-    - Línea de tiempo de ``residuo_pct`` con atípicos resaltados.
-    - Lista de los 20 dias con mayor |z_mod|.
-    - Tabla de episodios históricos documentados.
-    - Selector de dia atípico para ver real vs. pronóstico hora a hora.
-
-    Parámetros
-    ----------
-    tablas : dict[str, pd.DataFrame]
-    regiones : list[str]
-    fecha_inicio : pd.Timestamp
-    fecha_fin : pd.Timestamp
-    estaciones : list[str]
+    Renderiza el módulo del estudio de Anomalias.
     """
-    st.header("Anomalias y dias atipicos")
+    renderizar_hero_banner("Deteccion de Anomalias y Dias Atipicos")
+
+    regiones, fecha_inicio, fecha_fin, estaciones = filtros.selector_filtros_modulo(
+        tablas, "anomalias", con_fechas=True
+    )
 
     if "PJME" not in regiones:
         st.info(
             "La detección de anomalías solo está disponible para la región **PJME**. "
-            "Selecciona PJME en el filtro de región para ver esta página."
+            "Selecciona PJME en el selector de regiones para ver este módulo."
         )
         return
 

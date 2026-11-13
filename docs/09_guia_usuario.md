@@ -75,9 +75,9 @@ Los parámetros están centralizados en `src/config.py`:
 | Parámetro | Uso | Valor por defecto |
 |---|---|---|
 | `HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA` | Pronóstico | 24 h, [24, 48, 168], [24, 168], "2017-01-01", 42 |
-| `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.50, 0.26 |
-| `UMBRAL_Z_MODIFICADO` | Valores atípicos y días atípicos | 3.5 (Iglewicz y Hoaglin) |
-| `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues, 12 meses por pliegue |
+| `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.50, 0.26, 10,000 días |
+| `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
+| `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (el notebook 04 usa 6), 12 meses por pliegue |
 
 `REZAGOS_HORAS` no puede contener valores menores que `HORIZONTE_HORAS`: el código lanza un error para evitar usar información futura que no se tendría disponible al momento de pronosticar.
 
@@ -152,7 +152,7 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 1 | `01_exploracion.ipynb` | Revisa la estructura, calidad y convención horaria | Ninguno | Disponible |
 | 2 | `02_limpieza.ipynb` | Limpia, interpola DST y valida formalmente | `data/processed/<REGION>_clean.parquet` y `consumo_horario.parquet` | Disponible |
 | 3 | `03_analisis.ipynb` | Analiza patrones horarios, estacionalidad y comparativas | Figuras exploratorias | Disponible |
-| 4 | `04_modelado.ipynb` | Entrena pronóstico de referencia a 24 h (XGBoost vs base) | Residuos temporales y métricas en ventana móvil | Disponible |
+| 4 | `04_modelado.ipynb` | Entrena pronóstico de referencia a 24 h (XGBoost vs base) | `residuos_PJME.parquet` y `metricas_ventana_movil_PJME.parquet` | Disponible |
 | 5 | `05_agrupamiento.ipynb` | Normaliza perfiles, evalúa silueta y agrupa tipos de día | `tipos_de_dia*.parquet` | Disponible |
 | 6 | `06_anomalias.ipynb` | Detecta anomalías con z modificado y contrasta con eventos | `anomalias_*.parquet` | Disponible |
 | 7 | `07_exportacion.ipynb` | Exporta dimensiones y tablas de hechos normalizadas | 17 archivos CSV en `data/processed/powerbi/` | Disponible |
@@ -166,9 +166,9 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 02 | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos |
 | 02 | `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
 | 03 | 10 regiones vigentes en el periodo común 2013-06-01 → 2018-08-03 |
-| 04 | XGBoost con MASE < 1.0 (mejora frente a basal) y validación en 3 pliegues de 12 meses |
-| 05 | Coeficiente de silueta evaluado para $k \in [2, 10]$ con umbrales 0.26 y 0.51 |
-| 06 | Detección de eventos documentados (por ejemplo, huracán Sandy en 2012 o vórtice polar de 2014) |
+| 04 | XGBoost supera al base en los 6 pliegues de 12 meses, con MASE entre 0.72 y 0.87 (0.86 en la partición única) |
+| 05 | Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50. Con la configuración por defecto resulta k-medias con k = 2 y silueta 0.413 |
+| 06 | 22 días atípicos de 2,191 y detección del huracán Sandy (2012-10-30) y del vórtice polar de 2014 |
 | 07 | 17 archivos `.csv` presentes en `data/processed/powerbi/` junto con `diccionario_datos.csv` |
 
 ---
@@ -259,6 +259,9 @@ Verificar que los CSV estén descomprimidos en `data/raw/` y que Jupyter se haya
 
 **Los notebooks 03 a 06 no encuentran `consumo_horario.parquet`.**
 Ejecutar previamente `02_limpieza.ipynb`.
+
+**El notebook 06 no encuentra `residuos_PJME.parquet`.**
+Ejecutar previamente `04_modelado.ipynb`.
 
 **El kernel de Jupyter no usa el entorno del proyecto.**
 Registrarlo ejecutando:
