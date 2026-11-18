@@ -1,4 +1,22 @@
-﻿# Casos de uso
+<div align="center">
+
+# Casos de uso
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Partes interesadas](#partes-interesadas)
+- [Historias de usuario](#historias-de-usuario)
+- [Trazabilidad](#trazabilidad)
+
+---
+
 
 Formato: *Como* [parte interesada], *quiero* [qué lograr], *para* [motivo].
 
@@ -38,3 +56,12 @@ Las historias HU-01 a HU-04 se cumplieron con el notebook 03, ejecutado con el d
 | HU-08 | P3 | OE4 |
 | HU-09, HU-10 | P1 a P4 | OE5 |
 | HU-06 | Transversal | OE1 |
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

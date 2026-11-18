@@ -1,4 +1,24 @@
-﻿# Resultados esperados
+<div align="center">
+
+# Resultados esperados
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Hallazgos del análisis descriptivo (notebooks 01 y 03)](#hallazgos-del-análisis-descriptivo-notebooks-01-y-03)
+- [Tipos de día (notebook 05)](#tipos-de-día-notebook-05)
+- [Días atípicos (notebook 06, `PJME`)](#días-atípicos-notebook-06-pjme)
+- [Pronóstico a 24 horas (notebook 04, `PJME`)](#pronóstico-a-24-horas-notebook-04-pjme)
+- [Exportación para el panel (notebook 07)](#exportación-para-el-panel-notebook-07)
+
+---
+
 
 > Las cifras de este documento salen de la ejecución de los notebooks 01 a 07 con el día operativo (decisión D1). Las horas son horas de inicio (0 = 00:00–01:00). El panel de Power BI está por construir.
 
@@ -117,3 +137,12 @@ El notebook 07 reúne los resultados de los notebooks 02 a 06 en un modelo en es
 | `patron_tipo_calendario` | 3,456 | `anomalias_dias` | 2,191 |
 | `tendencia_anual` | 132 | `anomalias_episodios` | 10 |
 | `estacionalidad_mensual` | 144 | | |
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

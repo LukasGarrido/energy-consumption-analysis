@@ -1,4 +1,24 @@
-﻿# Métodos y herramientas
+<div align="center">
+
+# Métodos y herramientas
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Herramientas](#herramientas)
+- [Métodos de ciencia de datos](#métodos-de-ciencia-de-datos)
+- [Métodos de visualización](#métodos-de-visualización)
+  - [Páginas del panel (Power BI)](#páginas-del-panel-power-bi)
+- [Métodos considerados y descartados](#métodos-considerados-y-descartados)
+
+---
+
 
 ## Herramientas
 
@@ -74,3 +94,12 @@ Principios de diseño: el canal de codificación se elige según la tarea (la po
 
 - **Prophet y modelos ARIMA/SARIMAX:** con datos horarios y varias estacionalidades simultáneas son lentos y complejos de ajustar, y el pronóstico es una referencia y no el producto final.
 - **Redes neuronales (por ejemplo, LSTM):** quedan fuera del alcance por su costo y su menor interpretabilidad.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

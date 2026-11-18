@@ -1,4 +1,55 @@
-﻿Los conceptos de componentes ya implementados (agrupamiento, anomalías, ventana móvil y exportación al panel) describen el diseño aplicado, y sus resultados se documentan en `08_modelo.md` cuando se completen. Las cifras marcadas como «por recalcular» se calcularon con `Datetime` como hora de fin y se actualizan con el día operativo.
+<div align="center">
+
+# Documentación
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Mapa: qué conceptos usa cada pregunta](#mapa-qué-conceptos-usa-cada-pregunta)
+  - [Hora de fin de intervalo (*hour ending*)](#hora-de-fin-de-intervalo-hour-ending)
+  - [Día operativo](#día-operativo)
+  - [Hora local y EPT](#hora-local-y-ept)
+  - [Desfase entre regiones](#desfase-entre-regiones)
+  - [Día completo](#día-completo)
+  - [Error de medición frente a valor extremo real](#error-de-medición-frente-a-valor-extremo-real)
+  - [Periodo común y regiones vigentes](#periodo-común-y-regiones-vigentes)
+  - [Media móvil centrada y efecto de borde](#media-móvil-centrada-y-efecto-de-borde)
+  - [Descomposición STL](#descomposición-stl)
+- [7. Agrupamiento de perfiles diarios (aprendizaje no supervisado)](#7-agrupamiento-de-perfiles-diarios-aprendizaje-no-supervisado)
+  - [Silueta](#silueta)
+  - [Elección del número de grupos (*k*)](#elección-del-número-de-grupos-k)
+  - [Agrupamiento jerárquico y criterio de Ward](#agrupamiento-jerárquico-y-criterio-de-ward)
+  - [Estabilidad del agrupamiento](#estabilidad-del-agrupamiento)
+  - [8. Detección de anomalías](#8-detección-de-anomalías)
+  - [Residuo diario](#residuo-diario)
+  - [Umbral de z modificado](#umbral-de-z-modificado)
+  - [Sensibilidad al umbral (nuevo)](#sensibilidad-al-umbral-nuevo)
+  - [Validación sin etiquetas](#validación-sin-etiquetas)
+  - [Distancia al centroide (complemento)](#distancia-al-centroide-complemento)
+- [9. Pronóstico (aprendizaje supervisado)](#9-pronóstico-aprendizaje-supervisado)
+  - [División cronológica entrenamiento/prueba](#división-cronológica-entrenamientoprueba)
+  - [Validación en ventana móvil (*rolling-origin*)](#validación-en-ventana-móvil-rolling-origin)
+  - [Extrapolación de los árboles](#extrapolación-de-los-árboles)
+- [10. Métricas de evaluación](#10-métricas-de-evaluación)
+  - [MASE (error absoluto medio escalado)](#mase-error-absoluto-medio-escalado)
+- [11. Visualización de datos](#11-visualización-de-datos)
+  - [Mapa de calor de calendario](#mapa-de-calor-de-calendario)
+- [12. Herramientas y buenas prácticas](#12-herramientas-y-buenas-prácticas)
+  - [Notebook de Jupyter](#notebook-de-jupyter)
+  - [Módulo reutilizable y paquete editable](#módulo-reutilizable-y-paquete-editable)
+  - [Modelo en estrella (nuevo)](#modelo-en-estrella-nuevo)
+  - [Power BI](#power-bi)
+- [13. Glosario de siglas](#13-glosario-de-siglas)
+
+---
+
+Los conceptos de componentes ya implementados (agrupamiento, anomalías, ventana móvil y exportación al panel) describen el diseño aplicado, y sus resultados se documentan en `08_modelo.md` cuando se completen. Las cifras marcadas como «por recalcular» se calcularon con `Datetime` como hora de fin y se actualizan con el día operativo.
 
 ## Mapa: qué conceptos usa cada pregunta
 
@@ -96,19 +147,7 @@
 
 **En el proyecto.** Se mide la concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado). La repetición con distintas semillas queda por hacer.
 
-### Índice de Rand ajustado (nuevo)
-
-**Qué es.** Medida de cuánto coinciden dos agrupamientos de los mismos elementos, corregida por el azar. Vale 1 si son idénticos y cerca de 0 si no tienen relación, no depende de cómo se numeren los grupos.
-
-**En el proyecto.** Compara k-medias con Ward para el k elegido: un valor alto indica que la solución no depende del algoritmo.
-
-### Distancia al centroide
-
-**En el proyecto.** Es la raíz de la suma de las diferencias al cuadrado, hora a hora, entre el perfil de un día y la curva media de su grupo. El notebook 05 la guarda en `tipos_de_dia.parquet`.
-
----
-
-## 8. Detección de anomalías
+### 8. Detección de anomalías
 
 ### Residuo diario
 
@@ -215,3 +254,12 @@ Cambia la fila de MASE y añade las nuevas:
 | MASE | Error absoluto medio escalado | Notebook 04 |
 | ARI | Índice de Rand ajustado | Notebook 05 |
 | D1 a D8 | Decisiones de diseño del proyecto | `04_metodologia_desarrollo.md` |
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

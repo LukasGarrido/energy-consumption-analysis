@@ -1,4 +1,24 @@
-﻿# Objetivo
+<div align="center">
+
+# Objetivo
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Problema](#problema)
+- [Preguntas de investigación](#preguntas-de-investigación)
+- [Objetivo general](#objetivo-general)
+- [Objetivos específicos](#objetivos-específicos)
+- [Alcance](#alcance)
+
+---
+
 
 ## Problema
 
@@ -35,3 +55,12 @@ Las decisiones de diseño que condicionan estos objetivos (día operativo, atíp
 **Dentro:** limpieza y documentación de la calidad de los datos, análisis descriptivo con el día operativo, agrupamiento de perfiles diarios de las 12 regiones, pronóstico de referencia a 24 horas con validación en ventana móvil, detección de días atípicos a partir de los residuos fuera de muestra y panel en Power BI.
 
 **Fuera:** datos externos (temperatura, precios), análisis en tiempo real, despliegue en producción y búsqueda de hiperparámetros del pronóstico. El pronóstico y la detección de anomalías se hacen solo para `PJME`.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

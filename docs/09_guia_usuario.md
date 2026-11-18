@@ -1,4 +1,38 @@
+<div align="center">
+
 # Guía de usuario
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [1. Requisitos](#1-requisitos)
+- [2. Instalación](#2-instalación)
+  - [2.1 Clonar el repositorio](#21-clonar-el-repositorio)
+  - [2.2 Crear el entorno virtual](#22-crear-el-entorno-virtual)
+  - [2.3 Activar el entorno virtual](#23-activar-el-entorno-virtual)
+  - [2.4 Instalar las dependencias](#24-instalar-las-dependencias)
+  - [2.5 Instalar el proyecto en modo editable](#25-instalar-el-proyecto-en-modo-editable)
+  - [2.6 Parámetros del proyecto](#26-parámetros-del-proyecto)
+- [3. Obtención de los datos](#3-obtención-de-los-datos)
+  - [Opción A: con la API de Kaggle](#opción-a-con-la-api-de-kaggle)
+  - [Opción B: descarga manual](#opción-b-descarga-manual)
+  - [Verificación](#verificación)
+- [4. Estructura del proyecto](#4-estructura-del-proyecto)
+- [5. Orden de ejecución](#5-orden-de-ejecución)
+  - [Comprobaciones tras ejecutar](#comprobaciones-tras-ejecutar)
+- [6. Cómo ver los resultados](#6-cómo-ver-los-resultados)
+  - [6.1 Prototipo interactivo en Streamlit](#61-prototipo-interactivo-en-streamlit)
+  - [6.2 Panel en Power BI Desktop](#62-panel-en-power-bi-desktop)
+- [7. Solución de problemas](#7-solución-de-problemas)
+
+---
+
 
 Esta guía explica cómo instalar el proyecto, obtener los datos y reproducir el análisis desde cero, así como explorar los resultados tanto en el prototipo interactivo de Streamlit como en el panel de Power BI.
 
@@ -271,3 +305,12 @@ python -m ipykernel install --user --name energy-consumption --display-name "Pyt
 ```
 
 y seleccionarlo en Jupyter desde *Kernel → Change Kernel*.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

@@ -1,4 +1,24 @@
-﻿# Metodología de desarrollo
+<div align="center">
+
+# Metodología de desarrollo
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Fases](#fases)
+- [Flujo de notebooks](#flujo-de-notebooks)
+- [Decisiones de diseño](#decisiones-de-diseño)
+  - [Pendientes de decisión (con ID en la bitácora)](#pendientes-de-decisión-con-id-en-la-bitácora)
+- [Criterios de avance](#criterios-de-avance)
+
+---
+
 
 El proyecto avanza por fases, con un notebook por fase y las funciones reutilizables en `src/`. En cada fase se formulan hipótesis a partir de los resultados y se contrastan con los datos antes de aceptarlas. Por ejemplo:
 
@@ -72,3 +92,12 @@ Una fase se considera cerrada cuando cumple su criterio de logro:
 | Anomalías | Lista contrastada con al menos un episodio externo, con fuente | Cumplido: 5 episodios coinciden |
 | Exportación | Tablas con claves coherentes y diccionario de datos | Cumplido: 17 tablas, 0 claves huérfanas, 146 columnas documentadas |
 | Panel | Cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Pendiente |
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

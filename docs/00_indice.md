@@ -1,4 +1,12 @@
-﻿# Índice de Documentación
+<div align="center">
+
+# Índice de Documentación
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
 
 Bienvenido a la documentación del proyecto **Análisis de Consumo Horario de Energía**. A continuación se listan las distintas secciones temáticas del proyecto:
 
@@ -30,3 +38,12 @@ Bienvenido a la documentación del proyecto **Análisis de Consumo Horario de En
 ---
 
 *Nota para Obsidian:* En Obsidian también puedes vincular estas notas utilizando la sintaxis de wikilinks: `[[01_objetivo]]`, `[[02_base_de_datos]]`, `[[03_metodos_y_herramientas]]`, `[[04_metodologia_desarrollo]]`, `[[05_resultados_esperados]]`, `[[06_plan_proyecto]]`, `[[07_casos_de_uso]]`, `[[08_modelo]]`, `[[09_guia_usuario]]`, `[[10_referencias]]`, `[[11_conceptos]]` y `[[12_bitacora_decisiones]]`.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

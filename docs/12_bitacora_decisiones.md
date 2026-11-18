@@ -1,4 +1,28 @@
+<div align="center">
+
 # Bitácora de decisiones
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [1. Enfoque y alcance](#1-enfoque-y-alcance)
+- [2. Datos y limpieza](#2-datos-y-limpieza)
+- [3. Pronóstico de referencia](#3-pronóstico-de-referencia)
+- [4. Agrupamiento de perfiles diarios](#4-agrupamiento-de-perfiles-diarios)
+- [5. Detección de anomalías](#5-detección-de-anomalías)
+- [6. Visualización y panel](#6-visualización-y-panel)
+- [7. Documentación y reproducibilidad](#7-documentación-y-reproducibilidad)
+- [8. Hipótesis contrastadas](#8-hipótesis-contrastadas)
+- [9. Decisiones abiertas y pendientes](#9-decisiones-abiertas-y-pendientes)
+
+---
+
 
 Registro de las decisiones del proyecto: qué se decidió, por qué y qué se descartó. D1 a D8 coinciden con `04_metodologia_desarrollo.md`, el resto agrupa las demás decisiones por área. Las decisiones que siguen abiertas están en la sección 9.
 
@@ -118,3 +142,12 @@ Registro de las decisiones del proyecto: qué se decidió, por qué y qué se de
 - **`AEP`:** verificar el máximo del 2008-10-20 (25,695 MW).
 - **Panel (D4, D34):** construir el archivo de Power BI y verificar la licencia.
 - **Reproducibilidad:** que un tercero siga la guía de usuario.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

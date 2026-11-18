@@ -1,4 +1,39 @@
-﻿# Documentación del modelo
+<div align="center">
+
+# Documentación del modelo
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [1. Datos de entrada](#1-datos-de-entrada)
+- [2. Preparación de los datos](#2-preparación-de-los-datos)
+- [3. Diseño del experimento](#3-diseño-del-experimento)
+- [4. Algoritmos](#4-algoritmos)
+- [5. Métricas y resultados](#5-métricas-y-resultados)
+  - [Interpretación](#interpretación)
+- [6. Limitaciones](#6-limitaciones)
+- [7. Reproducibilidad](#7-reproducibilidad)
+- [1. Datos de entrada](#1-datos-de-entrada)
+- [2. Diseño del experimento](#2-diseño-del-experimento)
+- [3. Resultados](#3-resultados)
+- [4. Limitaciones](#4-limitaciones)
+- [5. Reproducibilidad](#5-reproducibilidad)
+- [1. Definición](#1-definición)
+- [2. Diseño](#2-diseño)
+- [3. Resultados](#3-resultados)
+  - [Interpretación](#interpretación)
+  - [Criterios de cierre](#criterios-de-cierre)
+- [4. Limitaciones](#4-limitaciones)
+- [5. Reproducibilidad](#5-reproducibilidad)
+
+---
+
 
 Este documento describe los tres componentes analíticos del proyecto y cómo se evalúan.
 
@@ -426,3 +461,12 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 ## 5. Reproducibilidad
 
 El código está en `notebooks/06_anomalias.ipynb` y `src/anomalies.py`. Los parámetros (`UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS`) están en `src/config.py`. La tabla de episodios, con sus fuentes, está en el notebook 06 y reemplaza a `EPISODIOS_CONOCIDOS` de `src/anomalies.py`, que no incluye fuentes: conviene actualizar ese archivo con la misma tabla.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

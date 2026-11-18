@@ -1,4 +1,28 @@
-﻿# Plan del proyecto
+<div align="center">
+
+# Plan del proyecto
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [1. Objetivos y alcance](#1-objetivos-y-alcance)
+- [2. Métricas de evaluación](#2-métricas-de-evaluación)
+  - [Del proyecto](#del-proyecto)
+  - [Del agrupamiento](#del-agrupamiento)
+  - [Del pronóstico (`PJME`)](#del-pronóstico-pjme)
+  - [De los días atípicos](#de-los-días-atípicos)
+- [3. Cronograma](#3-cronograma)
+- [4. Presupuesto](#4-presupuesto)
+- [5. Riesgos](#5-riesgos)
+
+---
+
 
 ## 1. Objetivos y alcance
 
@@ -83,3 +107,12 @@ Sin costo económico: las librerías son de código abierto y el dataset es de a
 | Fechas de episodios sin fuente (por ejemplo, la tormenta Jonas) | Pequeño | Cada episodio lleva su fuente y una marca de verificación | Parcialmente mitigado |
 | El pronóstico falla en olas de calor y de frío por no usar temperatura | Medio | Documentarlo como limitación, los residuos se usan para detectar anomalías | Abierto |
 | Dependencia de Power BI y de su licencia | Medio | Verificar la licencia, Streamlit queda como alternativa (D4) | Abierto |
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>

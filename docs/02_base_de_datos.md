@@ -1,4 +1,25 @@
-﻿# Base de datos (dataset)
+<div align="center">
+
+# Base de datos (dataset)
+
+*Análisis de Consumo Horario de Energía (Red PJM)*
+
+</div>
+
+---
+
+## Índice de contenidos
+
+- [← Volver al Índice Principal](00_indice.md)
+- [Fuente y contenido](#fuente-y-contenido)
+  - [Periodos distintos por región](#periodos-distintos-por-región)
+- [Calidad de los datos](#calidad-de-los-datos)
+  - [Valores sospechosos y atípicos](#valores-sospechosos-y-atípicos)
+- [Reglas de preprocesamiento](#reglas-de-preprocesamiento)
+  - [Salidas de la limpieza](#salidas-de-la-limpieza)
+
+---
+
 
 ## Fuente y contenido
 
@@ -101,3 +122,12 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 - `consumo_horario.parquet`: las 12 regiones en formato largo (`Datetime`, `MW`, `region`), con 1,090,343 filas (1,090,167 originales − 40 duplicados unificados + 217 horas interpoladas − 1 fila recortada).
 
 Las 12 regiones superan `validar_limpieza`: fechas sin repetir, orden cronológico, una hora exacta entre filas consecutivas, sin vacíos y sin valores menores o iguales a 0.
+
+---
+
+<div align="center">
+
+*— Fin del documento —*  
+[Volver al Índice Principal](00_indice.md)
+
+</div>
