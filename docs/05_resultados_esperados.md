@@ -1,6 +1,6 @@
 ﻿# Resultados esperados
 
-> Las cifras de este documento salen de la ejecución de los notebooks 01 a 06 con el día operativo (decisión D1). Las horas son horas de inicio (0 = 00:00–01:00). El notebook 07 y el panel están pendientes de verificación.
+> Las cifras de este documento salen de la ejecución de los notebooks 01 a 07 con el día operativo (decisión D1). Las horas son horas de inicio (0 = 00:00–01:00). El panel de Power BI está por construir.
 
 | N.º        | Resultado esperado                                                                    | Estado                            | Qué se ha obtenido                                                                                                                                                                                  |
 | ---------- | ------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -8,7 +8,7 @@
 | OE2        | Catálogo de tipos de día, con su curva, su frecuencia y su ubicación en el calendario | Cumplido con salvedad             | 2 tipos de día (k-medias, k = 2), silueta 0.413 (estructura débil): temporada fría (62.3 % de los días) y verano (37.7 %). Son estacionales y no separan laborables de fines de semana                |
 | OE3        | Tipología de regiones y matriz región por tipo de día                                 | Cumplido                          | Variabilidad (CV) de 17 % a 26 %, razón invierno/verano de 0.92 (`DUQ`) a 1.20 (`EKPC`), correlaciones diarias de 0.56 a 0.96. Los días de verano van de 31 % (`FE`) a 45 % (`DOM` y `EKPC`) en el periodo común |
 | OE4        | Lista de días atípicos con su magnitud y coincidencia con episodios                   | Cumplido                          | 22 días atípicos de 2,191 en `PJME` (15 altos y 7 bajos). De 10 episodios, 5 coinciden con el signo esperado, 3 no coinciden y 2 están fuera del rango de los residuos                              |
-| OE5        | Panel interactivo con seis páginas (resumen, patrones, tipos de día, regiones, anomalías y pronóstico) | Parcial                           | Las 17 tablas del modelo de datos las genera el notebook 07. El archivo de Power BI está por construir                                                                                              |
+| OE5        | Panel interactivo con seis páginas (resumen, patrones, tipos de día, regiones, anomalías y pronóstico) | Parcial                           | Las 17 tablas del modelo de datos las genera y valida el notebook 07 (sin claves huérfanas, diccionario de 146 columnas). El archivo de Power BI está por construir                                  |
 | Referencia | Pronóstico a 24 horas contra modelos base, con MASE y ventana móvil                   | Cumplido                          | XGBoost: MAE 1,862 MW frente a 2,300 MW del modelo base de 24 h (−19.1 %), MASE 0.86. En la ventana móvil supera al base en los 6 pliegues, con MASE de 0.72 a 0.87                                  |
 
 ## Hallazgos del análisis descriptivo (notebooks 01 y 03)
@@ -41,6 +41,7 @@
 
 - Los dos tipos son **estacionales**, no de calendario: el porcentaje de fines de semana en cada grupo es casi igual al 28.6 % esperado sin relación, y los festivos no se concentran (3.2 % y 2.8 %).
 - Una hipótesis, sin verificar: el efecto de fin de semana es sobre todo de nivel, y al dividir cada perfil entre el promedio del día ese efecto desaparece del agrupamiento.
+- **Nombres de los grupos:** «Temporada fría» y «Verano» salen del resumen del notebook 05, pero las tablas guardadas y el notebook 07 exportan todavía los nombres automáticos «G1 · Invierno · mixto» y «G2 · Verano · mixto».
 - **Mezcla por región (periodo común):** la proporción de días de verano va de 31 % (`FE`) a 45 % (`DOM` y `EKPC`). Sigue a la amplitud diaria de cada región (`EKPC` 0.44, `DOM` 0.40, `FE` 0.31) y no al sesgo invernal o veraniego.
 - **Distancia al centro:** es similar en ambos grupos (mediana ≈ 0.21). Los días más alejados se concentran en regiones pequeñas (`EKPC` aparece 6 veces entre los 10 primeros), por lo que la distancia no es comparable entre regiones sin normalizar.
 
@@ -67,9 +68,10 @@
 
 - **No se detectan** la ola de calor de julio de 2013, la ola de frío de enero de 2018 ni la tormenta Jonas (esta última con fechas sin verificar). Una explicación posible, sin confirmar, es que en episodios largos los rezagos del modelo ya incorporan el nivel alto.
 - **Fuera de rango:** las olas de calor de agosto de 2006 y julio de 2011 quedan antes del periodo de los residuos y no se evalúan.
-- 16 de los 22 atípicos no coinciden con ningún episodio de la tabla. Dos caen el día siguiente a un festivo (2016-07-05 y 2018-05-29), un patrón compatible con que el rezago de 24 h hereda la baja demanda del festivo.
+- **Error por estación:** es más disperso en invierno y verano (MAD ≈ 3.8 %) que en otoño y primavera (≈ 2.5–2.7 %), pero los atípicos no se concentran en ninguna estación.
+- **Atípicos sin episodio:** 16 de los 22 no coinciden con ningún episodio de la tabla. Los de menos demanda que lista el notebook caen entre mayo y julio (2017-05-20, 2018-06-03, 2014-07-04, 2013-07-25 y 2016-06-08), compatible con días templados con menos aire acondicionado (hipótesis). El 2014-07-04 es festivo, el 2016-07-05 y el 2018-05-29 son el día siguiente a un festivo, y la tasa en festivos (1.5 %) no difiere de la del resto (1.0 %).
 - El modelo tiende a sobrepronosticar: la mediana del residuo es negativa (de −0.65 % a −1.74 % según el pliegue).
-- **Forma frente a nivel:** la correlación de Spearman entre |z| y la distancia al centro del grupo es 0.02, pero 8 de los 22 atípicos (36 %) tienen una forma lejana frente a cerca del 5 % del resto.
+- **Forma frente a nivel:** la correlación de Spearman entre |z| y la distancia al centro del grupo es 0.02, pero 8 de los 22 atípicos (36 %) tienen una forma lejana frente a cerca del 5 % del resto (102 de 2,169 días, 4.7 %). Los otros 14 (64 %) tienen una forma normal para su tipo de día y se distinguen solo por el nivel de demanda.
 
 ## Pronóstico a 24 horas (notebook 04, `PJME`)
 
@@ -99,3 +101,19 @@ Ventana móvil (6 pliegues de 12 meses):
 - **Dónde falla más:** en las horas de la tarde (≈ 2,350 MW a las 17 h frente a ≈ 1,500 MW de madrugada) y en verano e invierno (junio y julio ≈ 2,400 MW). Son los periodos más sensibles a la temperatura, que el modelo no tiene.
 - **Dónde gana más al base:** en las horas de subida de la mañana (5–9 h, cerca de un 40 %). Por tipo de día, un 30 % en festivos, un 25 % en fines de semana y un 15 % en laborables.
 - **Días de mayor error:** 2017-05-20 (MAE de 8,098 MW), 2018-06-03 y 2018-07-07. En 4 de los 10 peores días el modelo base obtiene menos error que XGBoost.
+
+## Exportación para el panel (notebook 07)
+
+El notebook 07 reúne los resultados de los notebooks 02 a 06 en un modelo en estrella. Todas las claves de las tablas de hechos existen en su dimensión (0 claves huérfanas) y el diccionario `diccionario_datos.csv` documenta 146 columnas.
+
+| Tabla | Filas | Tabla | Filas |
+|---|---|---|---|
+| `dim_region` | 12 | `indicadores_region` | 12 |
+| `dim_fecha` | 7,429 | `curvas_tipo_dia` | 48 |
+| `dim_estacion` | 4 | `mezcla_region_tipo` | 24 |
+| `dim_tipo_dia` | 2 | `silueta_k` | 18 |
+| `hechos_diario` | 45,430 | `pronostico_horario` | 52,584 |
+| `patron_hora_dia` | 8,064 | `pronostico_metricas` | 12 |
+| `patron_tipo_calendario` | 3,456 | `anomalias_dias` | 2,191 |
+| `tendencia_anual` | 132 | `anomalias_episodios` | 10 |
+| `estacionalidad_mensual` | 144 | | |

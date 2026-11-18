@@ -37,7 +37,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Pronóstico a 24 horas | XGBoost con variables de calendario, rezagos (24, 48 y 168 h) y medias móviles desplazadas, frente a dos modelos base | Hecho |
 | Validación | División cronológica con control de fuga de datos y ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3), sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra | Hecho (notebook 04) |
 | Métricas | MAE, RMSE y MAPE, MASE con la escala del pronóstico ingenuo estacional de 24 h (Hyndman y Koehler), menor que 1 si el modelo mejora al ingenuo | Hecho |
-| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 04 a 06) con validación de claves y diccionario de datos | Implementada (notebook 07), por verificar |
+| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 04 a 06) con validación de claves y diccionario de datos | Hecho (notebook 07): 17 tablas, 0 claves huérfanas, diccionario de 146 columnas |
 
 ## Métodos de visualización
 

@@ -255,7 +255,7 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 - **Grupo 1:** reúne los días de octubre a mayo, con una meseta de mañana (7 a 11 h), un pico nocturno a las 19–20 h, un mínimo a las 3 h y una amplitud de ≈ 0.2 del promedio del día.
 - **Grupo 2:** reúne los días de junio a septiembre, con una sola curva de pico a las 16–17 h (≈ 1.19 del promedio), un mínimo a las 4 h y una amplitud de ≈ 0.4.
 - **Son tipos estacionales, no de calendario.** El 28.9 % y el 28.1 % de los días son sábado o domingo, casi igual que el 28.6 % esperado si no hubiera relación, y los festivos no se concentran. No hay un tipo de día de fin de semana. Una hipótesis, sin verificar, es que el efecto de fin de semana es sobre todo de nivel (cerca de −9 % según el notebook 03) y desaparece al dividir cada perfil entre el promedio del día.
-- Los nombres automáticos del notebook («G1 · Invierno · mixto» y «G2 · Verano · mixto») se sustituyen por los nombres basados en el calendario. Esa sustitución todavía no llega a las tablas guardadas (el notebook 06 aún lee los nombres automáticos) y debe aplicarse antes de exportar.
+- Los nombres automáticos del notebook («G1 · Invierno · mixto» y «G2 · Verano · mixto») se sustituyen por los nombres basados en el calendario. Esa sustitución todavía no llega a las tablas guardadas: el notebook 07 exportó `dim_tipo_dia` con los nombres automáticos, y debe aplicarse antes de exportar.
 
 **Mezcla de tipos de día y estacionalidad por región.** «Común» es el periodo común de las 10 regiones vigentes (2013-06-01 → 2018-08-02).
 
@@ -285,7 +285,7 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 ## 4. Limitaciones
 
 - **Estructura débil.** La silueta de 0.413 indica que los perfiles diarios forman en parte un continuo, así que los tipos de día son una simplificación útil y no categorías naturalmente separadas.
-- **k = 2 solo captura la estación.** Si se quiere separar el fin de semana hay que probar un k mayor y justificar la elección aunque la silueta baje (con k = 3 es 0.30 y con k ≥ 4 es menor de 0.26). Esta decisión está pendiente.
+- **k = 2 solo captura la estación.** Si se quiere separar el fin de semana hay que probar un k mayor y justificar la elección aunque la silueta baje (con k = 3 es 0.30 y con k ≥ 4 es menor de 0.26). Esta decisión está pendiente (D26).
 - K-medias asume grupos compactos con distancia euclidiana.
 - Al normalizar por el promedio del día se pierde la información de magnitud.
 - Las regiones cubren periodos distintos, y eso afecta a su mezcla de tipos de día, por eso se compara también en el periodo común.
@@ -360,7 +360,7 @@ El corte es frágil entre 3.5 y 4.0, donde la lista pasa de 22 a 9 días.
 | 5 | 365 | 5 | 1.37 |
 | 6 | 365 | 2 | 0.55 |
 
-Los atípicos no se concentran en una estación (0.7 % a 1.3 %). El pliegue 2 tiene más (7 días, 1.9 %). En festivos la tasa es 1.54 % (1 de 65 días) frente a 0.99 % en no festivos.
+El error del modelo no se reparte por igual: es más disperso en invierno y verano (MAD ≈ 3.8 %) que en otoño y primavera (≈ 2.5–2.7 %). Aun así, los atípicos no se concentran en ninguna estación (de 0.7 % a 1.3 %, con solo 4 a 7 días por estación), y el invierno, una de las estaciones más dispersas, es la que menos tiene. El pliegue 2 reúne 7 de los 22 atípicos, pero con tan pocos casos esa diferencia es difícil de interpretar. No hay evidencia de que la lista refleje sobre todo el error del modelo en una estación o pliegue concreto, así que se mantiene `Z_POR_ESTACION = False`. En festivos la tasa es 1.54 % (1 de 65 días) frente a 0.99 % en no festivos.
 
 **Los 10 días de mayor magnitud.**
 
@@ -398,8 +398,8 @@ Los atípicos no se concentran en una estación (0.7 % a 1.3 %). El pliegue 2 ti
 - **Dónde falla.** No salen atípicos la ola de calor de julio de 2013, la ola de frío de enero de 2018 ni la tormenta Jonas (esta última con fechas sin verificar). Una posible explicación, a confirmar, es que en episodios largos los rezagos y medias móviles del modelo ya incorporan el nivel alto de demanda y el residuo no se dispara.
 - **Predominan los atípicos altos** (15 de 22). El modelo tiende además a sobrepronosticar, un sesgo coherente con la ligera baja de demanda de largo plazo del notebook 03.
 - **Los casos hora a hora apuntan al clima.** En Sandy la demanda real cayó a unos 15,000 MW frente a unos 30,000 esperados. El 2014-01-07 llegó a cerca de 50,000 MW con un pronóstico muy inferior. Sin temperatura en el dataset, esto es una hipótesis.
-- **16 de los 22 atípicos no coinciden con ningún episodio de la tabla.** Son días a revisar contra el clima y el calendario. Dos de ellos caen el día siguiente a un festivo (2016-07-05 y 2018-05-29), un patrón compatible con que el rezago de 24 h hereda la baja demanda del festivo, a verificar.
-- **Forma frente a nivel.** La correlación de Spearman es 0.02, pero los días extremos en nivel tienden a serlo también en forma (36 % frente a ≈ 5 %), aunque no de manera lineal. Por tipo de día, la tasa es 0.8 % en el grupo 1 (11 de 1,350 días) y 1.3 % en el grupo 2 (11 de 841).
+- **16 de los 22 atípicos no coinciden con ningún episodio de la tabla.** De los 15 que lista el notebook, 10 son altos y 5 bajos, y los 5 bajos caen entre mayo y julio (2017-05-20, 2018-06-03, 2014-07-04, 2013-07-25 y 2016-06-08), compatible con días templados con menos aire acondicionado (hipótesis). Varios se relacionan con el calendario (el 2014-07-04 es festivo, el 2016-07-05 y el 2018-05-29 son el día siguiente a un festivo, y 5 de los 15 caen en fin de semana), aunque la tasa en festivos (1.5 %) no difiere de la del resto (1.0 %). Sin temperatura no se puede confirmar la causa.
+- **Forma frente a nivel.** La correlación de Spearman es 0.02, pero los días extremos en nivel tienden a serlo también en forma (36 % frente a ≈ 5 %; 102 de 2,169 días no atípicos), aunque no de manera lineal. Los otros 14 atípicos (64 %) tienen una forma normal para su tipo de día y se distinguen solo por tener más o menos demanda de la esperada. Por tipo de día, la tasa es 0.8 % en el grupo 1 (11 de 1,350 días) y 1.3 % en el grupo 2 (11 de 841).
 
 ### Criterios de cierre
 

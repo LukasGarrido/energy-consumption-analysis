@@ -14,7 +14,7 @@ Los objetivos y el alcance están en [01_objetivo.md](01_objetivo.md). Las decis
 | Tipos de día identificados | Silueta media ≥ 0.50 (razonable) o entre 0.26 y 0.50 (débil, reportada como tal), grupos de al menos el 5 % de los días e interpretables con el calendario | Cumplido con salvedad: silueta 0.413 (débil), 2 grupos estacionales, grupo más pequeño 37.7 % |
 | Comparación entre regiones | Cada región caracterizada por su mezcla de tipos de día, en el historial completo y en el periodo común | Cumplido |
 | Días atípicos detectados | z modificado del residuo > 3.5 y contraste con episodios externos, con fuente y fecha verificada | Cumplido: 22 días, 5 episodios coinciden |
-| Panel interactivo | Seis páginas, cada vista justificada por una tarea y un canal perceptual, filtros por región, fecha y estación | Tablas listas (notebook 07), panel por hacer |
+| Panel interactivo | Seis páginas, cada vista justificada por una tarea y un canal perceptual, filtros por región, fecha y estación | Tablas listas y validadas (notebook 07), panel por hacer |
 | Reproducibilidad | Un tercero reproduce el análisis con la guía de usuario | Por comprobar |
 
 ### Del agrupamiento
@@ -55,7 +55,7 @@ Herramientas: las de [03_metodos_y_herramientas.md](03_metodos_y_herramientas.md
 | 4     | Pronóstico de referencia, MASE y ventana móvil   | Notebook 04       | Hecho                                     |
 | 5     | Agrupamiento de perfiles diarios                 | Notebook 05       | Hecho, con decisiones pendientes (D7 y k) |
 | 6     | Detección de anomalías                           | Notebook 06       | Hecho                                     |
-| 7     | Exportación y panel en Power BI                  | Notebook 07 y panel | Notebook 07 implementado, panel por hacer |
+| 7     | Exportación y panel en Power BI                  | Notebook 07 y panel | Notebook 07 ejecutado, panel por hacer  |
 | 8     | Documentación e informe final                    | `docs/`           | En curso                                  |
 
 ## 4. Presupuesto
@@ -69,14 +69,15 @@ Sin costo económico: las librerías son de código abierto y el dataset es de a
 | Las regiones cubren periodos distintos | Comparaciones poco justas | Comparar las 10 regiones vigentes en su periodo común | Se materializó y está mitigado |
 | Horas duplicadas o faltantes por cambios de horario | Errores en agregaciones y en el modelo | Limpieza con reglas y validación | Se materializó y está resuelto |
 | Horas faltantes sin causa horaria (2010-12-10 en 7 regiones, más 2 de `AEP`) | Pequeño | Se interpolan como el resto | Aceptado, falla común de la fuente por confirmar |
-| La convención de hora de fin desplaza el día de la fila de las 00:00 | Pequeño (1 de cada 24 horas) | Día operativo (D1) en `features.py` | Resuelto: los notebooks 03 a 06 se ejecutaron con el día operativo |
+| La convención de hora de fin desplaza el día de la fila de las 00:00 | Pequeño (1 de cada 24 horas) | Día operativo (D1) en `features.py` | Resuelto: los notebooks 03 a 07 se ejecutaron con el día operativo |
 | Las cifras publicadas (horas, fin de semana, pronóstico) quedaron desactualizadas | Medio | Reemplazarlas tras repetir los notebooks | Cerrado: documentación actualizada |
 | Valores bajos aislados en `DOM` y `PJMW` | Pequeño | Se conservan, regla del z modificado en la limpieza por hacer (D2) | Aceptado |
 | `DEOK` con una racha baja (2018-04-22) y lecturas duplicadas inconsistentes (2017-11-05) | Pequeño | Revisar con la tabla de valores aislados del notebook 01 | Abierto |
 | Máximo de `AEP` (2008-10-20) inusual | Pequeño | Verificar contra la fuente | Abierto |
 | La hora de `COMED` y `NI` llega una hora más tarde que el resto | Medio: los tipos de día podrían separarse por la hora y no por la forma | Medido en el notebook 05 (+1 h). Repetir con `ALINEAR_HORA_CENTRAL = True` y comparar (D7) | Abierto |
 | La estructura de los grupos resulta débil | Medio | Reportarla como tal y apoyarla con el calendario | Se materializó (silueta 0.413), reportada |
-| Con k = 2 los tipos de día solo capturan la estación y no el fin de semana | Medio: P1 queda respondida solo en parte | Justificar un k mayor aunque baje la silueta, o reportarlo como limitación | Abierto |
+| Con k = 2 los tipos de día solo capturan la estación y no el fin de semana | Medio: P1 queda respondida solo en parte | Justificar un k mayor aunque baje la silueta, o reportarlo como limitación (D26) | Abierto |
+| Los nombres de los grupos exportados al panel son los automáticos («G1 · Invierno · mixto») | Pequeño | Aplicar los nombres del resumen del notebook 05 antes de exportar | Abierto |
 | Entrenar un modelo por región y pliegue es lento | Medio | Empezar con `PJME` (6 modelos en la ventana móvil) y ampliar a las demás | Abierto |
 | Las anomalías solo se evalúan en `PJME`, la única región con residuos | Medio | Documentarlo, repetir el notebook 04 con otras regiones si hay tiempo | Abierto |
 | Fechas de episodios sin fuente (por ejemplo, la tormenta Jonas) | Pequeño | Cada episodio lleva su fuente y una marca de verificación | Parcialmente mitigado |

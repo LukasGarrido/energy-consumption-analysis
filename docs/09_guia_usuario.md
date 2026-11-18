@@ -169,7 +169,7 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 04 | XGBoost supera al base en los 6 pliegues de 12 meses, con MASE entre 0.72 y 0.87 (0.86 en la partición única) |
 | 05 | Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50. Con la configuración por defecto resulta k-medias con k = 2 y silueta 0.413 |
 | 06 | 22 días atípicos de 2,191 y detección del huracán Sandy (2012-10-30) y del vórtice polar de 2014 |
-| 07 | 17 archivos `.csv` presentes en `data/processed/powerbi/` junto con `diccionario_datos.csv` |
+| 07 | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (146 columnas documentadas) y el mensaje «Modelo coherente: todas las claves tienen su dimensión» |
 
 ---
 

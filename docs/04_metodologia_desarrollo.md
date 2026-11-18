@@ -18,7 +18,7 @@ El proyecto avanza por fases, con un notebook por fase y las funciones reutiliza
 | 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base, MASE, validación en ventana móvil, residuos fuera de muestra | Notebook 04 | Hecho |
 | 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | Notebook 05 | Hecho, con decisiones pendientes (D7 y justificación de k) |
 | 6. Detección de anomalías | Residuo diario, z modificado y contraste con episodios conocidos | Notebook 06 | Hecho |
-| 7. Visualización | Exportación de tablas y construcción del panel | Notebook 07 y panel en Power BI | Notebook 07 implementado, panel por hacer |
+| 7. Visualización | Exportación de tablas y construcción del panel | Notebook 07 y panel en Power BI | Notebook 07 ejecutado (17 tablas validadas), panel por hacer |
 | 8. Documentación | Informe, conclusiones y orden del repositorio | Documentación en `docs/` | En curso |
 
 ## Flujo de notebooks
@@ -39,11 +39,11 @@ Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el 
 
 ## Decisiones de diseño
 
-Cada decisión se escribe aquí una vez, los demás documentos la enlazan.
+Cada decisión se escribe aquí una vez, los demás documentos la enlazan. El registro completo (D1 a D44) está en [12_bitacora_decisiones.md](12_bitacora_decisiones.md).
 
 | ID | Decisión | Motivo | Alternativa descartada | Impacto | Estado |
 |---|---|---|---|---|---|
-| D1 | Calcular las variables de calendario desde `Datetime − 1 h` (día operativo) | `Datetime` marca el final de la hora, sin el ajuste, la hora 24 de cada día cae en el día siguiente y los perfiles de 24 horas quedan desfasados | Usar `Datetime` directamente | `src/features.py`, notebooks 01 a 07. Los notebooks 03 a 06 ya se ejecutaron con el día operativo | Aplicada |
+| D1 | Calcular las variables de calendario desde `Datetime − 1 h` (día operativo) | `Datetime` marca el final de la hora, sin el ajuste, la hora 24 de cada día cae en el día siguiente y los perfiles de 24 horas quedan desfasados | Usar `Datetime` directamente | `src/features.py`, notebooks 01 a 07. Los notebooks 03 a 07 se ejecutaron con el día operativo | Aplicada |
 | D2 | Conservar los atípicos aislados (`DOM` 1,253 MW y `PJMW` 487 MW) y dejar la regla del z modificado de la limpieza por hacer | Son 2 valores en más de 1 M de filas. Los valores de `PJMW` de 2012-04-01/02 (2,553 y 2,574 MW) no cumplen el criterio de aislado. La regla debe aplicarse a la desviación respecto del patrón esperado y no al MW crudo, porque marcaría los picos reales | Implementarla ahora en `cleaning.py` | `cleaning.py`, notebook 02, `02_base_de_datos.md` | Por hacer |
 | D3 | Guardar `NI` y `COMED` por separado por ahora | Unirlas supone asumir que son la misma serie. El cociente de niveles es 1.00 y se tocan el 2011-01-01 (notebook 03, sección 6.2), lo que respalda unirlas | Unirlas en una sola serie | Notebooks 02, 05 y 07 | Por confirmar |
 | D4 | Panel en Power BI, Streamlit queda como prototipo opcional | Lo pide la rúbrica | Solo Streamlit | Notebook 07, `app/` | Confirmada |
@@ -52,9 +52,13 @@ Cada decisión se escribe aquí una vez, los demás documentos la enlazan.
 | D7 | Conservar la hora de la fuente de `COMED` y `NI`, salvo que el notebook 05 decida alinearlas a hora central | El diagnóstico del notebook 05 mide +1 h en ambas y 0 en el resto. Si no se alinea, la comparación de formas con otras regiones podría distorsionarse | Alinearlas siempre | Notebooks 05 y 07 | Por decidir: el notebook 05 se ejecutó con `ALINEAR_HORA_CENTRAL = False`, falta repetirlo con `True` y comparar la mezcla de tipos de día |
 | D8 | Calcular el z modificado con todos los días de la región | Es simple y comparable. El notebook 06 comprobó que los atípicos no se concentran en una estación (0.7 % a 1.3 %) | Calcularlo por estación | Notebook 06 | Aplicada |
 
-### Pendiente de decisión (sin ID asignado)
+### Pendientes de decisión (con ID en la bitácora)
 
-**Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2 (0.413, débil). Esos dos grupos separan temporada fría (oct–may) y verano (jun–sep), no laborables y fines de semana. Con k = 3 la silueta es 0.30 y con k ≥ 4 queda por debajo de 0.26. Hay que decidir si se reporta k = 2 como resultado o se justifica un k mayor, y registrarlo en la bitácora.
+**Elección de k (D26).** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2 (0.413, débil). Esos dos grupos separan temporada fría (oct–may) y verano (jun–sep), no laborables y fines de semana. Con k = 3 la silueta es 0.30 y con k ≥ 4 queda por debajo de 0.26. Hay que decidir si se reporta k = 2 como resultado o se justifica un k mayor, y registrarlo en la bitácora.
+
+**Cortes de silueta (D28).** `config.py` usa 0.50 para «razonable» y la fuente (Kaufman y Rousseeuw) usa 0.51. No cambia el resultado actual, pero hay que decidir y alinear código y documentación.
+
+**Nombres de los grupos.** El resumen del notebook 05 llama a los grupos «Temporada fría» y «Verano», pero las tablas guardadas y el notebook 07 exportan «G1 · Invierno · mixto» y «G2 · Verano · mixto». Hay que aplicar los nombres antes de exportar.
 
 ## Criterios de avance
 
@@ -66,4 +70,5 @@ Una fase se considera cerrada cuando cumple su criterio de logro:
 | Agrupamiento | Silueta media reportada y grupos con al menos el 5 % de los días | Cumplido: silueta 0.413 (débil), grupo más pequeño 37.7 % |
 | Pronóstico | El modelo supera al base en todos los pliegues de la ventana móvil y su MASE es menor que 1 | Cumplido: 6 de 6 pliegues, MASE de 0.72 a 0.87 |
 | Anomalías | Lista contrastada con al menos un episodio externo, con fuente | Cumplido: 5 episodios coinciden |
+| Exportación | Tablas con claves coherentes y diccionario de datos | Cumplido: 17 tablas, 0 claves huérfanas, 146 columnas documentadas |
 | Panel | Cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Pendiente |
