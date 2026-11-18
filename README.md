@@ -37,7 +37,7 @@ Los datos crudos **no se incluyen en el repositorio**, se descargan desde Kaggle
 
 ---
 
-## Resultados preliminares
+## Resultados
 
 Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora de fin y se actualizan con el día operativo.
 
@@ -47,11 +47,11 @@ Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora
 | Limpieza | Las 12 regiones superan la validación (1,090,343 filas), se interpoló el 0.02 % de las horas |
 | Convención horaria | `Datetime` marca el final de la hora, el calendario usa el día operativo |
 | Hora de `COMED` | Su curva llega una hora más tarde que la del resto: es lo esperable si las series están en hora del este y `COMED` es una zona de hora central |
-| Ciclo diario | Mínimo hacia las 4–5 h y máximo entre las 18 y las 20 h (hora de fin, por recalcular) |
-| Calendario | El fin de semana consume entre un 4 % y un 14 % menos que un laborable, un festivo, cerca de un 5 % menos (por recalcular) |
+| Ciclo diario | Mínimo hacia las 3–4 h y máximo entre las 17 y las 19 h |
+| Calendario | El fin de semana consume entre un 3.9 % y un 13.9 % menos que un laborable (≈ −9 % en promedio), un festivo cerca de un 5 % menos |
 | Estacionalidad | Dos máximos anuales (verano e invierno), `EKPC` y `PJMW` son invernales, `COMED`, `DUQ`, `DEOK` y `PJME` veraniegas |
-| Pronóstico a 24 h (`PJME`) | XGBoost: MAE de 1,862 MW frente a 2,300 MW del modelo base (−19.0 %) en una partición, la validación en ventana móvil y el MASE están implementados |
-| Tipos de día y anomalías | Notebooks 05 y 06 ejecutados, resultados por documentar |
+| Pronóstico a 24 h (`PJME`) | XGBoost: MAE de 1,862 MW frente a 2,300 MW del modelo base (−19.1 %), MASE de 0.86 (0.72 a 0.87 en ventana móvil de 6 pliegues) |
+| Tipos de día y anomalías | 2 tipos estacionales (k = 2, silueta 0.413: temporada fría y verano); 22 días atípicos en PJME (z modificado > 3.5), con 5 episodios contrastados |
 
 ---
 
@@ -185,7 +185,15 @@ La documentación completa está en [`docs/`](docs/00_indice.md):
 
 ## Tecnologías
 
-Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels, holidays, pyarrow), Jupyter, Power BI, Streamlit, Plotly, Matplotlib y Seaborn, GitHub y Obsidian. El detalle está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
+El proyecto se desarrolla utilizando un ecosistema robusto de análisis de datos, modelado, visualización y gestión:
+
+- **Procesamiento y Análisis de Datos:** Python, `pandas`, `numpy`, `scipy`, `pyarrow`.
+- **Aprendizaje Automático y Modelado:** `scikit-learn` (agrupamiento k-medias y Ward, métricas), `xgboost` (pronóstico de referencia a 24 horas), `statsmodels` (descomposición STL).
+- **Utilidades y Datos:** `holidays` (festivos federales de EE. UU.), `kagglehub` (descarga y gestión de datasets).
+- **Visualización y Presentación:** `Plotly`, `Matplotlib`, `Seaborn`, Streamlit (prototipo interactivo), Power BI Desktop (panel analítico en modelo en estrella).
+- **Entorno y Documentación:** Jupyter Notebook / JupyterLab, Git y GitHub (control de versiones), Obsidian (documentación técnica y bitácora de decisiones).
+
+El detalle completo de métodos y asignación de herramientas está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
 
 ---
 
