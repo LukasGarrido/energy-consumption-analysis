@@ -191,7 +191,12 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 6 | `06_anomalias.ipynb` | Detecta anomalías con z modificado y contrasta con eventos | `anomalias_*.parquet` | Disponible |
 | 7 | `07_exportacion.ipynb` | Exporta dimensiones y tablas de hechos normalizadas | 17 archivos CSV en `data/processed/powerbi/` | Disponible |
 
-> **Importante:** los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben mantener el mismo valor en los notebooks 05 y 07 para conservar la coherencia en las formas de los perfiles.
+También puedes ejecutar la exportación directamente con el script de Python:
+```bash
+python src/export.py
+```
+
+> **Importante:** los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben mantener el mismo valor en los notebooks 05 y 07 (o en el script) para conservar la coherencia en las formas de los perfiles.
 
 ### Comprobaciones tras ejecutar
 
@@ -203,7 +208,7 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 04 | XGBoost supera al base en los 6 pliegues de 12 meses, con MASE entre 0.72 y 0.87 (0.86 en la partición única) |
 | 05 | Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50. Con la configuración por defecto resulta k-medias con k = 2 y silueta 0.413 |
 | 06 | 22 días atípicos de 2,191 y detección del huracán Sandy (2012-10-30) y del vórtice polar de 2014 |
-| 07 | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (146 columnas documentadas) y el mensaje «Modelo coherente: todas las claves tienen su dimensión» |
+| 07 | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (118 columnas documentadas) y el mensaje «Exportación completada con éxito» |
 
 ---
 
@@ -276,7 +281,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 El archivo `app/streamlit_app.py` añade automáticamente la raíz del proyecto al `sys.path`. Asegúrate de lanzar el comando desde la raíz del repositorio (`streamlit run app/streamlit_app.py`).
 
 **Aviso en Streamlit: "Faltan los siguientes archivos CSV en la carpeta de datos...".**
-La aplicación se detiene si faltan tablas en `data/processed/powerbi/`. Ejecuta el notebook `07_exportacion.ipynb` con *Restart & Run All* para exportar las 17 tablas requeridas.
+La aplicación se detiene si faltan tablas en `data/processed/powerbi/`. Ejecuta el script `python src/export.py` o el notebook `07_exportacion.ipynb` con *Restart & Run All* para exportar las 17 tablas requeridas.
 
 **El puerto 8501 de Streamlit ya está en uso.**
 Puedes especificar otro puerto agregando la bandera `--server.port`:

@@ -86,13 +86,17 @@ Ejecuta los notebooks **en orden numérico (01 a 07)**, con *Restart & Run All*.
 
 ### Ejecutar el prototipo de Streamlit
 
-Una vez ejecutados los notebooks (01 a 07), la app puede levantarse directamente desde la raíz del proyecto:
+Una vez ejecutados los notebooks o el script de exportación, la app puede levantarse directamente desde la raíz del proyecto:
 
 ```bash
+# Opción 1: Ejecutar el script de exportación directamente
+python src/export.py
+
+# Opción 2: Lanzar la aplicación
 streamlit run app/streamlit_app.py
 ```
 
-La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar el notebook 07.
+La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py` o el notebook 07.
 
 ---
 
