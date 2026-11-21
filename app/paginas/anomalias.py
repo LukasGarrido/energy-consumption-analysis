@@ -107,8 +107,9 @@ def _linea_de_tiempo(
     """Línea de tiempo del residuo diario con atípicos resaltados y episodios sombreados."""
     st.subheader("Residuo diario de PJME (%)")
 
-    ep = tablas["anomalias_episodios"]
-    ep = ep[ep["region"] == "PJME"].copy()
+    ep = tablas["anomalias_episodios"].copy()
+    if "region" in ep.columns:
+        ep = ep[ep["region"] == "PJME"].copy()
 
     fig = go.Figure()
 
@@ -195,8 +196,9 @@ def _tabla_episodios(tablas: dict[str, pd.DataFrame]) -> None:
     """Tabla de episodios históricos documentados con estado, fuente y verificación."""
     st.subheader("Episodios históricos documentados")
 
-    ep = tablas["anomalias_episodios"]
-    ep = ep[ep["region"] == "PJME"].copy()
+    ep = tablas["anomalias_episodios"].copy()
+    if "region" in ep.columns:
+        ep = ep[ep["region"] == "PJME"].copy()
 
     if ep.empty:
         st.info("Sin episodios registrados.")
@@ -238,7 +240,8 @@ def _caso_hora_a_hora(
 
     fecha_ts = pd.Timestamp(fecha_sel)
     ph = tablas["pronostico_horario"].copy()
-    ph = ph[ph["region"] == "PJME"].copy()
+    if "region" in ph.columns:
+        ph = ph[ph["region"] == "PJME"].copy()
     ph = ph[
         (ph["fecha"] >= fecha_ts - pd.Timedelta(days=3))
         & (ph["fecha"] <= fecha_ts + pd.Timedelta(days=3))

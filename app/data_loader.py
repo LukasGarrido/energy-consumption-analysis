@@ -53,7 +53,7 @@ def cargar_datos() -> dict[str, pd.DataFrame]:
     _convertir_fechas(tablas)
     _convertir_grupos(tablas)
     _convertir_numericos(tablas)
-    _unir_estacion_anomalias(tablas)
+    _enriquecer_tablas(tablas)
 
     return tablas
 
@@ -103,7 +103,7 @@ def _convertir_numericos(tablas: dict[str, pd.DataFrame]) -> None:
         "anomalias_dias":         ["residuo_pct", "z_mod"],
         "silueta_k":              ["silueta", "k"],
         "dim_tipo_dia":           ["n_dias", "pct_dias", "hora_pico", "amplitud", "pct_fin_de_semana"],
-        "mezcla_region_tipo":     ["pct_dias_total", "pct_dias_comun"],
+        "mezcla_region_tipo":     ["pct_dias", "pct_dias_total", "pct_dias_comun"],
         "indicadores_region":     ["razon_inv_ver_comun", "amplitud_diaria_comun",
                                    "razon_inv_ver", "amplitud_diaria"],
         "curvas_tipo_dia":        ["hora", "media", "inferior", "superior"],
@@ -120,12 +120,60 @@ def _convertir_numericos(tablas: dict[str, pd.DataFrame]) -> None:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
 
-def _unir_estacion_anomalias(tablas: dict[str, pd.DataFrame]) -> None:
+def _enriquecer_tablas(tablas: dict[str, pd.DataFrame]) -> None:
     """
-    Añade la columna ``estacion`` a ``anomalias_dias`` uniéndola desde
-    ``dim_fecha``, si aún no está presente.
+    Enriquece las tablas de hechos con atributos dimensionales requeridos por las páginas:
+    - hechos_diario: nombre_grupo (desde dim_tipo_dia), estacion (desde dim_fecha), MW_medio.
+    - anomalias_dias: estacion (desde dim_fecha), nombre_grupo (desde hechos_diario para PJME).
+    - anomalias_episodios: columna region fija en 'PJME'.
+    - pronostico_horario: region fija en 'PJME', estacion (desde dim_fecha), nombre_grupo.
     """
-    df_ad = tablas["anomalias_dias"]
-    if "estacion" not in df_ad.columns:
-        df_f = tablas["dim_fecha"][["fecha", "estacion"]].drop_duplicates()
-        tablas["anomalias_dias"] = df_ad.merge(df_f, on="fecha", how="left")
+    df_f = tablas.get("dim_fecha")
+    df_td = tablas.get("dim_tipo_dia")
+
+    # 1. hechos_diario
+    if "hechos_diario" in tablas:
+        hd = tablas["hechos_diario"]
+        if "MW_medio" not in hd.columns and "MW_medio_dia" in hd.columns:
+            hd["MW_medio"] = hd["MW_medio_dia"]
+        if df_td is not None and "nombre_grupo" not in hd.columns and "nombre_grupo" in df_td.columns:
+            mapa_g = df_td[["grupo", "nombre_grupo"]].dropna().drop_duplicates()
+            hd = hd.merge(mapa_g, on="grupo", how="left")
+        if df_f is not None and "estacion" not in hd.columns and "estacion" in df_f.columns:
+            mapa_e = df_f[["fecha", "estacion"]].dropna().drop_duplicates()
+            hd = hd.merge(mapa_e, on="fecha", how="left")
+        tablas["hechos_diario"] = hd
+
+    # 2. anomalias_dias
+    if "anomalias_dias" in tablas:
+        ad = tablas["anomalias_dias"]
+        if df_f is not None and "estacion" not in ad.columns and "estacion" in df_f.columns:
+            mapa_e = df_f[["fecha", "estacion"]].dropna().drop_duplicates()
+            ad = ad.merge(mapa_e, on="fecha", how="left")
+        if "hechos_diario" in tablas and "nombre_grupo" not in ad.columns:
+            hd = tablas["hechos_diario"]
+            if "nombre_grupo" in hd.columns:
+                hd_pjme = hd[hd["region"] == "PJME"][["fecha", "nombre_grupo"]].dropna().drop_duplicates()
+                ad = ad.merge(hd_pjme, on="fecha", how="left")
+        tablas["anomalias_dias"] = ad
+
+    # 3. anomalias_episodios
+    if "anomalias_episodios" in tablas:
+        ep = tablas["anomalias_episodios"]
+        if "region" not in ep.columns:
+            ep["region"] = "PJME"
+
+    # 4. pronostico_horario
+    if "pronostico_horario" in tablas:
+        ph = tablas["pronostico_horario"]
+        if "region" not in ph.columns:
+            ph["region"] = "PJME"
+        if df_f is not None and "estacion" not in ph.columns and "estacion" in df_f.columns:
+            mapa_e = df_f[["fecha", "estacion"]].dropna().drop_duplicates()
+            ph = ph.merge(mapa_e, on="fecha", how="left")
+        if "hechos_diario" in tablas and "nombre_grupo" not in ph.columns:
+            hd = tablas["hechos_diario"]
+            if "nombre_grupo" in hd.columns:
+                hd_pjme = hd[hd["region"] == "PJME"][["fecha", "nombre_grupo"]].dropna().drop_duplicates()
+                ph = ph.merge(hd_pjme, on="fecha", how="left")
+        tablas["pronostico_horario"] = ph

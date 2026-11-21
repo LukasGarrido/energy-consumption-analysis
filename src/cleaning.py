@@ -144,39 +144,3 @@ def validar_limpieza(df: pd.DataFrame) -> pd.DataFrame:
     print(f"Validación correcta: {len(df)} filas, una por hora, sin vacíos.")
     return df
 
-
-def limpiar_region(df: pd.DataFrame, limite_horas: int = 2) -> pd.DataFrame:
-    """Aplica todos los pasos de limpieza a UNA región y la valida.
-
-    Lanza un error si la región no supera validar_limpieza.
-    """
-    df = unificar_duplicados(df)
-    df = marcar_valores_sospechosos(df)
-    df = reindexar_calendario_horario(df)
-    df = recortar_extremos_vacios(df)
-    df = interpolar_huecos(df, limite_horas=limite_horas)
-    return validar_limpieza(df)
-
-
-def run_cleaning(raw_dir: Path = RAW_DIR, processed_dir: Path = PROCESSED_DIR) -> pd.DataFrame:
-    """Limpia las 12 regiones y guarda un parquet por región y uno conjunto.
-
-    Salidas en processed_dir: {REGION}.parquet y consumo_horario.parquet
-    (formato largo: Datetime, MW, region). Lanza un error si alguna región
-    no supera la validación.
-    """
-    regiones = load_regions_dict(raw_dir)
-    processed_dir.mkdir(parents=True, exist_ok=True)
-
-    limpias = []
-    for nombre, df in regiones.items():
-        print(f"\n--- {nombre} ---")
-        limpia = limpiar_region(df)
-        limpia["region"] = nombre
-        limpia.to_parquet(processed_dir / f"{nombre}.parquet", index=False)
-        limpias.append(limpia)
-
-    todo = pd.concat(limpias, ignore_index=True)
-    todo.to_parquet(processed_dir / "consumo_horario.parquet", index=False)
-    print(f"\nTotal: {len(todo):,} filas en {len(limpias)} regiones.")
-    return todo

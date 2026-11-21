@@ -82,17 +82,21 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 jupyter lab
 ```
 
-Ejecuta los notebooks **en orden numérico (01 a 07)**, con *Restart & Run All*. Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el mismo valor en los notebooks 05 y 07. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/09_guia_usuario.md](docs/09_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
+Ejecuta los notebooks **en orden numérico (01 a 03)**, con *Restart & Run All*. Posteriormente, ejecuta el script de exportación (`python src/export.py`) para generar las 17 tablas requeridas por Power BI y Streamlit. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/09_guia_usuario.md](docs/09_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
 
 ### Ejecutar el prototipo de Streamlit
 
-Una vez ejecutados los notebooks (01 a 07), la app puede levantarse directamente desde la raíz del proyecto:
+Una vez ejecutados los notebooks y el script de exportación, la app puede levantarse directamente desde la raíz del proyecto:
 
 ```bash
+# Opción 1: Generar o actualizar las tablas analíticas
+python src/export.py
+
+# Opción 2: Lanzar la aplicación interactiva
 streamlit run app/streamlit_app.py
 ```
 
-La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar el notebook 07.
+La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py`.
 
 ---
 
@@ -114,11 +118,11 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   │   ├── regiones.py           # Barras apiladas y dispersión de indicadores
 │   │   ├── anomalias.py          # Línea de tiempo, episodios y caso hora a hora
 │   │   └── pronostico.py         # Métricas, error desglosado y real vs. pronóstico
-│   └── panel_pjm.pbix            # Panel en Power BI (por crear)
+│   └── panel_pjm.pbix            # Panel en Power BI (en desarrollo)
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep, excluidos por .gitignore)
 │   └── processed/                # Datos limpios y resultados (.gitkeep)
-│       └── powerbi/              # 17 tablas CSV para el panel (generadas por el notebook 07)
+│       └── powerbi/              # 17 tablas CSV y diccionario de datos (generadas por src/export.py)
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
 │   ├── 00_indice.md              # Índice general de la documentación
 │   ├── 01_objetivo.md            # Problema, preguntas y objetivos
@@ -134,26 +138,21 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── 11_conceptos.md           # Conceptos teóricos explicados para este proyecto
 │   └── 12_bitacora_decisiones.md # Registro histórico de decisiones del proyecto
 ├── notebooks/                    # Cuadernos Jupyter en orden de ejecución
-│   ├── 01_exploracion.ipynb      # Exploración inicial (EDA), convención horaria y calidad de datos
-│   ├── 02_limpieza.ipynb         # Limpieza y tratamiento de series de tiempo
-│   ├── 03_analisis.ipynb         # Patrones, estacionalidad, regiones y picos
-│   ├── 04_modelado.ipynb         # Pronóstico de referencia a 24 horas, MASE y ventana móvil
-│   ├── 05_agrupamiento.ipynb     # Agrupamiento de perfiles diarios
-│   ├── 06_anomalias.ipynb        # Detección de días atípicos y contraste con episodios
-│   └── 07_exportacion.ipynb      # Tablas para el panel
+│   ├── 01_datos.ipynb            # Exploración inicial (EDA), calidad de datos, convención horaria y limpieza
+│   ├── 02_patrones.ipynb         # Patrones horarios/estacionales y agrupamiento de tipos de día
+│   └── 03_pronostico_anomalias.ipynb # Pronóstico de referencia (XGBoost vs base) y detección de anomalías
 ├── public/                       # Recursos estáticos y multimedia
-│   ├── templates/                # Plantillas y formatos de informes (PDF, documentos)
+│   ├── report/                   # Plantillas y formatos de informes (PDF)
 │   └── power_electric_plant.png  # Ilustración conceptual del proyecto
-├── reports/
-│   └── figures/                  # Figuras y gráficos exportados
 ├── src/                          # Módulos Python reutilizables por los notebooks
 │   ├── __init__.py               # Inicialización del paquete
 │   ├── anomalies.py              # Residuo diario, z modificado y contraste con episodios
-│   ├── cleaning.py               # Limpieza de datos
-│   ├── config.py                 # Rutas y parámetros del proyecto
+│   ├── cleaning.py               # Limpieza de series, deduplicación e interpolación
+│   ├── config.py                 # Rutas y parámetros globales del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
+│   ├── export.py                 # Exportación del modelo dimensional (17 tablas CSV para Power BI)
 │   ├── features.py               # Día operativo, variables de calendario, rezagos y medias móviles
-│   ├── modeling.py               # División, modelos, métricas (MASE) y ventana móvil
+│   ├── modeling.py               # Partición temporal, modelos XGBoost/base, métricas y ventana móvil
 │   ├── plots.py                  # Utilidades y funciones de graficado
 │   └── profiles.py               # Perfiles diarios, elección de k y agrupamiento
 ├── .env.example                  # Plantilla de variables de entorno

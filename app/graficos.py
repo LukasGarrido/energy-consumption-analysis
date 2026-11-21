@@ -126,6 +126,13 @@ def mapa_colores_grupos(
     -------
     dict[str, str]
     """
+    if col_grupo not in df_fuente.columns:
+        return {}
+
+    if col_nombre not in df_fuente.columns:
+        grupos = sorted(df_fuente[col_grupo].dropna().unique())
+        return {str(g): color_grupo(int(g)) for g in grupos}
+
     pares = (
         df_fuente[[col_grupo, col_nombre]]
         .dropna()

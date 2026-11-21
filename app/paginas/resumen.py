@@ -35,8 +35,9 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     mae_medio = metricas_xgb["MAE"].mean()
     mase_medio = metricas_xgb["MASE"].mean()
 
+    col_mw = "MW_medio" if "MW_medio" in hd.columns else ("MW_medio_dia" if "MW_medio_dia" in hd.columns else None)
     consumo_str = (
-        f"{hd['MW_medio'].mean():,.0f}" if not hd.empty else "—"
+        f"{hd[col_mw].mean():,.0f}" if (not hd.empty and col_mw is not None) else "—"
     )
     mae_str = f"{mae_medio:,.0f}" if pd.notna(mae_medio) else "—"
     mase_str = f"{mase_medio:.3f}" if pd.notna(mase_medio) else "—"
@@ -66,7 +67,8 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     st.subheader("Tendencia anual del consumo medio")
 
     tend = filtros.por_region(tablas["tendencia_anual"], regiones)
-    tend = tend[tend["completo"] == "Sí"].copy()
+    if "completo" in tend.columns:
+        tend = tend[tend["completo"] == "Sí"].copy()
 
     if filtros.verificar_vacio(tend):
         return

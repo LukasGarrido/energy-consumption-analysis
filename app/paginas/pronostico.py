@@ -145,21 +145,28 @@ def _error_desglosado(
 
     # Por tipo de dia
     st.markdown("**Por tipo de dia**")
-    ph_ng = ph.dropna(subset=["nombre_grupo"])
-    err_tipo = ph_ng.groupby("nombre_grupo")[col_error].mean().reset_index()
-    if not filtros.verificar_vacio(err_tipo):
-        fig_t = px.bar(
-            err_tipo,
-            x="nombre_grupo",
-            y=col_error,
-            title=f"{etiqueta} medio por tipo de dia",
-            labels={"nombre_grupo": "Tipo de dia", col_error: etiqueta},
-        )
-        mostrar_grafico(fig_t)
-        st.caption(
-            "Un error mayor en dias de verano o invierno indica que esos perfiles "
-            "son más difíciles de pronosticar con variables de calendario."
-        )
+    if "nombre_grupo" not in ph.columns and "hechos_diario" in tablas:
+        hd = tablas["hechos_diario"]
+        if "nombre_grupo" in hd.columns:
+            hd_pjme = hd[hd["region"] == "PJME"][["fecha", "nombre_grupo"]].dropna().drop_duplicates()
+            ph = ph.merge(hd_pjme, on="fecha", how="left")
+
+    if "nombre_grupo" in ph.columns:
+        ph_ng = ph.dropna(subset=["nombre_grupo"])
+        err_tipo = ph_ng.groupby("nombre_grupo")[col_error].mean().reset_index()
+        if not filtros.verificar_vacio(err_tipo):
+            fig_t = px.bar(
+                err_tipo,
+                x="nombre_grupo",
+                y=col_error,
+                title=f"{etiqueta} medio por tipo de dia",
+                labels={"nombre_grupo": "Tipo de dia", col_error: etiqueta},
+            )
+            mostrar_grafico(fig_t)
+            st.caption(
+                "Un error mayor en dias de verano o invierno indica que esos perfiles "
+                "son más difíciles de pronosticar con variables de calendario."
+            )
 
 
 def _real_vs_pronostico(
