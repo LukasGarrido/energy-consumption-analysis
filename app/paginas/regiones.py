@@ -32,6 +32,8 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
         key="modo_periodo",
     )
     col_pct = "pct_dias_total" if modo == "Historial completo" else "pct_dias_comun"
+    if col_pct not in tablas["mezcla_region_tipo"].columns:
+        col_pct = "pct_dias"
 
     _barras_apiladas(tablas, regiones, col_pct, modo)
     st.divider()
@@ -52,6 +54,9 @@ def _barras_apiladas(
 
     if filtros.verificar_vacio(mrt):
         return
+
+    if col_pct not in mrt.columns:
+        col_pct = "pct_dias"
 
     # Ordenar regiones de mayor a menor peso del grupo 1
     orden_regiones: list[str] = (
@@ -111,17 +116,22 @@ def _dispersion_indicadores(
     if filtros.verificar_vacio(ind):
         return
 
+    col_x = "razon_inv_ver_comun" if "razon_inv_ver_comun" in ind.columns and ind["razon_inv_ver_comun"].notna().any() else "razon_inv_ver"
+    col_y = "amplitud_diaria_comun" if "amplitud_diaria_comun" in ind.columns and ind["amplitud_diaria_comun"].notna().any() else "amplitud_diaria"
+
+    subtitulo_periodo = "periodo comun" if col_x == "razon_inv_ver_comun" else "historial completo"
+
     fig = px.scatter(
         ind,
-        x="razon_inv_ver_comun",
-        y="amplitud_diaria_comun",
+        x=col_x,
+        y=col_y,
         text="region",
         color="region",
         color_discrete_map=COLORES_REGION,
-        title="Razón invierno/verano vs. amplitud diaria media (periodo comun)",
+        title=f"Razón invierno/verano vs. amplitud diaria media ({subtitulo_periodo})",
         labels={
-            "razon_inv_ver_comun": "Razón consumo invierno / verano",
-            "amplitud_diaria_comun": "Amplitud diaria relativa media",
+            col_x: "Razón consumo invierno / verano",
+            col_y: "Amplitud diaria relativa media",
             "region": "Región",
         },
     )

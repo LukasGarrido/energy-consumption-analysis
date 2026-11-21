@@ -158,31 +158,31 @@ class EnergyDataExporter:
         self.save_csv(est, "estacionalidad_mensual")
 
     def _export_indicadores(self, df: pd.DataFrame):
-        # Periodo común
-        counts = df.groupby("fecha")["region"].nunique()
-        n_regiones = df["region"].nunique()
-        fechas_comunes = counts[counts == n_regiones].index
-        
         def calc_metrics(data):
-            # razon_inv_ver = Invierno / Verano
+            if data.empty:
+                return pd.Series({"razon": np.nan, "amplitud": np.nan})
             inv = data[data["estacion"] == "Invierno"]["MW"].mean()
             ver = data[data["estacion"] == "Verano"]["MW"].mean()
             razon = inv / ver if ver > 0 else np.nan
-            
-            # amplitud_diaria = mean(max - min del día)
             amp = data.groupby("fecha")["MW"].agg(lambda x: x.max() - x.min()).mean()
             return pd.Series({"razon": razon, "amplitud": amp})
 
         # Totales
-        ind_total = df.groupby("region").apply(calc_metrics)
-        # Comunes
-        ind_comun = df[df["fecha"].isin(fechas_comunes)].groupby("region").apply(calc_metrics)
-        
-        ind = pd.concat([
-            ind_total.rename(columns={"razon": "razon_inv_ver", "amplitud": "amplitud_diaria"}),
-            ind_comun.rename(columns={"razon": "razon_inv_ver_comun", "amplitud": "amplitud_diaria_comun"})
-        ], axis=1).reset_index()
-        
+        ind_total = df.groupby("region", group_keys=False).apply(calc_metrics)
+        ind_total = ind_total.rename(columns={"razon": "razon_inv_ver", "amplitud": "amplitud_diaria"})
+
+        # Periodo común (regiones vigentes que comparten el periodo final)
+        rango = df.groupby("region")["fecha"].agg(["min", "max"])
+        vig = rango[rango["max"] >= rango["max"].max() - pd.Timedelta(days=7)]
+        if not vig.empty:
+            ini_comun, fin_comun = vig["min"].max(), vig["max"].min()
+            df_comun = df[df["region"].isin(vig.index) & (df["fecha"] >= ini_comun) & (df["fecha"] <= fin_comun)]
+            ind_comun = df_comun.groupby("region", group_keys=False).apply(calc_metrics)
+            ind_comun = ind_comun.rename(columns={"razon": "razon_inv_ver_comun", "amplitud": "amplitud_diaria_comun"})
+            ind = ind_total.join(ind_comun, how="left").reset_index()
+        else:
+            ind = ind_total.reset_index()
+
         self.save_csv(ind, "indicadores_region")
 
     def _export_curvas_tipo_dia(self):
@@ -192,6 +192,8 @@ class EnergyDataExporter:
 
     def _export_mezcla_region_tipo(self):
         mezcla = self.load_parquet("tipos_de_dia_mezcla_region")
+        if "pct_dias" in mezcla.columns and "pct_dias_total" not in mezcla.columns:
+            mezcla["pct_dias_total"] = mezcla["pct_dias"]
         self.save_csv(mezcla, "mezcla_region_tipo")
 
     def _export_silueta_k(self):

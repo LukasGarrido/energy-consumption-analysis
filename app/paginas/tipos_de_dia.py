@@ -123,6 +123,13 @@ def _calendario_de_color(
     hd["anio"] = hd["fecha"].dt.year
     hd["dia_del_anio"] = hd["fecha"].dt.dayofyear
 
+    if "nombre_grupo" not in hd.columns:
+        if "dim_tipo_dia" in tablas and "nombre_grupo" in tablas["dim_tipo_dia"].columns:
+            mapa_g = tablas["dim_tipo_dia"][["grupo", "nombre_grupo"]].dropna().drop_duplicates()
+            hd = hd.merge(mapa_g, on="grupo", how="left")
+        else:
+            hd["nombre_grupo"] = hd["grupo"].astype(str)
+
     mapa_colores = mapa_colores_grupos(hd)
 
     fig = px.scatter(
