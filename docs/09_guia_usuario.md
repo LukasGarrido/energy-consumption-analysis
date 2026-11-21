@@ -111,7 +111,7 @@ Los parámetros están centralizados en `src/config.py`:
 | `HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA` | Pronóstico | 24 h, [24, 48, 168], [24, 168], "2017-01-01", 42 |
 | `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.50, 0.26, 10,000 días |
 | `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
-| `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (el notebook 04 usa 6), 12 meses por pliegue |
+| `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (el notebook 03 usa 6), 12 meses por pliegue |
 
 `REZAGOS_HORAS` no puede contener valores menores que `HORIZONTE_HORAS`: el código lanza un error para evitar usar información futura que no se tendría disponible al momento de pronosticar.
 
@@ -149,8 +149,8 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 |---|---|
 | `data/raw/` | Datos originales de Kaggle (no se versionan) |
 | `data/processed/` | Datos limpios y series consolidadas en formato Parquet |
-| `data/processed/powerbi/` | 17 tablas CSV normalizadas exportadas para Power BI y Streamlit |
-| `notebooks/` | Notebooks de Jupyter, numerados en orden de ejecución (01 a 07) |
+| `data/processed/powerbi/` | 17 tablas CSV normalizadas y diccionario de datos exportados para Power BI y Streamlit |
+| `notebooks/` | Notebooks de Jupyter, numerados en orden de ejecución (01 a 03) |
 | `src/config.py` | Rutas y parámetros globales |
 | `src/data_loader.py` | Lectura segura y validación de datos crudos y procesados |
 | `src/cleaning.py` | Funciones de limpieza, deduplicación e interpolación |
@@ -158,6 +158,7 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 | `src/modeling.py` | Particiones temporales, modelos basales y XGBoost, métricas (MASE) y ventana móvil |
 | `src/profiles.py` | Extracción de perfiles diarios, normalización, silueta y agrupamiento |
 | `src/anomalies.py` | Cálculo de residuos diarios, z modificado y contraste con episodios históricos |
+| `src/export.py` | Script de exportación del modelo dimensional (17 tablas CSV para Power BI y Streamlit) |
 | `src/plots.py` | Funciones auxiliares de graficado y estilos |
 | `app/streamlit_app.py` | Punto de entrada del prototipo interactivo en Streamlit |
 | `app/config.py` | Constantes, paleta Okabe-Ito y rutas de la app |
@@ -165,8 +166,9 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 | `app/filtros.py` | Helpers de filtrado por región, estación y rango de fechas |
 | `app/graficos.py` | Helpers de visualización y compatibilidad con Plotly |
 | `app/paginas/` | Módulos individuales por página (resumen, patrones, tipos de día, regiones, anomalías, pronóstico) |
-| `app/panel_pjm.pbix` | Archivo del panel de Power BI *(por crear)* |
-| `reports/figures/` | Figuras y gráficos exportados listos para publicación |
+| `app/panel_pjm.pbix` | Archivo del panel de Power BI *(en desarrollo)* |
+| `public/report/` | Plantilla de informe final en PDF |
+| `public/power_electric_plant.png` | Ilustración conceptual del proyecto |
 | `docs/` | Documentación técnica modular del proyecto |
 
 ---
@@ -181,34 +183,26 @@ jupyter lab
 
 Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. Cada uno depende de los datos generados por los anteriores.
 
-| Orden | Notebook | Qué hace | Archivos que genera | Estado |
+| Orden | Archivo | Qué hace | Archivos que genera | Estado |
 |---|---|---|---|---|
-| 1 | `01_exploracion.ipynb` | Revisa la estructura, calidad y convención horaria | Ninguno | Disponible |
-| 2 | `02_limpieza.ipynb` | Limpia, interpola DST y valida formalmente | `data/processed/<REGION>_clean.parquet` y `consumo_horario.parquet` | Disponible |
-| 3 | `03_analisis.ipynb` | Analiza patrones horarios, estacionalidad y comparativas | Figuras exploratorias | Disponible |
-| 4 | `04_modelado.ipynb` | Entrena pronóstico de referencia a 24 h (XGBoost vs base) | `residuos_PJME.parquet` y `metricas_ventana_movil_PJME.parquet` | Disponible |
-| 5 | `05_agrupamiento.ipynb` | Normaliza perfiles, evalúa silueta y agrupa tipos de día | `tipos_de_dia*.parquet` | Disponible |
-| 6 | `06_anomalias.ipynb` | Detecta anomalías con z modificado y contrasta con eventos | `anomalias_*.parquet` | Disponible |
-| 7 | `07_exportacion.ipynb` | Exporta dimensiones y tablas de hechos normalizadas | 17 archivos CSV en `data/processed/powerbi/` | Disponible |
+| 1 | `01_datos.ipynb` | Revisa la estructura y calidad de las 12 regiones, convención horaria, duplicados e interpolación de saltos DST | `data/processed/<REGION>_clean.parquet` y `consumo_horario.parquet` | Disponible |
+| 2 | `02_patrones.ipynb` | Analiza patrones horarios, estacionalidad, ciclo semanal, normaliza perfiles diarios y agrupa tipos de día | `data/processed/tipos_de_dia*.parquet` (resumen, curvas, mezcla, silueta) | Disponible |
+| 3 | `03_pronostico_anomalias.ipynb` | Entrena pronóstico de referencia (XGBoost vs base a 24 h en ventana móvil) y detecta días atípicos con z modificado | `residuos_PJME.parquet`, `metricas_ventana_movil_PJME.parquet`, `anomalias_PJME_*.parquet` | Disponible |
+| 4 | `src/export.py` (script) | Consolida los datos procesados y exporta el modelo dimensional de 17 tablas CSV junto al diccionario de datos | 17 archivos CSV en `data/processed/powerbi/` | Disponible |
 
-También puedes ejecutar la exportación directamente con el script de Python:
+Para ejecutar la exportación directamente desde la terminal:
 ```bash
 python src/export.py
 ```
 
-> **Importante:** los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben mantener el mismo valor en los notebooks 05 y 07 (o en el script) para conservar la coherencia en las formas de los perfiles.
-
 ### Comprobaciones tras ejecutar
 
-| Notebook | Qué debe verse |
+| Paso | Qué debe verse |
 |---|---|
-| 02 | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos |
-| 02 | `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
-| 03 | 10 regiones vigentes en el periodo común 2013-06-01 → 2018-08-03 |
-| 04 | XGBoost supera al base en los 6 pliegues de 12 meses, con MASE entre 0.72 y 0.87 (0.86 en la partición única) |
-| 05 | Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50. Con la configuración por defecto resulta k-medias con k = 2 y silueta 0.413 |
-| 06 | 22 días atípicos de 2,191 y detección del huracán Sandy (2012-10-30) y del vórtice polar de 2014 |
-| 07 | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (118 columnas documentadas) y el mensaje «Exportación completada con éxito» |
+| `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
+| `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50 (k-medias con $k = 2$ y silueta 0.413) |
+| `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE global 0.86, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
+| `src/export.py` | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (118 columnas documentadas) y el mensaje «Exportación completada con éxito» |
 
 ---
 
@@ -254,7 +248,7 @@ La aplicación cuenta con una barra lateral izquierda de filtros globales y seis
 
 ### 6.2 Panel en Power BI Desktop
 
-El panel interactivo en Power BI consume las tablas exportadas por el notebook 07 *(por crear)*:
+El panel interactivo en Power BI consume las tablas exportadas por `src/export.py` *(panel en desarrollo en `app/panel_pjm.pbix`)*:
 
 1. Instalar Power BI Desktop (requiere Windows).
 2. Abrir el archivo `app/panel_pjm.pbix`.
@@ -281,7 +275,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 El archivo `app/streamlit_app.py` añade automáticamente la raíz del proyecto al `sys.path`. Asegúrate de lanzar el comando desde la raíz del repositorio (`streamlit run app/streamlit_app.py`).
 
 **Aviso en Streamlit: "Faltan los siguientes archivos CSV en la carpeta de datos...".**
-La aplicación se detiene si faltan tablas en `data/processed/powerbi/`. Ejecuta el script `python src/export.py` o el notebook `07_exportacion.ipynb` con *Restart & Run All* para exportar las 17 tablas requeridas.
+La aplicación se detiene si faltan tablas en `data/processed/powerbi/`. Ejecuta el script `python src/export.py` para exportar las 17 tablas requeridas.
 
 **El puerto 8501 de Streamlit ya está en uso.**
 Puedes especificar otro puerto agregando la bandera `--server.port`:
@@ -296,11 +290,11 @@ Falta instalar el proyecto en modo editable (`pip install -e .`) o el kernel de 
 **Los notebooks no encuentran los archivos de datos crudos.**
 Verificar que los CSV estén descomprimidos en `data/raw/` y que Jupyter se haya abierto desde la raíz del proyecto.
 
-**Los notebooks 03 a 06 no encuentran `consumo_horario.parquet`.**
-Ejecutar previamente `02_limpieza.ipynb`.
+**Los notebooks 02 o 03 no encuentran `consumo_horario.parquet`.**
+Ejecutar previamente `01_datos.ipynb`.
 
-**El notebook 06 no encuentra `residuos_PJME.parquet`.**
-Ejecutar previamente `04_modelado.ipynb`.
+**El script `src/export.py` falla por falta de archivos Parquet.**
+Ejecutar previamente y en orden los notebooks `01_datos.ipynb`, `02_patrones.ipynb` y `03_pronostico_anomalias.ipynb` para generar todos los datos procesados requeridos.
 
 **El kernel de Jupyter no usa el entorno del proyecto.**
 Registrarlo ejecutando:
