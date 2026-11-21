@@ -134,13 +134,9 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── 11_conceptos.md           # Conceptos teóricos explicados para este proyecto
 │   └── 12_bitacora_decisiones.md # Registro histórico de decisiones del proyecto
 ├── notebooks/                    # Cuadernos Jupyter en orden de ejecución
-│   ├── 01_exploracion.ipynb      # Exploración inicial (EDA), convención horaria y calidad de datos
-│   ├── 02_limpieza.ipynb         # Limpieza y tratamiento de series de tiempo
-│   ├── 03_analisis.ipynb         # Patrones, estacionalidad, regiones y picos
-│   ├── 04_modelado.ipynb         # Pronóstico de referencia a 24 horas, MASE y ventana móvil
-│   ├── 05_agrupamiento.ipynb     # Agrupamiento de perfiles diarios
-│   ├── 06_anomalias.ipynb        # Detección de días atípicos y contraste con episodios
-│   └── 07_exportacion.ipynb      # Tablas para el panel
+│   ├── 01_datos.ipynb      # Exploración inicial (EDA), convención horaria y calidad de datos
+│   ├── 02_patrones.ipynb         # Limpieza y tratamiento de series de tiempo
+│   ├── 03_pronostico_anomalias.ipynb         # Patrones, estacionalidad, regiones y picos
 ├── public/                       # Recursos estáticos y multimedia
 │   ├── templates/                # Plantillas y formatos de informes (PDF, documentos)
 │   └── power_electric_plant.png  # Ilustración conceptual del proyecto
@@ -149,6 +145,7 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 ├── src/                          # Módulos Python reutilizables por los notebooks
 │   ├── __init__.py               # Inicialización del paquete
 │   ├── anomalies.py              # Residuo diario, z modificado y contraste con episodios
+│   ├── export.py                 # Exportar modelo dimensional 
 │   ├── cleaning.py               # Limpieza de datos
 │   ├── config.py                 # Rutas y parámetros del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
