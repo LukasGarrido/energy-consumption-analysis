@@ -150,7 +150,6 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── export.py                 # Exportación del modelo dimensional (17 tablas CSV para Power BI)
 │   ├── features.py               # Día operativo, variables de calendario, rezagos y medias móviles
 │   ├── modeling.py               # Partición temporal, modelos XGBoost/base, métricas y ventana móvil
-│   ├── plots.py                  # Utilidades y funciones de graficado
 │   └── profiles.py               # Perfiles diarios, elección de k y agrupamiento
 ├── .env.example                  # Plantilla de variables de entorno
 ├── .gitignore                    # Configuración de exclusiones de Git
@@ -185,7 +184,7 @@ La documentación completa está en [`docs/`](docs/00_indice.md):
 
 ## Tecnologías
 
-El proyecto se desarrolla utilizando un ecosistema robusto de análisis de datos, modelado, visualización y gestión:
+El proyecto se desarrolla utilizando un ecosistema de análisis de datos, modelado, visualización y gestión:
 
 - **Procesamiento y Análisis de Datos:** Python, `pandas`, `numpy`, `scipy`, `pyarrow`.
 - **Aprendizaje Automático y Modelado:** `scikit-learn` (agrupamiento k-medias y Ward, métricas), `xgboost` (pronóstico de referencia a 24 horas), `statsmodels` (descomposición STL).
@@ -193,7 +192,7 @@ El proyecto se desarrolla utilizando un ecosistema robusto de análisis de datos
 - **Visualización y Presentación:** `Plotly`, `Matplotlib`, `Seaborn`, Streamlit (prototipo interactivo), Power BI Desktop (panel analítico en modelo en estrella).
 - **Entorno y Documentación:** Jupyter Notebook / JupyterLab, Git y GitHub (control de versiones), Obsidian (documentación técnica y bitácora de decisiones).
 
-El detalle completo de métodos y asignación de herramientas está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
+El detalle completo de métodos y herramientas está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
 
 ---
 
