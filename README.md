@@ -141,9 +141,6 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── 01_datos.ipynb            # Exploración inicial (EDA), calidad de datos, convención horaria y limpieza
 │   ├── 02_patrones.ipynb         # Patrones horarios/estacionales y agrupamiento de tipos de día
 │   └── 03_pronostico_anomalias.ipynb # Pronóstico de referencia (XGBoost vs base) y detección de anomalías
-├── public/                       # Recursos estáticos y multimedia
-│   ├── report/                   # Plantillas y formatos de informes (PDF)
-│   └── power_electric_plant.png  # Ilustración conceptual del proyecto
 ├── src/                          # Módulos Python reutilizables por los notebooks
 │   ├── __init__.py               # Inicialización del paquete
 │   ├── anomalies.py              # Residuo diario, z modificado y contraste con episodios
