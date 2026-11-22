@@ -1,6 +1,6 @@
 <div align="center">
 
-# Base de datos (dataset)
+# Datos
 
 *Análisis de Consumo Horario de Energía (Red PJM)*
 
@@ -10,13 +10,16 @@
 
 ## Índice de contenidos
 
-- [← Volver al Índice Principal](00_indice.md)
 - [Fuente y contenido](#fuente-y-contenido)
   - [Periodos distintos por región](#periodos-distintos-por-región)
 - [Calidad de los datos](#calidad-de-los-datos)
   - [Valores sospechosos y atípicos](#valores-sospechosos-y-atípicos)
 - [Reglas de preprocesamiento](#reglas-de-preprocesamiento)
   - [Salidas de la limpieza](#salidas-de-la-limpieza)
+
+---
+
+Las decisiones citadas (D1, D2, D3…) están en [05_decisiones.md](05_decisiones.md).
 
 ---
 
@@ -38,7 +41,7 @@ Las regiones no cubren los mismos años, por lo que **no existe un periodo comú
 
 - `PJM_Load` cubre 1998-04 → 2002-01 y `NI` 2004-05 → 2011-01.
 - Las otras 10 regiones llegan hasta 2018-08-03 y se denominan *vigentes*. Comparten el periodo **2013-06-01 → 2018-08-03** (días operativos hasta el 2018-08-02).
-- **Continuidad entre regiones** (notebook 03, sección 6.2, comparando las medias de 30 días a cada lado del empalme):
+- **Continuidad entre regiones** (`02_patrones.ipynb`, comparando las medias de 30 días a cada lado del empalme):
   - `NI` → `COMED`: cociente de niveles 1.00 (12,230 frente a 12,242 MW) y las series se tocan el 2011-01-01. La evidencia permite unirlas (decisión D3, por confirmar).
   - `PJM_Load` → `PJME`: cociente 1.05, compatible con una continuación.
   - `PJM_Load` → `PJMW`: cociente 0.17. `PJMW` es una subzona aparte y no un empalme.
@@ -49,7 +52,7 @@ Las comparaciones entre regiones se hacen sobre las 10 vigentes en su periodo co
 
 ## Calidad de los datos
 
-Resultados de `01_exploracion.ipynb`. Ninguna región tiene valores nulos y todas tienen una cobertura de entre 99.98 % y 99.99 % de las horas de su periodo.
+Resultados de la parte de exploración de `01_datos.ipynb`. Ninguna región tiene valores nulos y todas tienen una cobertura de entre 99.98 % y 99.99 % de las horas de su periodo.
 
 | Región   | Inicio           | Fin              | Filas   | Duplicados | Horas faltantes | Cobertura (%) | Ceros |
 | -------- | ---------------- | ---------------- | ------- | ---------- | --------------- | ------------- | ----- |
@@ -111,23 +114,16 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 | Vacíos en los extremos        | Se recortan                                                                                 | No hay dato vecino para estimarlos (por ejemplo, el 0 MW inicial de `FE`)  | Aplicada                                                  |
 | Año completo                  | Al menos 8,700 horas (99.3 %)                                                               | Criterio del proyecto                                                      | Aplicada (114 de 132 combinaciones región-año son completas) |
 | Día operativo                 | Del 01:00 al 24:00 (`Datetime − 1 h`)                                                       | `Datetime` marca el final de la hora (decisión D1)                         | Aplicada en `src/features.py`                             |
-| Día completo                  | 24 horas por día y región                                                                   | Requisito de los perfiles diarios y de los promedios diarios               | Aplicada en `src/profiles.py` y en el notebook 03         |
+| Día completo                  | 24 horas por día y región                                                                   | Requisito de los perfiles diarios y de los promedios diarios               | Aplicada en `src/profiles.py` y en `02_patrones.ipynb`         |
 | Series `NI` y `COMED`         | Se guardan por separado y se documenta la continuidad                                       | La evidencia permite unirlas (cociente 1.00), pero la decisión no está tomada | **Por confirmar (D3)**                                 |
 
 ### Salidas de la limpieza
 
-`02_limpieza.ipynb` (o `run_cleaning` en `src/cleaning.py`) guarda en `data/processed/`:
+La parte de limpieza de `01_datos.ipynb` (o `run_cleaning` en `src/cleaning.py`) guarda en `data/processed/`:
 
 - Un archivo `<REGION>_clean.parquet` por región.
 - `consumo_horario.parquet`: las 12 regiones en formato largo (`Datetime`, `MW`, `region`), con 1,090,343 filas (1,090,167 originales − 40 duplicados unificados + 217 horas interpoladas − 1 fila recortada).
 
 Las 12 regiones superan `validar_limpieza`: fechas sin repetir, orden cronológico, una hora exacta entre filas consecutivas, sin vacíos y sin valores menores o iguales a 0.
 
----
 
-<div align="center">
-
-*— Fin del documento —*  
-[Volver al Índice Principal](00_indice.md)
-
-</div>

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Documentación del modelo
+# Modelo y resultados
 
 *Análisis de Consumo Horario de Energía (Red PJM)*
 
@@ -10,46 +10,50 @@
 
 ## Índice de contenidos
 
-- [← Volver al Índice Principal](00_indice.md)
-- [1. Datos de entrada](#1-datos-de-entrada)
-- [2. Preparación de los datos](#2-preparación-de-los-datos)
-- [3. Diseño del experimento](#3-diseño-del-experimento)
-- [4. Algoritmos](#4-algoritmos)
-- [5. Métricas y resultados](#5-métricas-y-resultados)
-  - [Interpretación](#interpretación)
-- [6. Limitaciones](#6-limitaciones)
-- [7. Reproducibilidad](#7-reproducibilidad)
-- [1. Datos de entrada](#1-datos-de-entrada)
-- [2. Diseño del experimento](#2-diseño-del-experimento)
-- [3. Resultados](#3-resultados)
-- [4. Limitaciones](#4-limitaciones)
-- [5. Reproducibilidad](#5-reproducibilidad)
-- [1. Definición](#1-definición)
-- [2. Diseño](#2-diseño)
-- [3. Resultados](#3-resultados)
-  - [Interpretación](#interpretación)
-  - [Criterios de cierre](#criterios-de-cierre)
-- [4. Limitaciones](#4-limitaciones)
-- [5. Reproducibilidad](#5-reproducibilidad)
+- [Resumen](#resumen)
+- [Hallazgos del análisis descriptivo](#hallazgos-del-análisis-descriptivo)
+- [Parte A. Pronóstico de referencia](#parte-a-pronóstico-de-referencia)
+- [Parte B. Agrupamiento de perfiles diarios](#parte-b-agrupamiento-de-perfiles-diarios)
+- [Parte C. Detección de días atípicos](#parte-c-detección-de-días-atípicos)
+- [Exportación para el panel](#exportación-para-el-panel)
+- [Glosario](#glosario)
 
 ---
 
+## Resumen
 
-Este documento describe los tres componentes analíticos del proyecto y cómo se evalúan.
+Este documento describe los componentes analíticos del proyecto, cómo se evalúan y los resultados obtenidos. Las cifras salen de la ejecución de los notebooks con el día operativo (decisión D1). Las horas son horas de inicio (0 = 00:00–01:00). Los objetivos y su estado están en [01_proyecto.md](01_proyecto.md) y las decisiones en [05_decisiones.md](05_decisiones.md).
 
-| Parte | Tema | Pregunta | Notebook | Estado |
+| Componente | Tema | Pregunta | Dónde se ejecuta | Estado |
 |---|---|---|---|---|
-| A | Pronóstico de referencia a 24 horas | P4 y base de P3 | 04 | Hecho: supera al base en los 6 pliegues, MASE de 0.72 a 0.87 |
-| B | Agrupamiento de perfiles diarios | P1 y P2 | 05 | Hecho: k = 2 (estacionales), silueta 0.413 (débil). D7 y justificación de k pendientes |
-| C | Detección de días atípicos | P3 | 06 | Hecho: 22 días atípicos, 5 episodios coinciden |
+| Descriptivo | Patrones por hora, día y estación, tendencia, comparación y picos | P1 y P2 | `01_datos` y `02_patrones` | Hecho |
+| A | Pronóstico de referencia a 24 horas | P4 y base de P3 | `03_pronostico_anomalias` | Hecho: supera al base en los 6 pliegues, MASE de 0.72 a 0.87 |
+| B | Agrupamiento de perfiles diarios | P1 y P2 | `02_patrones` | Hecho: k = 2 (estacionales), silueta 0.413 (débil). D7 y justificación de k pendientes |
+| C | Detección de días atípicos | P3 | `03_pronostico_anomalias` | Hecho: 22 días atípicos, 5 episodios coinciden |
+| Exportación | Modelo en estrella para el panel | P1 a P4 | `src/export.py` | Hecho: 17 tablas. El panel de Power BI está por construir |
 
 ---
 
-# Parte A. Pronóstico de referencia
+## Hallazgos del análisis descriptivo
 
-> Todas las cifras de esta parte salen de la ejecución del notebook 04 con el día operativo (`Datetime − 1 h`, decisión D1). Las horas son horas de inicio (0 = 00:00–01:00).
+- **Periodo:** no existe un periodo común a las 12 regiones, 10 comparten 2013-06-01 → 2018-08-03 (días operativos hasta el 2018-08-02).
+- **Ciclo diario:** mínimo entre las 3 y las 4 h, subida desde las 5–6 h y máximo entre las 17 y las 19 h (18 h en 7 de 10 regiones, `DUQ` y `PJME` a las 17 h, `EKPC` a las 19 h).
+- **Forma por estación:** en verano hay una sola curva con máximo por la tarde (hasta 1.2–1.4 del promedio) y en invierno hay dos picos, uno hacia las 7 h y otro hacia las 18–19 h.
+- **Calendario:** el fin de semana consume entre un 3.9 % (`EKPC`) y un 13.9 % (`DAYTON`) menos que un laborable (≈ −9 % en promedio). Un festivo consume cerca de un 5 % menos (de −0.7 % en `DOM` a −8.8 % en `DAYTON`; `EKPC` es la excepción con +1.7 %).
+- **Estacionalidad:** dos máximos anuales (verano e invierno) con valles en abril y octubre. `EKPC` (1.20) y `PJMW` (1.12) son invernales, `COMED` (0.93), `DUQ` (0.92), `DEOK` y `PJME` (0.95), veraniegas.
+- **Tendencia:** estabilidad o ligera baja (`PJME` −9 % entre 2007 y 2017, de 33,612 a 30,653 MW; `AEP` −13 %; `DUQ` −10 %). `DOM` sube cerca de un 6 % desde 2006.
+- **Picos:** `PJME` alcanzó 62,009 MW el 2006-08-02. `DOM`, `EKPC` y `PJMW` tienen su récord el 2015-02-20 a las 7 h. Ambas fechas coinciden con episodios documentados por PJM: el récord de demanda de verano y el de invierno. El máximo de `AEP` (2008-10-20) es inusual y debe verificarse.
+- **Correlaciones:** de 0.56 a 0.96. Los pares más parecidos son `AEP`–`PJMW` y `DAYTON`–`FE` (0.96), y la región más distinta es `EKPC`.
+- **Hora de `COMED` y `NI`:** su curva diaria llega una hora más tarde que la del resto (error de 0.014 con +1 h frente a 0.024 sin desplazar). Es lo esperable si las series están en hora del este y esas zonas son de hora central. No se corrige (ver D7).
+- **`NI` y `COMED`:** cociente de niveles 1.00 y empalme el 2011-01-01, lo que permite tratarlas como la misma zona (D3, por confirmar).
 
-## 1. Datos de entrada
+---
+
+## Parte A. Pronóstico de referencia
+
+> Todas las cifras de esta parte salen de la ejecución de `03_pronostico_anomalias.ipynb` con el día operativo (`Datetime − 1 h`, decisión D1). Las horas son horas de inicio (0 = 00:00–01:00).
+
+### 1. Datos de entrada
 
 | Elemento | Detalle |
 |---|---|
@@ -61,9 +65,9 @@ Este documento describe los tres componentes analíticos del proyecto y cómo se
 
 Se eligió `PJME` por ser la región con el historial más largo (16 años completos) y la de mayor tamaño.
 
-## 2. Preparación de los datos
+### 2. Preparación de los datos
 
-**Calidad.** Los datos provienen de la limpieza (`02_limpieza.ipynb`): en `PJME` se unificaron 4 duplicados y se agregaron e interpolaron 30 horas (17 de primavera, 12 de otoño y 1 de otra causa, el 2010-12-10 00:00, que también falta en otras 6 regiones). No se aplicó ningún tratamiento adicional.
+**Calidad.** Los datos provienen de la limpieza (`01_datos.ipynb`): en `PJME` se unificaron 4 duplicados y se agregaron e interpolaron 30 horas (17 de primavera, 12 de otoño y 1 de otra causa, el 2010-12-10 00:00, que también falta en otras 6 regiones). No se aplicó ningún tratamiento adicional.
 
 **Variables creadas.**
 
@@ -88,7 +92,7 @@ Todas las variables de calendario se calculan con el día operativo: `hora` va d
 
 Las primeras 191 filas (24 + 168 − 1) se descartan porque no tienen historia suficiente para calcular los rezagos y las medias móviles.
 
-## 3. Diseño del experimento
+### 3. Diseño del experimento
 
 | Elemento | Decisión |
 |---|---|
@@ -107,7 +111,7 @@ Con la hora de fin, la prueba de la partición única empieza en `2017-01-01 00:
 
 **Validación en ventana móvil.** Los pliegues son bloques consecutivos de 12 meses que terminan el 2018-08-03: en cada uno se entrena con todo lo anterior y se prueba en el bloque. Los bloques no se solapan, así que cada hora se predice una sola vez fuera de muestra (52,584 horas). Con 6 pliegues, los residuos cubren **2012-08-03 → 2018-08-03**, que incluye el huracán Sandy, el vórtice polar de 2014 y el frío de 2015. Criterio: XGBoost supera al base en todos los pliegues y su MASE es menor que 1. Los residuos (`real − predicción`) se guardan en `data/processed/residuos_PJME.parquet` y alimentan la Parte C.
 
-## 4. Algoritmos
+### 4. Algoritmos
 
 | Modelo | Motivo de elección | Parámetros |
 |---|---|---|
@@ -117,9 +121,9 @@ Con la hora de fin, la prueba de la partición única empieza en `2017-01-01 00:
 
 Se descartaron Prophet y los modelos ARIMA: con datos horarios y varias estacionalidades simultáneas son lentos y complejos de ajustar, y el pronóstico es una referencia y no el producto final.
 
-## 5. Métricas y resultados
+### 5. Métricas y resultados
 
-Métricas definidas en `06_plan_proyecto.md`: MAE y RMSE (en MW), MAPE (en %) y MASE, evaluadas sobre los 13,897 registros de la prueba (partición única).
+Métricas: MAE y RMSE (en MW), MAPE (en %) y MASE, evaluadas sobre los 13,897 registros de la prueba (partición única).
 
 | Modelo | MAE (MW) | RMSE (MW) | MAPE (%) | MASE |
 |---|---|---|---|---|
@@ -203,7 +207,7 @@ Ninguno es festivo. En 4 de los 10 días (2017-03-15, 2017-07-25, 2017-12-31 y 2
 | `MW_media_24h` | 0.009 |
 | `MW_media_168h` | 0.006 |
 
-### Interpretación
+#### Interpretación
 
 XGBoost reduce el error cerca de un 19 % respecto al modelo base de 24 horas y casi un 47 % respecto al semanal, y la mejora se mantiene en los 6 pliegues (entre un 18 % y un 28 %). La mejora es moderada: el 71 % de la importancia recae en el consumo del día anterior a la misma hora, por lo que el modelo es esencialmente "ayer" con correcciones por tipo de día. Esas correcciones explican dónde gana más: en la transición matutina entre laborables y fines de semana y en los festivos, donde la referencia del día anterior es peor.
 
@@ -211,7 +215,7 @@ Donde menos mejora es en los episodios de clima extremo. Las variables disponibl
 
 Un MAPE de 5.89 % para un pronóstico con 24 horas de antelación es un resultado razonable y no hay señales de fuga de datos: un error cercano a cero habría sido sospechoso.
 
-## 6. Limitaciones
+### 6. Limitaciones
 
 - **Sin temperatura.** Es el principal determinante de la demanda y el dataset no la incluye. Los picos extremos son los más difíciles de pronosticar, y un residuo grande puede ser clima y no una anomalía de otro tipo.
 - **Los árboles no extrapolan.** Un modelo de árboles no predice valores fuera del rango que vio en el entrenamiento, lo que podría explicar los errores en olas de frío intensas (hipótesis).
@@ -221,17 +225,17 @@ Un MAPE de 5.89 % para un pronóstico con 24 horas de antelación es un resultad
 - **Hiperparámetros por defecto.** XGBoost no se ajustó con búsqueda de parámetros.
 - **Sesgo.** El modelo tiende a sobrepronosticar: la mediana del residuo diario es negativa (de −0.65 % a −1.74 % según el pliegue), coherente con la ligera baja de demanda de largo plazo.
 
-## 7. Reproducibilidad
+### 7. Reproducibilidad
 
-El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/features.py`. Los parámetros del experimento están en `src/config.py` (`HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `N_PLIEGUES`, `MESES_PLIEGUE`, `SEMILLA`). El notebook usa 6 pliegues, por encima del mínimo `N_PLIEGUES`. Salidas: `residuos_PJME.parquet` y `metricas_ventana_movil_PJME.parquet` en `data/processed/`. Los pasos para ejecutarlo están en la [guía de usuario](09_guia_usuario.md).
+El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py` y `src/features.py`. Los parámetros del experimento están en `src/config.py` (`HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `N_PLIEGUES`, `MESES_PLIEGUE`, `SEMILLA`). El notebook usa 6 pliegues, por encima del mínimo `N_PLIEGUES`. Salidas: `residuos_PJME.parquet` y `metricas_ventana_movil_PJME.parquet` en `data/processed/`. Los pasos para ejecutarlo están en la [guía de usuario](06_guia_usuario.md).
 
 ---
 
-# Parte B. Agrupamiento de perfiles diarios
+## Parte B. Agrupamiento de perfiles diarios
 
-> No confundir con la variable `tipo_dia` de los notebooks 03 y 04 (laborable, fin de semana, festivo), que se define por el calendario. Aquí el tipo de día lo descubre el agrupamiento a partir de la forma de la curva.
+> No confundir con la variable `tipo_dia` de `02_patrones.ipynb` y `03_pronostico_anomalias.ipynb` (laborable, fin de semana, festivo), que se define por el calendario. Aquí el tipo de día lo descubre el agrupamiento a partir de la forma de la curva.
 
-## 1. Datos de entrada
+### 1. Datos de entrada
 
 | Elemento | Detalle |
 |---|---|
@@ -242,7 +246,7 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 | Días incluidos | Solo días completos (24 horas). Se descartó 1 día con menos de 24 horas |
 | Alcance | Las 12 regiones juntas, de modo que los tipos de día son los mismos y se puede construir la matriz región por tipo de día (decisión D6) |
 
-## 2. Diseño del experimento
+### 2. Diseño del experimento
 
 | Elemento | Decisión |
 |---|---|
@@ -252,11 +256,11 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 | Selección de k | Mayor silueta media entre las combinaciones en que ningún grupo baja del 5 % de los días |
 | Calidad de la estructura | El proyecto usa 0.50 como umbral de estructura razonable (`SILUETA_RAZONABLE`) y 0.26 como límite de la estructura débil (`SILUETA_DEBIL`), siguiendo a Kaufman y Rousseeuw. Por debajo de 0.26 no hay estructura sustancial. Se reporta tal como sale |
 | Estabilidad | Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado). La repetición con distintas semillas queda por hacer |
-| Alineación horaria | Parámetro `ALINEAR_HORA_CENTRAL`: con `True` se resta 1 h a las regiones de `REGIONES_HORA_CENTRAL` antes de calcular el día operativo. El notebook mide el desfase de cada región para decidir (decisión D7) |
+| Alineación horaria | Parámetro `ALINEAR_HORA_CENTRAL`: con `True` se resta 1 h a las regiones de `REGIONES_HORA_CENTRAL` antes de calcular el día operativo. `02_patrones.ipynb` mide el desfase de cada región para decidir (decisión D7) |
 | Interpretación | Curva media de cada grupo con banda de percentiles 10 a 90, frecuencia y composición por día de la semana, mes, estación y festivo |
-| Días que no encajan | Distancia de cada día al centro de su grupo (`distancia_centroide`), insumo del notebook 06 |
+| Días que no encajan | Distancia de cada día al centro de su grupo (`distancia_centroide`), insumo de la detección de anomalías |
 
-## 3. Resultados
+### 3. Resultados
 
 | Concepto | Valor |
 |---|---|
@@ -289,8 +293,8 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 
 - **Grupo 1:** reúne los días de octubre a mayo, con una meseta de mañana (7 a 11 h), un pico nocturno a las 19–20 h, un mínimo a las 3 h y una amplitud de ≈ 0.2 del promedio del día.
 - **Grupo 2:** reúne los días de junio a septiembre, con una sola curva de pico a las 16–17 h (≈ 1.19 del promedio), un mínimo a las 4 h y una amplitud de ≈ 0.4.
-- **Son tipos estacionales, no de calendario.** El 28.9 % y el 28.1 % de los días son sábado o domingo, casi igual que el 28.6 % esperado si no hubiera relación, y los festivos no se concentran. No hay un tipo de día de fin de semana. Una hipótesis, sin verificar, es que el efecto de fin de semana es sobre todo de nivel (cerca de −9 % según el notebook 03) y desaparece al dividir cada perfil entre el promedio del día.
-- Los nombres automáticos del notebook («G1 · Invierno · mixto» y «G2 · Verano · mixto») se sustituyen por los nombres basados en el calendario. Esa sustitución todavía no llega a las tablas guardadas: el notebook 07 exportó `dim_tipo_dia` con los nombres automáticos, y debe aplicarse antes de exportar.
+- **Son tipos estacionales, no de calendario.** El 28.9 % y el 28.1 % de los días son sábado o domingo, casi igual que el 28.6 % esperado si no hubiera relación, y los festivos no se concentran. No hay un tipo de día de fin de semana. Una hipótesis, sin verificar, es que el efecto de fin de semana es sobre todo de nivel (cerca de −9 % según `02_patrones.ipynb`) y desaparece al dividir cada perfil entre el promedio del día.
+- Los nombres automáticos de `02_patrones.ipynb` («G1 · Invierno · mixto» y «G2 · Verano · mixto») se sustituyen por los nombres basados en el calendario. Esa sustitución todavía no llega a las tablas guardadas: `src/export.py` exporta `dim_tipo_dia` con los nombres automáticos, y debe aplicarse antes de exportar.
 
 **Mezcla de tipos de día y estacionalidad por región.** «Común» es el periodo común de las 10 regiones vigentes (2013-06-01 → 2018-08-02).
 
@@ -313,11 +317,11 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 - Sigue a la amplitud diaria de cada región (`EKPC` 0.44, `DOM` 0.40, `FE` 0.31) y no al sesgo invernal o veraniego: `EKPC` tiene sesgo invernal (1.20) y aun así es de las regiones con más días de forma veraniega.
 - Al comparar el historial completo con el periodo común cambian las mezclas de `AEP`, `DAYTON` y `PJMW` (entre 3 y 4 puntos), por eso conviene reportar ambas.
 
-**Días que no encajan en su grupo.** La distancia al centro tiene una mediana de ≈ 0.21 en ambos grupos (media 0.226 y 0.223). El día más lejano es el 2008-09-14 de `DAYTON` (1.54), y `EKPC` aparece 6 veces entre los 10 primeros. La distancia no es comparable entre regiones y conviene normalizarla antes de usarla como insumo del notebook 06.
+**Días que no encajan en su grupo.** La distancia al centro tiene una mediana de ≈ 0.21 en ambos grupos (media 0.226 y 0.223). El día más lejano es el 2008-09-14 de `DAYTON` (1.54), y `EKPC` aparece 6 veces entre los 10 primeros. La distancia no es comparable entre regiones y conviene normalizarla antes de usarla como insumo de la detección de anomalías.
 
 **Salidas** (`data/processed/`): `tipos_de_dia.parquet` (45,430 filas), `tipos_de_dia_curvas.parquet` (48 filas), `tipos_de_dia_resumen.parquet` (2 filas), `tipos_de_dia_mezcla_region.parquet` (24 filas) y `tipos_de_dia_silueta_k.parquet` (18 filas).
 
-## 4. Limitaciones
+### 4. Limitaciones
 
 - **Estructura débil.** La silueta de 0.413 indica que los perfiles diarios forman en parte un continuo, así que los tipos de día son una simplificación útil y no categorías naturalmente separadas.
 - **k = 2 solo captura la estación.** Si se quiere separar el fin de semana hay que probar un k mayor y justificar la elección aunque la silueta baje (con k = 3 es 0.30 y con k ≥ 4 es menor de 0.26). Esta decisión está pendiente (D26).
@@ -329,19 +333,19 @@ El código está en `notebooks/04_modelado.ipynb`, `src/modeling.py` y `src/feat
 - La silueta y Ward se calculan sobre una muestra de días (grupo más pequeño: 38.2 % en la muestra y 37.7 % con todos los días).
 - Sin temperatura, los tipos de día se interpretan por el calendario y no por el clima.
 
-## 5. Reproducibilidad
+### 5. Reproducibilidad
 
-El código está en `notebooks/05_agrupamiento.ipynb` y `src/profiles.py`. Los parámetros (`K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO`, `SEMILLA`) están en `src/config.py`. `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el mismo valor en los notebooks 05 y 07.
+El código está en `notebooks/02_patrones.ipynb` y `src/profiles.py`. Los parámetros (`K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO`, `SEMILLA`) están en `src/config.py`. `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el mismo valor en `02_patrones.ipynb` y en `src/export.py`.
 
 ---
 
-# Parte C. Detección de días atípicos
+## Parte C. Detección de días atípicos
 
-## 1. Definición
+### 1. Definición
 
 Un día es atípico si su demanda se aleja de lo esperable. Lo esperable lo da el modelo de pronóstico de la Parte A, evaluado fuera de muestra con la ventana móvil (2012-08 → 2018-08).
 
-## 2. Diseño
+### 2. Diseño
 
 | Elemento | Decisión |
 |---|---|
@@ -354,7 +358,7 @@ Un día es atípico si su demanda se aleja de lo esperable. Lo esperable lo da e
 | Dirección esperada | Frío o calor extremo: residuos positivos, huracán Sandy: negativos |
 | Complemento | Relación con la distancia de cada día al centro de su grupo (Parte B) |
 
-## 3. Resultados
+### 3. Resultados
 
 | Concepto | Valor |
 |---|---|
@@ -427,16 +431,16 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 | Tormenta Jonas | 2016-01-22 → 01-24 | Sin coincidencia | 0 | n. a. | Por verificar | **No** |
 | Ola de frío de enero de 2018 | 2018-01-01 → 01-07 | Sin coincidencia | 0 | n. a. | Alta / n. a. | Sí |
 
-### Interpretación
+#### Interpretación
 
 - **El detector encuentra los eventos de mayor magnitud.** Sandy, el vórtice polar de enero de 2014 y la ola de frío de febrero de 2015 son los tres atípicos con mayor |z| entre los episodios, y en los 5 episodios detectados el signo coincide con el esperado: demanda por encima de lo esperable en frío y calor extremos y por debajo en Sandy.
 - **Dónde falla.** No salen atípicos la ola de calor de julio de 2013, la ola de frío de enero de 2018 ni la tormenta Jonas (esta última con fechas sin verificar). Una posible explicación, a confirmar, es que en episodios largos los rezagos y medias móviles del modelo ya incorporan el nivel alto de demanda y el residuo no se dispara.
-- **Predominan los atípicos altos** (15 de 22). El modelo tiende además a sobrepronosticar, un sesgo coherente con la ligera baja de demanda de largo plazo del notebook 03.
+- **Predominan los atípicos altos** (15 de 22). El modelo tiende además a sobrepronosticar, un sesgo coherente con la ligera baja de demanda de largo plazo de `02_patrones.ipynb`.
 - **Los casos hora a hora apuntan al clima.** En Sandy la demanda real cayó a unos 15,000 MW frente a unos 30,000 esperados. El 2014-01-07 llegó a cerca de 50,000 MW con un pronóstico muy inferior. Sin temperatura en el dataset, esto es una hipótesis.
 - **16 de los 22 atípicos no coinciden con ningún episodio de la tabla.** De los 15 que lista el notebook, 10 son altos y 5 bajos, y los 5 bajos caen entre mayo y julio (2017-05-20, 2018-06-03, 2014-07-04, 2013-07-25 y 2016-06-08), compatible con días templados con menos aire acondicionado (hipótesis). Varios se relacionan con el calendario (el 2014-07-04 es festivo, el 2016-07-05 y el 2018-05-29 son el día siguiente a un festivo, y 5 de los 15 caen en fin de semana), aunque la tasa en festivos (1.5 %) no difiere de la del resto (1.0 %). Sin temperatura no se puede confirmar la causa.
 - **Forma frente a nivel.** La correlación de Spearman es 0.02, pero los días extremos en nivel tienden a serlo también en forma (36 % frente a ≈ 5 %; 102 de 2,169 días no atípicos), aunque no de manera lineal. Los otros 14 atípicos (64 %) tienen una forma normal para su tipo de día y se distinguen solo por tener más o menos demanda de la esperada. Por tipo de día, la tasa es 0.8 % en el grupo 1 (11 de 1,350 días) y 1.3 % en el grupo 2 (11 de 841).
 
-### Criterios de cierre
+#### Criterios de cierre
 
 | Criterio | Estado |
 |---|---|
@@ -446,7 +450,7 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 
 **Salidas** (`data/processed/`): `anomalias_PJME_diario.parquet` (2,191 filas), `anomalias_PJME_lista.parquet` (22 filas) y `anomalias_PJME_episodios.parquet` (10 filas).
 
-## 4. Limitaciones
+### 4. Limitaciones
 
 - Sin temperatura, las anomalías solo pueden interpretarse por coincidencia con eventos. Un día extremo por clima puede no salir atípico si los rezagos y medias móviles del modelo ya lo incorporaban.
 - Lo atípico depende del modelo: otro pronóstico daría otros residuos y otra lista.
@@ -458,15 +462,103 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 - La tabla de episodios no es exhaustiva: que un atípico no coincida con un episodio no lo hace una falsa alarma. Solo recoge 10 eventos, uno de ellos sin verificar.
 - No hay verdad de referencia con la que medir la detección.
 
-## 5. Reproducibilidad
+### 5. Reproducibilidad
 
-El código está en `notebooks/06_anomalias.ipynb` y `src/anomalies.py`. Los parámetros (`UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS`) están en `src/config.py`. La tabla de episodios, con sus fuentes, está en el notebook 06 y reemplaza a `EPISODIOS_CONOCIDOS` de `src/anomalies.py`, que no incluye fuentes: conviene actualizar ese archivo con la misma tabla.
+El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.py`. Los parámetros (`UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS`) están en `src/config.py`. La tabla de episodios, con sus fuentes, está en `03_pronostico_anomalias.ipynb` y reemplaza a `EPISODIOS_CONOCIDOS` de `src/anomalies.py`, que no incluye fuentes: conviene actualizar ese archivo con la misma tabla.
+
 
 ---
 
-<div align="center">
+## Exportación para el panel
 
-*— Fin del documento —*  
-[Volver al Índice Principal](00_indice.md)
+`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella. Todas las claves de las tablas de hechos existen en su dimensión (0 claves huérfanas) y el diccionario `diccionario_datos.csv` documenta 146 columnas.
 
-</div>
+| Tabla | Filas | Tabla | Filas |
+|---|---|---|---|
+| `dim_region` | 12 | `indicadores_region` | 12 |
+| `dim_fecha` | 7,429 | `curvas_tipo_dia` | 48 |
+| `dim_estacion` | 4 | `mezcla_region_tipo` | 24 |
+| `dim_tipo_dia` | 2 | `silueta_k` | 18 |
+| `hechos_diario` | 45,430 | `pronostico_horario` | 52,584 |
+| `patron_hora_dia` | 8,064 | `pronostico_metricas` | 12 |
+| `patron_tipo_calendario` | 3,456 | `anomalias_dias` | 2,191 |
+| `tendencia_anual` | 132 | `anomalias_episodios` | 10 |
+| `estacionalidad_mensual` | 144 | | |
+
+---
+
+## Glosario
+
+Los conceptos clave del proyecto, agrupados por tema. Cada entrada dice qué es y cómo se aplica aquí.
+
+### Mapa: qué conceptos usa cada pregunta
+
+| Pregunta | Conceptos principales |
+|---|---|
+| P1. Tipos de día | Perfil diario, normalización, k-medias, agrupamiento jerárquico, silueta, índice de Rand ajustado, distancia al centroide, mapa de calor de calendario |
+| P2. Diferencias entre regiones | Normalización relativa, coeficiente de variación, correlación, mezcla de tipos de día, periodo común, desfase entre regiones |
+| P3. Días atípicos | Residuo, validación en ventana móvil, z modificado, MAD, sensibilidad al umbral, validación sin etiquetas |
+| P4. Error del pronóstico | Rezagos, fuga de datos, XGBoost, MAE, RMSE, MAPE, MASE, análisis por segmento |
+
+### Datos y tiempo
+
+- **Hora de fin de intervalo (*hour ending*).** Convención que etiqueta cada hora con el instante en que **termina**: la hora 1 va de 00:00 a 01:00 y la hora 24 es la última del día. PJM la usa en sus reportes. `Datetime` la sigue: todas las series empiezan a las 01:00 y terminan a las 00:00, en primavera falta la fila de las 03:00 (no la de las 02:00) y en otoño se repite la de las 02:00. Consecuencias: la fila de las 00:00 es la última hora del día anterior, y un «pico a las 19 h» en `Datetime` corresponde al intervalo 18:00–19:00. Si el calendario se calcula directamente desde `Datetime`, `dia_semana`, `es_fin_de_semana` y `es_festivo` quedan desplazados un día en esa fila (1 de cada 24 horas). Se corrige con el día operativo.
+- **Día operativo.** Día definido según la convención de los datos y no según el calendario civil. Se resta una hora a `Datetime` antes de calcular la fecha: la fila de las 00:00 pasa a ser la hora 23 (23:00–24:00) del día anterior y `hora` va de 0 a 23. Decisión D1, aplicada en `src/features.py` (columna `fecha`). Es la base de los promedios diarios, de los perfiles del agrupamiento y de los residuos diarios.
+- **Hora local y EPT.** EPT (*Eastern Prevailing Time*) es la hora civil del este de EE. UU., que cambia entre horario estándar y de verano. Los datos parecen estar todos en EPT, aunque algunas regiones operen en hora central. Falta confirmarlo en la documentación de PJM.
+- **Desfase entre regiones.** Diferencia de hora entre perfiles que deberían parecerse. `COMED` (y `NI`) aparece retrasada 1 hora (error de 0.014 con ese desplazamiento frente a 0.024 sin él), coherente con series en hora del este para zonas que operan en hora central. No se corrige en la limpieza. `ALINEAR_HORA_CENTRAL` permite restar 1 h a `COMED` y `NI` antes de comparar formas de día (D7).
+- **Día completo.** Día con sus 24 horas. Con el día operativo, el primer registro de cada serie (01:00) y el último (00:00) cierran días completos. Aun así se exigen las 24 horas por día y región en los promedios diarios, los perfiles del agrupamiento y los residuos diarios. Los bordes de los pliegues de la ventana móvil pueden dejar días incompletos, que se descartan.
+- **Error de medición frente a valor extremo real.** Un valor extremo puede ser un error del medidor o consumo real. El criterio es la **continuidad**: varias horas seguidas extremas sugieren un evento real, un valor aislado entre horas normales sugiere un error. Los picos altos forman una nube continua y se conservan. Aislados y sospechosos: el 0 de `FE` (su primer registro, se recorta), `DOM` (1,253 MW) y `PJMW` (487 MW), que se conservan hasta aplicar el z modificado (D2). El mínimo de `EKPC` (514 MW) es una racha de varias horas en la madrugada de un domingo: un valle real. `01_datos` los distingue con el cociente entre el valor y el promedio de sus horas vecinas.
+- **Periodo común y regiones vigentes.** El periodo común es el intervalo en el que *todas* las regiones comparadas tienen datos: empieza en el inicio más tardío y termina en el final más temprano. Las regiones vigentes son las que llegan hasta el final del dataset. No existe periodo común a las 12 regiones: las 10 vigentes comparten 2013-06-01 → 2018-08-03 y las comparaciones entre regiones se hacen en ese intervalo.
+- **Media móvil centrada y efecto de borde.** Explica por qué la línea gruesa de las gráficas de tendencia es más corta que la serie y por qué el tramo final de la tendencia STL de `PJME` no es fiable y no se interpreta.
+- **Descomposición STL.** Separa tendencia, estacionalidad y resto. Se aplica con `period = 365` a la serie diaria de `PJME` (solo días completos) con `robust=True`, que reduce la influencia de los valores extremos. El periodo fijo de 365 días ignora los años bisiestos, por lo que el componente estacional es una aproximación.
+
+### Agrupamiento de perfiles diarios (aprendizaje no supervisado)
+
+- **Silueta.** Mide cuán bien separado está cada día de los demás grupos. Siguiendo a Kaufman y Rousseeuw, una silueta media de 0.71 a 1.00 indica estructura fuerte, de 0.51 a 0.70 razonable, de 0.26 a 0.50 débil (podría ser artificial) y de 0.25 o menos que no hay estructura sustancial. El código usa hoy 0.50 y 0.26 (`SILUETA_RAZONABLE`, `SILUETA_DEBIL`), la alineación con 0.51 y 0.71 está pendiente (D28). Se calcula para cada *k* entre 2 y 10, con k-medias y con Ward, sobre una muestra reproducible de 10,000 días.
+- **Elección del número de grupos (*k*).** Se prueba cada *k* de 2 a 10 con ambos métodos y se elige la mayor silueta entre las combinaciones en que ningún grupo tiene menos del 5 % de los días. Con frecuencia k = 2 gana en silueta, y si ocurre se justifica un k mayor cuando sus grupos son más interpretables, aunque la silueta baje (D26).
+- **Agrupamiento jerárquico y criterio de Ward.** Es costoso en memoria con decenas de miles de elementos, por eso se ajusta sobre una muestra de 10,000 días y el resto se asigna al centro más cercano.
+- **Estabilidad del agrupamiento.** Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado, ARI). La repetición con distintas semillas queda por hacer (D29).
+- **Distancia al centroide.** Distancia de cada día al centro de su grupo. Mira la forma de la curva, mientras que el residuo del pronóstico mira el nivel: un día puede ser raro en una, en la otra o en ambas. La detección de anomalías mide su correlación.
+- **Mapa de calor de calendario.** Las celdas son los días del año y el color indica el tipo de día: cada fila es un año y cada columna un día del año. Es una variante del esquema de van Wijk y van Selow (1999) y muestra cuándo ocurre cada forma de día.
+
+### Detección de anomalías
+
+- **Residuo diario.** Resumen de los 24 residuos horarios de un día en un solo número: el residuo medio, **con signo**, en porcentaje de la predicción media del día. El signo distingue los días `alta` (más demanda de la esperable) de los `baja`, y el porcentaje permite comparar épocas con niveles distintos. Solo se usan días completos.
+- **z modificado.** `z = 0.6745 · (x − mediana) / MAD`, donde MAD es la mediana de las desviaciones absolutas respecto de la mediana. Ejemplo ilustrativo con cifras inventadas: con una mediana de 0.1 % y un MAD de 1.0 punto porcentual, un residuo de +6 % da z ≈ 4.0, mayor que 3.5, y se marca como `alta`. El 3.5 se calibró para datos normales (Iglewicz y Hoaglin) y es una convención: un valor más bajo marca más días, con más falsos positivos, y uno más alto marca menos, con más falsos negativos.
+- **Sensibilidad al umbral.** Repetir la detección con varios umbrales (3, 3.5, 4 y 5) para ver cuánto cambia el número de días marcados. Si cambia mucho entre 3.5 y 4, el corte es frágil y se reporta. También se compara la concentración de atípicos por estación y por pliegue, porque un error del modelo desigual produciría atípicos que reflejan al modelo y no al día.
+- **Validación sin etiquetas.** Cada episodio de la tabla (huracán Sandy, vórtices polares de 2014, frío de 2015, olas de calor de 2013, entre otros) lleva su fuente y una marca de verificación. Se reporta cuántos se recuperan, si la dirección coincide con la esperada (frío y calor: `alta`, Sandy: `baja`) y cuántos atípicos no corresponden a ningún episodio. Los episodios fuera del rango de los residuos (2006 y 2011) se marcan como **fuera de rango**, distinto de **sin coincidencia**. La atribución a eventos sigue siendo una hipótesis sin datos de temperatura.
+
+### Pronóstico (aprendizaje supervisado) y métricas
+
+- **División cronológica entrenamiento/prueba.** Se entrena con 2002-01-01 → 2016-12-31 y se prueba con 2017-01-01 → 2018-08-03. Con la hora de fin, el primer día de la prueba empieza en su hora 23 y queda incompleto.
+- **Validación en ventana móvil (*rolling-origin*).** Repite la evaluación con varias particiones cronológicas: el modelo se entrena con el pasado hasta un punto, se evalúa en el periodo siguiente y el corte avanza. Aquí son 6 bloques consecutivos de 12 meses que terminan el 2018-08-03, con entrenamiento creciente y sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra. Da una evaluación más estable que una sola partición (el modelo debe superar al base en todos los pliegues) y produce los residuos de 2012-08 → 2018-08 que alimentan las anomalías. Exige entrenar un modelo por pliegue (y por región), por eso se hace con `PJME`. Cada pliegue es un año concreto con su clima.
+- **Fuga de datos.** Usar información que no se tendría al pronosticar. Se evita con rezagos de al menos 24 h y medias móviles desplazadas 24 h, y el código lanza un error si algún rezago es menor que el horizonte.
+- **Extrapolación de los árboles.** Un modelo de árboles no predice fuera del rango que vio en el entrenamiento. Podría explicar por qué, en olas de frío intensas, el modelo base supera a XGBoost en 4 de los 10 peores días. Es una hipótesis que no se verificó.
+- **MASE (error absoluto medio escalado).** El MAE del modelo dividido entre el error del pronóstico ingenuo estacional medido sobre los datos de entrenamiento (Hyndman y Koehler, 2006). El denominador es el error absoluto medio de «ayer a la misma hora» en el entrenamiento (`escala_ingenua`, estacionalidad de 24 h), que no es lo mismo que dividir entre el MAE del base en la prueba (eso sería un error relativo). Menor que 1: el modelo supera al ingenuo, mayor que 1: lo empeora. No depende de la escala, así que sirve para comparar entre regiones.
+
+### Herramientas y buenas prácticas
+
+- **Notebooks de Jupyter.** Hay tres, en orden: `01_datos`, `02_patrones` y `03_pronostico_anomalias`. La exportación vive en `src/export.py`.
+- **Módulo reutilizable y paquete editable.** `src/` contiene `config.py` (rutas y parámetros), `data_loader.py`, `cleaning.py`, `features.py`, `modeling.py`, `profiles.py`, `anomalies.py` y `export.py`. Con `pip install -e .` los notebooks lo encuentran y los cambios se reflejan sin reinstalar.
+- **Modelo en estrella.** Forma de organizar tablas para un panel: **dimensiones** pequeñas, con una fila por valor de un filtro (región, fecha, estación, tipo de día), y **hechos** grandes, con una fila por observación. Cada hecho se relaciona con sus dimensiones por una clave, y un filtro sobre la dimensión actúa en todas las tablas relacionadas. La exportación genera 4 dimensiones y las tablas de hechos y resultados, y comprueba que no haya claves huérfanas, que aparecerían como filas en blanco en los filtros. Las tablas ya agregadas no responden al filtro de fecha.
+- **Power BI.** Herramienta del panel final, de seis páginas. Python genera los CSV (dimensiones, hechos, residuos, tipos de día y anomalías) y Power BI los muestra. Hay que verificar la licencia necesaria para publicarlo o compartirlo.
+
+### Siglas
+
+| Sigla | Significado | Dónde aparece |
+|---|---|---|
+| PJM | Pennsylvania-New Jersey-Maryland Interconnection, operador de la red | Dataset |
+| EPT | *Eastern Prevailing Time*, hora civil del este de EE. UU. | `02_datos.md`, desfase entre regiones |
+| MW | Megavatio | Variable objetivo |
+| MAE | Error absoluto medio | Pronóstico |
+| RMSE | Raíz del error cuadrático medio | Pronóstico |
+| MAPE | Error porcentual absoluto medio | Pronóstico |
+| MASE | Error absoluto medio escalado | `03_pronostico_anomalias` |
+| STL | Descomposición estacional y de tendencia con loess | `02_patrones` |
+| MAD | Mediana de las desviaciones absolutas respecto de la mediana | z modificado |
+| CV | Coeficiente de variación | Comparación de regiones |
+| ARI | Índice de Rand ajustado | `02_patrones` |
+| IQR | Rango intercuartílico | Calidad de los datos |
+| OE, P, HU | Objetivo específico, pregunta de investigación, historia de usuario | `01_proyecto.md` |
+| D1 a D44 | Decisiones de diseño del proyecto | `05_decisiones.md` |
+
