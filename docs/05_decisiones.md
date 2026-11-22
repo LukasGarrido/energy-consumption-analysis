@@ -139,9 +139,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 
 **Tareas de cierre**
 
-- **Nombres de los grupos:** aplicar «Temporada fría» y «Verano» a `nombre_grupo` antes de exportar, porque las tablas guardadas y `src/export.py` usan los nombres automáticos «G1 · Invierno · mixto» y «G2 · Verano · mixto».
-- **`02_patrones`:** completar los 5 marcadores `[completar]` (decisión D7, justificación de k y tres interpretaciones).
-- **`03_pronostico_anomalias`:** la interpretación habla de 15 atípicos sin episodio y el resultado dice 16.
+- **Nombres de los grupos:** `02_patrones` ya guarda «Temporada fría» y «Verano» en `nombre_grupo`; verificar que `src/export.py` los use y no los automáticos «G1 · Invierno · mixto» y «G2 · Verano · mixto».
 - **`AEP`:** verificar el máximo del 2008-10-20 (25,695 MW).
 - **Hora de las series (D1 y D7):** confirmar en la documentación de PJM que todas las series están en hora del este.
 - **D34:** alinear el README con seis páginas.

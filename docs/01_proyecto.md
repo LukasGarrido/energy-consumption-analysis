@@ -100,7 +100,7 @@ Las columnas *Pregunta* y *Objetivo* dan la trazabilidad de cada historia. HU-01
 | La hora de `COMED` y `NI` llega una hora más tarde que el resto | Medio: los tipos de día podrían separarse por la hora y no por la forma | Medido en `02_patrones.ipynb` (+1 h). Repetir con `ALINEAR_HORA_CENTRAL = True` y comparar (D7) | Abierto |
 | La estructura de los grupos resulta débil | Medio | Reportarla como tal y apoyarla con el calendario | Se materializó (silueta 0.413), reportada |
 | Con k = 2 los tipos de día solo capturan la estación y no el fin de semana | Medio: P1 queda respondida solo en parte | Justificar un k mayor aunque baje la silueta, o reportarlo como limitación (D26) | Abierto |
-| Los nombres de los grupos exportados al panel son los automáticos («G1 · Invierno · mixto») | Pequeño | Aplicar los nombres «Temporada fría» y «Verano» antes de exportar | Abierto |
+| Los nombres de los grupos exportados al panel podrían seguir siendo los automáticos («G1 · Invierno · mixto») | Pequeño | `02_patrones` ya guarda «Temporada fría» y «Verano» en sus tablas; verificar que `src/export.py` los use | Por verificar |
 | Entrenar un modelo por región y pliegue es lento | Medio | Empezar con `PJME` (6 modelos en la ventana móvil) y ampliar a las demás | Abierto |
 | Las anomalías solo se evalúan en `PJME`, la única región con residuos | Medio | Documentarlo, repetir el pronóstico con otras regiones si hay tiempo (D33) | Abierto |
 | Fechas de episodios sin fuente (por ejemplo, la tormenta Jonas) | Pequeño | Cada episodio lleva su fuente y una marca de verificación (D32) | Parcialmente mitigado |

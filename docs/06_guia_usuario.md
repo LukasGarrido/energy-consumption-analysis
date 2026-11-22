@@ -211,7 +211,7 @@ python src/export.py
 |---|---|
 | `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
 | `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50 (k-medias con $k = 2$ y silueta 0.413) |
-| `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE global 0.86, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
+| `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE de 0.86 en la partición única, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
 | `src/export.py` | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (146 columnas documentadas) y el mensaje «Exportación completada con éxito» |
 
 ---
