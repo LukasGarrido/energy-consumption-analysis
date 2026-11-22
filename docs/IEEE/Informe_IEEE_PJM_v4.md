@@ -5,12 +5,12 @@
 Lukas Garrido  
 Ing.informática  
 USM, Concepción Chile  
-correo@usm.cl
+lgarrido@usm.cl
 
 Octavio Valencia  
 Ing.informática  
 USM, Concepción Chile  
-correo@usm.cl
+ovalencia@usm.cl
 
 </div>
 
