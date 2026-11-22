@@ -130,7 +130,10 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── 04_modelo_y_resultados.md # Hallazgos, pronóstico, agrupamiento y anomalías
 │   ├── 05_decisiones.md          # Registro histórico de decisiones del proyecto
 │   ├── 06_guia_usuario.md        # Guía de instalación, uso y reproducción
-│   └── 07_referencias.md         # Bibliografía y referencias respaldadas
+│   ├── 07_referencias.md         # Bibliografía y referencias respaldadas
+│   └── IEEE/                     # Informe final en formato paper IEEE y figuras
+│       ├── fig_*.png             # Figuras del informe (anomalías, error, regiones, silueta)
+│       └── Informe_IEEE_PJM_v4.md # Informe técnico en formato paper IEEE
 ├── notebooks/                    # Cuadernos Jupyter en orden de ejecución
 │   ├── 01_datos.ipynb            # Exploración inicial (EDA), calidad de datos, convención horaria y limpieza
 │   ├── 02_patrones.ipynb         # Patrones horarios/estacionales y agrupamiento de tipos de día
@@ -167,6 +170,7 @@ La documentación completa está en [`docs/`](docs/01_proyecto.md):
 - [05. Decisiones](docs/05_decisiones.md)
 - [06. Guía de usuario](docs/06_guia_usuario.md)
 - [07. Referencias](docs/07_referencias.md)
+- [Informe IEEE (Formato Paper)](docs/IEEE/Informe_IEEE_PJM_v4.md)
 
 ---
 
