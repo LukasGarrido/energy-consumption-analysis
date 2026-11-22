@@ -82,7 +82,7 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 jupyter lab
 ```
 
-Ejecuta los notebooks **en orden numérico (01 a 03)**, con *Restart & Run All*. Posteriormente, ejecuta el script de exportación (`python src/export.py`) para generar las 17 tablas requeridas por Power BI y Streamlit. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/09_guia_usuario.md](docs/09_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
+Ejecuta los notebooks **en orden numérico (01 a 03)**, con *Restart & Run All*. Posteriormente, ejecuta el script de exportación (`python src/export.py`) para generar las 17 tablas requeridas por Power BI y Streamlit. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/06_guia_usuario.md](docs/06_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
 
 ### Ejecutar el prototipo de Streamlit
 
@@ -124,19 +124,13 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   └── processed/                # Datos limpios y resultados (.gitkeep)
 │       └── powerbi/              # 17 tablas CSV y diccionario de datos (generadas por src/export.py)
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
-│   ├── 00_indice.md              # Índice general de la documentación
-│   ├── 01_objetivo.md            # Problema, preguntas y objetivos
-│   ├── 02_base_de_datos.md       # Dataset, calidad, reglas de preprocesamiento y limpieza
-│   ├── 03_metodos_y_herramientas.md # Herramientas y métodos de datos y de visualización
-│   ├── 04_metodologia_desarrollo.md # Fases, flujo de notebooks y decisiones de diseño
-│   ├── 05_resultados_esperados.md # Entregables y resultados obtenidos
-│   ├── 06_plan_proyecto.md       # Métricas, recursos, cronograma y riesgos
-│   ├── 07_casos_de_uso.md        # Historias de usuario y estado
-│   ├── 08_modelo.md              # Pronóstico, agrupamiento y detección de anomalías
-│   ├── 09_guia_usuario.md        # Guía paso a paso de uso y reproducción
-│   ├── 10_referencias.md         # Bibliografía y afirmaciones que respalda
-│   ├── 11_conceptos.md           # Conceptos teóricos explicados para este proyecto
-│   └── 12_bitacora_decisiones.md # Registro histórico de decisiones del proyecto
+│   ├── 01_proyecto.md            # Problema, preguntas de investigación y objetivo general
+│   ├── 02_datos.md               # Dataset, fuente, contenido y calidad de los datos
+│   ├── 03_metodologia.md         # Enfoque, fases y flujo de notebooks
+│   ├── 04_modelo_y_resultados.md # Hallazgos, pronóstico, agrupamiento y anomalías
+│   ├── 05_decisiones.md          # Registro histórico de decisiones del proyecto
+│   ├── 06_guia_usuario.md        # Guía de instalación, uso y reproducción
+│   └── 07_referencias.md         # Bibliografía y referencias respaldadas
 ├── notebooks/                    # Cuadernos Jupyter en orden de ejecución
 │   ├── 01_datos.ipynb            # Exploración inicial (EDA), calidad de datos, convención horaria y limpieza
 │   ├── 02_patrones.ipynb         # Patrones horarios/estacionales y agrupamiento de tipos de día
@@ -164,21 +158,15 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 
 ## Documentación
 
-La documentación completa está en [`docs/`](docs/00_indice.md):
+La documentación completa está en [`docs/`](docs/01_proyecto.md):
 
-- [Índice de documentación](docs/00_indice.md)
-- [01. Objetivo del análisis](docs/01_objetivo.md)
-- [02. Base de datos (dataset)](docs/02_base_de_datos.md)
-- [03. Métodos y herramientas](docs/03_metodos_y_herramientas.md)
-- [04. Metodología para el desarrollo](docs/04_metodologia_desarrollo.md)
-- [05. Resultados esperados](docs/05_resultados_esperados.md)
-- [06. Plan del proyecto](docs/06_plan_proyecto.md)
-- [07. Casos de uso](docs/07_casos_de_uso.md)
-- [08. Documentación del modelo](docs/08_modelo.md)
-- [09. Guía de usuario](docs/09_guia_usuario.md)
-- [10. Referencias](docs/10_referencias.md)
-- [11. Conceptos teóricos](docs/11_conceptos.md)
-- [12. Bitácora de decisiones](docs/12_bitacora_decisiones.md)
+- [01. Proyecto](docs/01_proyecto.md)
+- [02. Datos](docs/02_datos.md)
+- [03. Metodología](docs/03_metodologia.md)
+- [04. Modelo y resultados](docs/04_modelo_y_resultados.md)
+- [05. Decisiones](docs/05_decisiones.md)
+- [06. Guía de usuario](docs/06_guia_usuario.md)
+- [07. Referencias](docs/07_referencias.md)
 
 ---
 

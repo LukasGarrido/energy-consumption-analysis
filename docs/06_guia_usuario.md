@@ -10,7 +10,6 @@
 
 ## Índice de contenidos
 
-- [← Volver al Índice Principal](00_indice.md)
 - [1. Requisitos](#1-requisitos)
 - [2. Instalación](#2-instalación)
   - [2.1 Clonar el repositorio](#21-clonar-el-repositorio)
@@ -36,7 +35,7 @@
 
 Esta guía explica cómo instalar el proyecto, obtener los datos y reproducir el análisis desde cero, así como explorar los resultados tanto en el prototipo interactivo de Streamlit como en el panel de Power BI.
 
-> Los pasos marcados como *(por crear)* corresponden a componentes que aún no existen en el repositorio.
+> El archivo de Power BI (`app/panel_pjm.pbix`) está en desarrollo. El resto de los pasos corresponde a componentes que ya existen.
 
 ---
 
@@ -111,7 +110,9 @@ Los parámetros están centralizados en `src/config.py`:
 | `HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA` | Pronóstico | 24 h, [24, 48, 168], [24, 168], "2017-01-01", 42 |
 | `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.50, 0.26, 10,000 días |
 | `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
-| `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (el notebook 03 usa 6), 12 meses por pliegue |
+| `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (`03_pronostico_anomalias.ipynb` usa 6), 12 meses por pliegue |
+
+`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` (decisión D7) deben tener el mismo valor en `02_patrones.ipynb` y en `src/export.py` (decisión D41). Los cortes de silueta (0.50 y 0.26) siguen pendientes de alinear con Kaufman y Rousseeuw (D28).
 
 `REZAGOS_HORAS` no puede contener valores menores que `HORIZONTE_HORAS`: el código lanza un error para evitar usar información futura que no se tendría disponible al momento de pronosticar.
 
@@ -169,7 +170,7 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 | `app/panel_pjm.pbix` | Archivo del panel de Power BI *(en desarrollo)* |
 | `public/report/` | Plantilla de informe final en PDF |
 | `public/power_electric_plant.png` | Ilustración conceptual del proyecto |
-| `docs/` | Documentación técnica modular del proyecto |
+| `docs/` | Documentación del proyecto: `01_proyecto`, `02_datos`, `03_metodologia`, `04_modelo_y_resultados`, `05_decisiones`, `06_guia_usuario` y `07_referencias` |
 
 ---
 
@@ -190,6 +191,15 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 3 | `03_pronostico_anomalias.ipynb` | Entrena pronóstico de referencia (XGBoost vs base a 24 h en ventana móvil) y detecta días atípicos con z modificado | `residuos_PJME.parquet`, `metricas_ventana_movil_PJME.parquet`, `anomalias_PJME_*.parquet` | Disponible |
 | 4 | `src/export.py` (script) | Consolida los datos procesados y exporta el modelo dimensional de 17 tablas CSV junto al diccionario de datos | 17 archivos CSV en `data/processed/powerbi/` | Disponible |
 
+Correspondencia con la numeración anterior de siete notebooks, útil para leer versiones anteriores de la documentación:
+
+| Ahora | Antes |
+|---|---|
+| `01_datos.ipynb` | 01 Exploración y 02 Limpieza |
+| `02_patrones.ipynb` | 03 Análisis y 05 Agrupamiento |
+| `03_pronostico_anomalias.ipynb` | 04 Modelado y 06 Anomalías |
+| `src/export.py` | 07 Exportación |
+
 Para ejecutar la exportación directamente desde la terminal:
 ```bash
 python src/export.py
@@ -202,7 +212,7 @@ python src/export.py
 | `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
 | `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50 (k-medias con $k = 2$ y silueta 0.413) |
 | `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE global 0.86, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
-| `src/export.py` | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (118 columnas documentadas) y el mensaje «Exportación completada con éxito» |
+| `src/export.py` | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (146 columnas documentadas) y el mensaje «Exportación completada con éxito» |
 
 ---
 
@@ -304,12 +314,3 @@ python -m ipykernel install --user --name energy-consumption --display-name "Pyt
 ```
 
 y seleccionarlo en Jupyter desde *Kernel → Change Kernel*.
-
----
-
-<div align="center">
-
-*— Fin del documento —*  
-[Volver al Índice Principal](00_indice.md)
-
-</div>

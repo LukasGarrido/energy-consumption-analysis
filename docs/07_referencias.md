@@ -10,7 +10,6 @@
 
 ## Índice de contenidos
 
-- [← Volver al Índice Principal](00_indice.md)
 - [Qué respalda cada referencia](#qué-respalda-cada-referencia)
 
 ---
@@ -76,12 +75,3 @@ van Wijk, J. J., & van Selow, E. R. (1999). Cluster and calendar based visualiza
 | Hyndman y Koehler (2006), Hyndman y Athanasopoulos (2021) | Métricas de error, MASE y pronóstico ingenuo como referencia |
 | Chen y Guestrin (2016) | Algoritmo de pronóstico |
 | Chapman et al. (2000) | Estructura por fases del proyecto |
-
----
-
-<div align="center">
-
-*— Fin del documento —*  
-[Volver al Índice Principal](00_indice.md)
-
-</div>
