@@ -37,7 +37,7 @@ Una fase se considera cerrada cuando cumple su criterio de logro.
 | 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base, MASE, validación en ventana móvil, residuos fuera de muestra | `03_pronostico_anomalias.ipynb` | El modelo supera al base en todos los pliegues y su MASE es menor que 1 | Hecho: 6 de 6 pliegues, MASE de 0.72 a 0.87 |
 | 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | `02_patrones.ipynb` | Silueta media reportada y grupos con al menos el 5 % de los días | Hecho con decisiones pendientes (D7 y D26): silueta 0.413 (débil), grupo más pequeño 37.7 % |
 | 6. Detección de anomalías | Residuo diario, z modificado y contraste con episodios conocidos | `03_pronostico_anomalias.ipynb` | Lista contrastada con al menos un episodio externo, con fuente | Hecho: 5 episodios coinciden |
-| 7. Visualización | Exportación de tablas y construcción del panel | `src/export.py` y panel en Power BI | Tablas con claves coherentes y diccionario de datos. Panel con cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Exportación hecha (17 tablas, 0 claves huérfanas, 146 columnas documentadas). Panel pendiente |
+| 7. Visualización | Exportación de tablas y construcción del panel | `src/export.py` y panel en Power BI | Tablas con claves coherentes y diccionario de datos. Panel con cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Exportación hecha (17 tablas, 0 claves huérfanas, 118 columnas documentadas). Panel pendiente |
 | 8. Documentación | Informe, conclusiones y orden del repositorio | `docs/` | Documentación al día con los resultados | En curso |
 
 ## Flujo de notebooks
@@ -90,7 +90,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Pronóstico a 24 horas | XGBoost con variables de calendario, rezagos (24, 48 y 168 h) y medias móviles desplazadas, frente a dos modelos base | Hecho |
 | Validación | División cronológica con control de fuga de datos y ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3), sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra | Hecho (`03_pronostico_anomalias`) |
 | Métricas | MAE, RMSE y MAPE, MASE con la escala del pronóstico ingenuo estacional de 24 h (Hyndman y Koehler), menor que 1 si el modelo mejora al ingenuo | Hecho |
-| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 02 y 03) con validación de claves y diccionario de datos (`src/export.py`) | Hecho: 17 tablas, 0 claves huérfanas, diccionario de 146 columnas |
+| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 02 y 03) con validación de claves y diccionario de datos (`src/export.py`) | Hecho: 17 tablas, 0 claves huérfanas, diccionario de 118 columnas |
 
 ## Métodos de visualización
 

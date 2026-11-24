@@ -83,7 +83,7 @@ Las columnas *Pregunta* y *Objetivo* dan la trazabilidad de cada historia. HU-01
 | HU-07 | Como analista, quiero ver qué tipos de día existen y cuándo ocurre cada uno, para entender las formas de la demanda más allá de laborable y fin de semana | Grupos con silueta reportada, curva de cada grupo con su banda de dispersión y su ubicación en el calendario | P1 | OE2 | Cumplida con salvedad: 2 tipos estacionales, silueta 0.413 (débil). No distingue laborable de fin de semana |
 | HU-08 | Como operador, quiero ver qué días se desvían de lo esperable, para identificar episodios de demanda inusual | Lista de días con z modificado > 3.5, su magnitud y dirección, y contraste con episodios conocidos con fuente | P3 | OE4 | Cumplida: 22 días y 5 episodios coincidentes |
 | HU-09 | Como analista, quiero explorar los resultados en un panel interactivo, para filtrar por región, fecha y estación sin programar | Panel de seis páginas con filtros y selección cruzada entre vistas | P1 a P4 | OE5 | Parcial: tablas listas y validadas, panel de Power BI por hacer |
-| HU-10 | Como analista, quiero tablas con un modelo de datos coherente, para construir el panel sin reprocesar los datos | Dimensiones y hechos con claves sin huérfanos, y diccionario de datos | P1 a P4 | OE5 | Cumplida: 17 tablas sin claves huérfanas y diccionario de 146 columnas |
+| HU-10 | Como analista, quiero tablas con un modelo de datos coherente, para construir el panel sin reprocesar los datos | Dimensiones y hechos con claves sin huérfanos, y diccionario de datos | P1 a P4 | OE5 | Cumplida: 17 tablas sin claves huérfanas y diccionario de 118 columnas |
 
 ## Riesgos
 

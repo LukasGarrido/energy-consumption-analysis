@@ -37,7 +37,7 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 ## Hallazgos del análisis descriptivo
 
 - **Periodo:** no existe un periodo común a las 12 regiones, 10 comparten 2013-06-01 → 2018-08-03 (días operativos hasta el 2018-08-02).
-- **Ciclo diario:** mínimo entre las 3 y las 4 h, subida desde las 5–6 h y máximo entre las 17 y las 19 h (18 h en 7 de 10 regiones, `DUQ` y `PJME` a las 17 h, `EKPC` a las 19 h).
+- **Ciclo diario:** mínimo entre las 3 y las 4 h, subida desde las 5–6 h y máximo entre las 17 y las 19 h (18 h en 8 de 10 regiones, `DUQ` a las 17 h, `EKPC` a las 19 h).
 - **Forma por estación:** en verano hay una sola curva con máximo por la tarde (hasta 1.2–1.4 del promedio) y en invierno hay dos picos, uno hacia las 7 h y otro hacia las 18–19 h.
 - **Calendario:** el fin de semana consume entre un 3.9 % (`EKPC`) y un 13.9 % (`DAYTON`) menos que un laborable (≈ −9 % en promedio). Un festivo consume cerca de un 5 % menos (de −0.7 % en `DOM` a −8.8 % en `DAYTON`; `EKPC` es la excepción con +1.7 %).
 - **Estacionalidad:** dos máximos anuales (verano e invierno) con valles en abril y octubre. `EKPC` (1.20) y `PJMW` (1.12) son invernales, `COMED` (0.93), `DUQ` (0.92), `DEOK` y `PJME` (0.95), veraniegas.
@@ -317,7 +317,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 - Sigue a la amplitud diaria de cada región (`EKPC` 0.44, `DOM` 0.40, `FE` 0.31) y no al sesgo invernal o veraniego: `EKPC` tiene sesgo invernal (1.20) y aun así es de las regiones con más días de forma veraniega.
 - Al comparar el historial completo con el periodo común cambian las mezclas de `AEP`, `DAYTON` y `PJMW` (entre 3 y 4 puntos), por eso conviene reportar ambas.
 
-**Días que no encajan en su grupo.** La distancia al centro tiene una mediana de ≈ 0.21 en ambos grupos (media 0.226 y 0.223). El día más lejano es el 2008-09-14 de `DAYTON` (1.54), y `EKPC` aparece 6 veces entre los 10 primeros. La distancia no es comparable entre regiones y conviene normalizarla antes de usarla como insumo de la detección de anomalías.
+**Días que no encajan en su grupo.** La distancia al centro tiene una mediana de ≈ 0.21 en ambos grupos (media 0.226 y 0.223). El día más lejano es el 2008-09-14 de `DAYTON` (1.54), y `EKPC` aparece 7 veces entre los 10 primeros. La distancia no es comparable entre regiones y conviene normalizarla antes de usarla como insumo de la detección de anomalías.
 
 **Salidas** (`data/processed/`): `tipos_de_dia.parquet` (45,430 filas), `tipos_de_dia_curvas.parquet` (48 filas), `tipos_de_dia_resumen.parquet` (2 filas), `tipos_de_dia_mezcla_region.parquet` (24 filas) y `tipos_de_dia_silueta_k.parquet` (18 filas).
 
@@ -471,7 +471,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.p
 
 ## Exportación para el panel
 
-`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella. Todas las claves de las tablas de hechos existen en su dimensión (0 claves huérfanas) y el diccionario `diccionario_datos.csv` documenta 146 columnas.
+`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella. Todas las claves de las tablas de hechos existen en su dimensión (0 claves huérfanas) y el diccionario `diccionario_datos.csv` documenta 118 columnas.
 
 | Tabla | Filas | Tabla | Filas |
 |---|---|---|---|
