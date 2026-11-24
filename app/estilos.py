@@ -362,17 +362,6 @@ div[data-testid="stButtonGroup"] button[data-variant="pills"][data-selected="tru
     gap: 0.6rem;
     margin-bottom: 0.9rem;
 }
-.sidebar-logo {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    color: #fff;
-    background: linear-gradient(135deg, #0072B2, #56B4E9);
-}
 .sidebar-name { font-weight: 800; line-height: 1.1; }
 .sidebar-sub { font-size: 0.7rem; opacity: 0.55; }
 section[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label:has(input:checked) {
