@@ -70,13 +70,13 @@ donde MAD es la mediana de las desviaciones absolutas respecto de la mediana \[1
 
 ### Diseño del panel
 
-Cada vista se diseña a partir de la tarea de la pregunta que responde \[19\] y de la precisión relativa de los canales visuales \[20\], \[21\]: se prefiere la posición sobre una escala común, las vistas comparativas comparten escala, el color es secuencial de un solo matiz para magnitudes y categórico de pocos colores (k ≤ 8) para los tipos de día, y se evitan los gráficos circulares. Los resultados de los notebooks se exportan como un modelo en estrella de 17 tablas CSV, validado sin claves huérfanas y con un diccionario de 146 columnas, que alimenta un panel de seis páginas: resumen, patrones, tipos de día, regiones, anomalías y pronóstico. Los filtros de región y estación actúan sobre todas las tablas; el de fecha, solo sobre las tablas diarias y horarias. Un prototipo en Streamlit con las seis páginas consume las mismas tablas; el panel final en Power BI está por construir.
+Cada vista se diseña a partir de la tarea de la pregunta que responde \[19\] y de la precisión relativa de los canales visuales \[20\], \[21\]: se prefiere la posición sobre una escala común, las vistas comparativas comparten escala, el color es secuencial de un solo matiz para magnitudes y categórico de pocos colores (k ≤ 8) para los tipos de día, y se evitan los gráficos circulares. Los resultados de los notebooks se exportan como un modelo en estrella de 17 tablas CSV, validado sin claves huérfanas y con un diccionario de 118 columnas, que alimenta un panel de seis páginas: resumen, patrones, tipos de día, regiones, anomalías y pronóstico. Los filtros de región y estación actúan sobre todas las tablas; el de fecha, solo sobre las tablas diarias y horarias. Un prototipo en Streamlit con las seis páginas consume las mismas tablas; el panel final en Power BI está por construir.
 
 ## Resultados
 
 ### P1: tipos de día
 
-El análisis por hora del día y día de la semana muestra un ciclo diario con mínimo entre las 3 y las 4 h y máximo entre las 17 y las 19 h (a las 18 h en 7 de las 10 regiones). El fin de semana consume entre 3.9 % (EKPC) y 13.9 % (DAYTON) menos que un laborable, cerca de 9 % en promedio, y un festivo cerca de 5 % menos.
+El análisis por hora del día y día de la semana muestra un ciclo diario con mínimo entre las 3 y las 4 h y máximo entre las 17 y las 19 h (a las 18 h en 8 de las 10 regiones). El fin de semana consume entre 3.9 % (EKPC) y 13.9 % (DAYTON) menos que un laborable, cerca de 9 % en promedio, y un festivo cerca de 5 % menos.
 
 El agrupamiento de los 45,430 perfiles diarios elige k-medias con k = 2, con una silueta media de 0.413, es decir, una estructura débil (Fig. 1). Con k = 3 la silueta baja a 0.30 y desde k = 4 queda por debajo de 0.26. Ward no supera a k-medias en ningún k y coincide con ellas en 0.82 (índice de Rand ajustado). Los dos grupos reúnen 62.3 % y 37.7 % de los días.
 
