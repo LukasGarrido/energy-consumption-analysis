@@ -95,7 +95,12 @@ def main() -> None:
 
     # Barra lateral de navegación (solo navegación y metadatos)
     with st.sidebar:
-        st.markdown("### Modulos de Estudio")
+        st.markdown(
+            '<div class="sidebar-brand"><div class="sidebar-logo">PJM</div>'
+            '<div><div class="sidebar-name">Panel de demanda</div>'
+            '<div class="sidebar-sub">12 regiones · 1998–2018</div></div></div>',
+            unsafe_allow_html=True,
+        )
         pagina = st.radio(
             "Seleccionar modulo",
             options=PAGINAS,
