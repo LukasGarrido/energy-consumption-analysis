@@ -288,15 +288,91 @@ section[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label:hover
     line-height: 1.45;
 }
 
-/* Panel de filtros (expander) */
-div[data-testid="stExpander"] {
-    border: 1px solid rgba(128,128,128,0.15);
-    border-radius: 8px;
-    margin-bottom: 1rem;
+/* Panel de filtros */
+div[class*="st-key-panel_filtros_"] {
+    border-radius: 12px;
+    border: 1px solid rgba(0,114,178,0.25);
+    background: linear-gradient(135deg, rgba(0,114,178,0.05), rgba(128,128,128,0.02));
+    padding: 0.6rem 0.9rem 0.8rem 0.9rem;
 }
-div[data-testid="stExpander"] summary {
+.filter-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0072B2;
+    margin-bottom: 0.2rem;
+}
+.filter-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.75;
+    margin: 0.35rem 0 0.2rem 0;
+}
+/* Botones de atajo del panel de filtros */
+div[class*="st-key-panel_filtros_"] div.stButton > button {
+    padding: 0.1rem 0.5rem;
+    min-height: 1.9rem;
+    font-size: 0.78rem;
+    border-radius: 999px;
+    border: 1px solid rgba(0,114,178,0.35);
+    background: transparent;
+}
+div[class*="st-key-panel_filtros_"] div.stButton > button:hover {
+    background: rgba(0,114,178,0.12);
+    border-color: #0072B2;
+    transform: translateY(-1px);
+}
+/* Pills (regiones y estaciones) */
+div[data-testid="stButtonGroup"] button[data-variant="pills"] {
+    border-radius: 999px;
+    font-size: 0.8rem;
     font-weight: 600;
-    font-size: 0.85rem;
+    transition: all 0.15s ease;
+}
+div[data-testid="stButtonGroup"] button[data-variant="pills"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+div[data-testid="stButtonGroup"] button[data-variant="pills"][data-selected="true"] {
+    background: #0072B2;
+    border-color: #0072B2;
+    color: #fff;
+}
+/* Resumen de filtros activos */
+.filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.5rem 0 1.25rem 0;
+}
+.filter-chip {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(0,114,178,0.1);
+    border: 1px solid rgba(0,114,178,0.25);
+}
+
+/* Barra lateral: marca */
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+}
+.sidebar-name { font-weight: 800; line-height: 1.1; }
+.sidebar-sub { font-size: 0.7rem; opacity: 0.55; }
+section[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label:has(input:checked) {
+    background: rgba(0,114,178,0.14);
+    box-shadow: inset 3px 0 0 #0072B2;
+    font-weight: 700;
+}
+
+/* Pestañas */
+button[data-baseweb="tab"] {
+    font-weight: 600;
 }
 
 /* Métricas nativas de Streamlit (st.metric) */
@@ -310,6 +386,13 @@ div[data-testid="stMetric"] {
 div[data-testid="stMetric"]:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+div[data-testid="stMetricLabel"] p {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.25;
 }
 
 /* Botones */

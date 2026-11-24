@@ -102,65 +102,170 @@ def verificar_vacio(df: pd.DataFrame) -> bool:
     return False
 
 
+# Regiones sin cobertura hasta 2018-08-03 (series históricas cerradas)
+_REGIONES_HISTORICAS: tuple[str, ...] = ("NI", "PJM_Load")
+# Inicio del periodo común de las 10 regiones vigentes
+_INICIO_PERIODO_COMUN = pd.Timestamp("2013-06-01").date()
+
+
+def _fijar(clave: str, valor) -> None:
+    """Callback auxiliar: escribe ``valor`` en ``st.session_state[clave]``."""
+    st.session_state[clave] = valor
+
+
+def _chips_resumen(
+    regiones: list[str],
+    total_regiones: int,
+    estaciones: list[str],
+    f_inicio: pd.Timestamp | None,
+    f_fin: pd.Timestamp | None,
+) -> str:
+    """
+    Construye el HTML de los chips que resumen los filtros activos.
+
+    Parámetros
+    ----------
+    regiones : list[str]
+        Regiones seleccionadas.
+    total_regiones : int
+        Número total de regiones disponibles.
+    estaciones : list[str]
+        Estaciones seleccionadas.
+    f_inicio, f_fin : pd.Timestamp | None
+        Rango de fechas (``None`` si el módulo no filtra por fecha).
+
+    Retorna
+    -------
+    str
+        Fragmento HTML con los chips.
+    """
+    chips = [f"{len(regiones)} de {total_regiones} regiones"]
+    chips.append(
+        "Todas las estaciones"
+        if len(estaciones) == len(ESTACIONES)
+        else ", ".join(estaciones) or "Sin estaciones"
+    )
+    if f_inicio is not None and f_fin is not None:
+        chips.append(f"{f_inicio:%d %b %Y} → {f_fin:%d %b %Y}")
+    return "".join(f'<span class="filter-chip">{c}</span>' for c in chips)
+
+
 def selector_filtros_modulo(
     tablas: dict[str, pd.DataFrame],
     key_sufijo: str,
     con_fechas: bool = True,
 ) -> tuple[list[str], pd.Timestamp, pd.Timestamp, list[str]]:
     """
-    Renderiza un panel de filtros integrado en el módulo actual para el estudio,
-    permitiendo filtrar datos de forma local y limpia sin sobrecargar el menú lateral.
+    Renderiza el panel de filtros del módulo actual: regiones y estaciones
+    como botones seleccionables (*pills*), atajos de selección, atajos de
+    rango de fechas y un resumen de los filtros activos.
+
+    Parámetros
+    ----------
+    tablas : dict[str, pd.DataFrame]
+        Tablas cargadas (se usan ``dim_region`` y ``hechos_diario``).
+    key_sufijo : str
+        Sufijo para que cada módulo conserve sus propios filtros.
+    con_fechas : bool
+        Si es ``False`` se oculta el selector de fechas y se usa todo el rango.
+
+    Retorna
+    -------
+    tuple[list[str], pd.Timestamp, pd.Timestamp, list[str]]
+        Regiones, fecha de inicio, fecha de fin y estaciones.
     """
-    todas_las_regiones = sorted(tablas["dim_region"]["region"].unique().tolist())
+    todas = sorted(tablas["dim_region"]["region"].unique().tolist())
+    vigentes = [r for r in todas if r not in _REGIONES_HISTORICAS]
     hd_fechas = tablas["hechos_diario"]["fecha"].dropna()
-    fecha_global_min = hd_fechas.min().date()
-    fecha_global_max = hd_fechas.max().date()
-    fecha_global_max_ts = pd.Timestamp(fecha_global_max)
+    f_min = hd_fechas.min().date()
+    f_max = hd_fechas.max().date()
+    inicio_comun = max(_INICIO_PERIODO_COMUN, f_min)
 
-    k_regiones = f"regiones_{key_sufijo}"
-    k_estaciones = f"estaciones_{key_sufijo}"
-    k_fechas = f"fecha_rango_{key_sufijo}"
+    k_reg = f"regiones_{key_sufijo}"
+    k_est = f"estaciones_{key_sufijo}"
+    k_fec = f"fecha_rango_{key_sufijo}"
 
-    if k_regiones not in st.session_state:
-        st.session_state[k_regiones] = todas_las_regiones
-    if k_estaciones not in st.session_state:
-        st.session_state[k_estaciones] = ESTACIONES
-    if k_fechas not in st.session_state:
-        st.session_state[k_fechas] = (fecha_global_min, fecha_global_max)
+    if k_reg not in st.session_state:
+        st.session_state[k_reg] = todas
+    if k_est not in st.session_state:
+        st.session_state[k_est] = list(ESTACIONES)
+    if k_fec not in st.session_state:
+        st.session_state[k_fec] = (f_min, f_max)
 
-    with st.expander("Filtros y parametros del modulo", expanded=False):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            regiones_sel = st.multiselect(
-                "Regiones",
-                options=todas_las_regiones,
-                key=k_regiones,
-            )
-        with col2:
-            estaciones_sel = st.multiselect(
-                "Estaciones",
-                options=ESTACIONES,
-                key=k_estaciones,
-            )
-        with col3:
-            if con_fechas:
+    with st.container(border=True, key=f"panel_filtros_{key_sufijo}"):
+        st.markdown(
+            '<div class="filter-title">Filtros</div>', unsafe_allow_html=True
+        )
+
+        # Regiones
+        c_tit, c_a, c_b, c_c = st.columns([3, 1, 1, 1], vertical_alignment="center")
+        c_tit.markdown('<div class="filter-label">Regiones</div>', unsafe_allow_html=True)
+        c_a.button("Todas", key=f"b_todas_{key_sufijo}", on_click=_fijar,
+                   args=(k_reg, todas), width="stretch")
+        c_b.button("Vigentes", key=f"b_vig_{key_sufijo}", on_click=_fijar,
+                   args=(k_reg, vigentes), width="stretch",
+                   help="Las 10 regiones con datos hasta 2018-08-03")
+        c_c.button("Ninguna", key=f"b_nin_{key_sufijo}", on_click=_fijar,
+                   args=(k_reg, []), width="stretch")
+        regiones_sel = st.pills(
+            "Regiones", options=todas, selection_mode="multi",
+            key=k_reg, label_visibility="collapsed",
+        ) or []
+
+        col_est, col_fec = st.columns([1, 1.4] if con_fechas else [1, 0.01])
+
+        # Estaciones
+        with col_est:
+            st.markdown('<div class="filter-label">Estaciones</div>', unsafe_allow_html=True)
+            estaciones_sel = st.pills(
+                "Estaciones", options=ESTACIONES, selection_mode="multi",
+                key=k_est, label_visibility="collapsed",
+            ) or []
+
+        # Fechas
+        if con_fechas:
+            with col_fec:
+                st.markdown('<div class="filter-label">Periodo</div>', unsafe_allow_html=True)
+                p1, p2, p3, p4 = st.columns(4)
+                p1.button("Todo", key=f"f_todo_{key_sufijo}", on_click=_fijar,
+                          args=(k_fec, (f_min, f_max)), width="stretch")
+                p2.button("Común", key=f"f_com_{key_sufijo}", on_click=_fijar,
+                          args=(k_fec, (inicio_comun, f_max)), width="stretch",
+                          help="Periodo común de las 10 regiones vigentes (desde 2013-06-01)")
+                p3.button("2 años", key=f"f_2a_{key_sufijo}", on_click=_fijar,
+                          args=(k_fec, (max(f_min, (pd.Timestamp(f_max) - pd.DateOffset(years=2)).date()), f_max)),
+                          width="stretch", help="Últimos 2 años del historial")
+                p4.button("1 año", key=f"f_1a_{key_sufijo}", on_click=_fijar,
+                          args=(k_fec, (max(f_min, (pd.Timestamp(f_max) - pd.DateOffset(years=1)).date()), f_max)),
+                          width="stretch", help="Último año del historial")
                 fecha_rango = st.date_input(
-                    "Rango de fechas",
-                    min_value=fecha_global_min,
-                    max_value=fecha_global_max,
-                    key=k_fechas,
+                    "Rango de fechas", min_value=f_min, max_value=f_max,
+                    key=k_fec, label_visibility="collapsed",
                 )
-            else:
-                fecha_rango = (fecha_global_min, fecha_global_max)
+        else:
+            fecha_rango = (f_min, f_max)
+
+        if not regiones_sel:
+            st.caption("Sin regiones seleccionadas: elige al menos una para ver resultados.")
 
     if con_fechas:
         if isinstance(fecha_rango, (list, tuple)) and len(fecha_rango) == 2:
             f_inicio, f_fin = pd.Timestamp(fecha_rango[0]), pd.Timestamp(fecha_rango[1])
         elif isinstance(fecha_rango, (list, tuple)) and len(fecha_rango) == 1:
-            f_inicio, f_fin = pd.Timestamp(fecha_rango[0]), fecha_global_max_ts
+            f_inicio, f_fin = pd.Timestamp(fecha_rango[0]), pd.Timestamp(f_max)
         else:
-            f_inicio, f_fin = pd.Timestamp(fecha_rango), fecha_global_max_ts
+            f_inicio, f_fin = pd.Timestamp(fecha_rango), pd.Timestamp(f_max)
     else:
-        f_inicio, f_fin = pd.Timestamp(fecha_global_min), fecha_global_max_ts
+        f_inicio, f_fin = pd.Timestamp(f_min), pd.Timestamp(f_max)
 
-    return regiones_sel, f_inicio, f_fin, estaciones_sel
+    st.markdown(
+        '<div class="filter-chips">'
+        + _chips_resumen(
+            regiones_sel, len(todas), estaciones_sel,
+            f_inicio if con_fechas else None, f_fin if con_fechas else None,
+        )
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    return list(regiones_sel), f_inicio, f_fin, list(estaciones_sel)
