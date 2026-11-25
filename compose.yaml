@@ -1,0 +1,16 @@
+services:
+  streamlit:
+    build: .
+    image: pjm-streamlit
+    ports:
+      # Solo accesible desde este equipo. El puerto se cambia con STREAMLIT_PORT.
+      - "127.0.0.1:${STREAMLIT_PORT:-8501}:8501"
+    volumes:
+      # Tablas generadas por src/export.py, montadas en solo lectura.
+      - type: bind
+        source: ./data/processed/powerbi
+        target: /srv/data/processed/powerbi
+        read_only: true
+        bind:
+          create_host_path: false # falla si la carpeta no existe, en vez de crearla vacía
+    restart: unless-stopped

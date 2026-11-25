@@ -98,6 +98,16 @@ streamlit run app/streamlit_app.py
 
 La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py`.
 
+### Ejecutar con Docker Compose
+
+Con Docker en marcha y las tablas ya generadas, un solo comando construye la imagen y levanta la app en `http://localhost:8501`:
+
+```bash
+docker compose up --build -d
+```
+
+Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](docs/06_guia_usuario.md#ejecución-con-docker-compose).
+
 ---
 
 ## Estructura del repositorio
@@ -148,12 +158,16 @@ La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algú
 │   ├── features.py               # Día operativo, variables de calendario, rezagos y medias móviles
 │   ├── modeling.py               # Partición temporal, modelos XGBoost/base, métricas y ventana móvil
 │   └── profiles.py               # Perfiles diarios, elección de k y agrupamiento
+├── .dockerignore                 # Archivos que se envían al construir la imagen
 ├── .env.example                  # Plantilla de variables de entorno
 ├── .gitignore                    # Configuración de exclusiones de Git
 ├── AGENTS.md                     # Directrices para agentes de IA y colaboradores
+├── compose.yaml                  # Servicio de Docker Compose para la app de Streamlit
+├── Dockerfile                    # Imagen de la app de Streamlit
 ├── LICENSE                       # Licencia del proyecto
 ├── pyproject.toml                # Configuración de empaquetado del proyecto
 ├── README.md                     # Descripción general del repositorio
+├── requirements-app.txt          # Dependencias de la imagen Docker de la app
 └── requirements.txt              # Dependencias del proyecto
 ```
 

@@ -168,6 +168,8 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 | `app/graficos.py` | Helpers de visualización y compatibilidad con Plotly |
 | `app/paginas/` | Módulos individuales por página (resumen, patrones, tipos de día, regiones, anomalías, pronóstico) |
 | `app/panel_pjm.pbix` | Archivo del panel de Power BI *(en desarrollo)* |
+| `Dockerfile`, `compose.yaml`, `.dockerignore` | Contenedor de la app de Streamlit y su servicio de Docker Compose |
+| `requirements-app.txt` | Dependencias fijadas de la imagen Docker |
 | `public/report/` | Plantilla de informe final en PDF |
 | `public/power_electric_plant.png` | Ilustración conceptual del proyecto |
 | `docs/` | Documentación del proyecto: `01_proyecto`, `02_datos`, `03_metodologia`, `04_modelo_y_resultados`, `05_decisiones`, `06_guia_usuario` y `07_referencias` |
@@ -236,6 +238,30 @@ streamlit run app/streamlit_app.py
 ```
 
 La app se abrirá automáticamente en tu navegador predeterminado (por defecto en `http://localhost:8501`).
+
+#### Ejecución con Docker Compose
+
+Es una alternativa que no necesita Python ni entorno virtual para levantar la app. Requiere Docker (en Windows, Docker Desktop en ejecución) y las tablas ya generadas en `data/processed/powerbi/`.
+
+Desde la raíz del proyecto:
+
+```bash
+docker compose up --build -d
+```
+
+La app queda disponible en `http://localhost:8501`, accesible solo desde el propio equipo.
+
+| Tarea | Comando |
+|---|---|
+| Ver el estado | `docker compose ps` |
+| Ver los registros | `docker compose logs -f` |
+| Detener y eliminar el contenedor | `docker compose down` |
+
+- **Datos:** la carpeta `data/processed/powerbi/` se monta en solo lectura, no se copia en la imagen. Tras volver a ejecutar `src/export.py`, reinicia con `docker compose restart` para descartar los datos en caché.
+- **Código:** los cambios en `app/`, `src/` o `.streamlit/` requieren repetir `docker compose up --build -d`.
+- **Puerto:** si el 8501 está ocupado, define `STREAMLIT_PORT` en un archivo `.env` en la raíz (por ejemplo, `STREAMLIT_PORT=8502`).
+- **Reinicio:** el contenedor vuelve a arrancar junto con Docker hasta que se detenga con `docker compose down`.
+- **Dependencias:** la imagen usa las versiones fijadas en `requirements-app.txt`.
 
 #### Estructura y navegación
 

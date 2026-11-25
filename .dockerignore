@@ -1,0 +1,9 @@
+# Se excluye todo y se permite solo lo que copia el Dockerfile.
+*
+!requirements-app.txt
+!.streamlit/config.toml
+!app/
+!src/
+**/__pycache__
+**/*.py[cod]
+app/*.pbix
