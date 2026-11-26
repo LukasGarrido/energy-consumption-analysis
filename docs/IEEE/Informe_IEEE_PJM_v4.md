@@ -30,7 +30,7 @@ Se plantean cuatro preguntas: P1, ¿qué tipos de día existen y cómo se distri
 
 ### A. Fuente y cobertura
 
-Los datos provienen del conjunto de Kaggle \[3\], que recopila la demanda publicada por PJM Interconnection, operador de la red de todo o parte de 13 estados del este de EE. UU. y Washington D. C. \[8\]. Cada región tiene un CSV con la fecha y hora (*Datetime*, que marca el final de la hora \[8\]) y el consumo en MW, entre 1998-04-01 y 2018-08-03, con entre 32,896 (PJM_Load) y 145,366 (PJME) filas por región y 1,090,167 en total. PJM_Load termina en 2002-01 y NI en 2011-01; las otras 10, llamadas vigentes, comparten el periodo 2013-06-01 → 2018-08-03, y solo entre ellas se comparan regiones.
+Los datos provienen del conjunto de Kaggle \[3\], que recopila la demanda publicada por PJM Interconnection, operador de la red de todo o parte de 13 estados del este de EE. UU. y Washington D. C. Cada región tiene un CSV con la fecha y hora (*Datetime*, que marca el final de la hora \[8\]) y el consumo en MW, entre 1998-04-01 y 2018-08-03, con entre 32,896 (PJM_Load) y 145,366 (PJME) filas por región y 1,090,167 en total. PJM_Load termina en 2002-01 y NI en 2011-01; las otras 10, llamadas vigentes, comparten el periodo 2013-06-01 → 2018-08-03, y solo entre ellas se comparan regiones.
 
 ### B. Calidad y preparación
 
@@ -64,7 +64,7 @@ donde MAD es la mediana de las desviaciones absolutas respecto de la mediana \[1
 
 ### E. Diseño del panel
 
-Cada vista parte de la tarea de la pregunta que responde \[17\] y de la precisión de los canales visuales \[18\], \[19\]: posición sobre una escala común, escalas compartidas en vistas comparativas, color secuencial de un matiz para magnitudes, categórico de pocos colores (k ≤ 8) para tipos de día y sin gráficos circulares. Los resultados se exportan como un modelo en estrella de 17 tablas CSV, con un diccionario de 109 columnas, para un panel de seis páginas (resumen, patrones, tipos de día, regiones, anomalías y pronóstico) con filtros de región, estación y fecha. El panel se implementa en Streamlit, que permite explorar las vistas de forma dinámica desde el navegador, sin licencias y con el mismo código Python del análisis.
+Cada vista parte de la tarea de la pregunta que responde \[17\] y de la precisión de los canales visuales \[18\], \[19\]: posición sobre una escala común, escalas compartidas en vistas comparativas, color secuencial de un matiz para magnitudes, categórico de pocos colores (k ≤ 8) para tipos de día y sin gráficos circulares. Los resultados se exportan como un modelo en estrella de 17 tablas CSV, con un diccionario de 111 columnas, para un panel de seis páginas (resumen, patrones, tipos de día, regiones, anomalías y pronóstico) con filtros de región, estación y fecha. El panel se implementa en Streamlit, que permite explorar las vistas de forma dinámica desde el navegador, sin licencias y con el mismo código Python del análisis.
 
 ## IV. Resultados
 

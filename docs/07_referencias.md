@@ -11,6 +11,7 @@
 ## Índice de contenidos
 
 - [Qué respalda cada referencia](#qué-respalda-cada-referencia)
+- [Estado de la verificación](#estado-de-la-verificación)
 
 ---
 
@@ -75,3 +76,41 @@ van Wijk, J. J., & van Selow, E. R. (1999). Cluster and calendar based visualiza
 | Hyndman y Koehler (2006), Hyndman y Athanasopoulos (2021) | Métricas de error, MASE y pronóstico ingenuo como referencia |
 | Chen y Guestrin (2016) | Algoritmo de pronóstico |
 | Chapman et al. (2000) | Estructura por fases del proyecto |
+
+## Estado de la verificación
+
+Revisión de la decisión D38. «Comprobado» indica contra qué se contrastó; no implica haber leído la obra completa.
+
+**Cifras y umbrales que usa el proyecto**
+
+| Afirmación | Comprobado en | Resultado |
+|---|---|---|
+| Silueta: 0.71–1.00 fuerte, 0.51–0.70 razonable, 0.26–0.50 débil, hasta 0.25 sin estructura | [Struyf, Hubert y Rousseeuw (1997)](https://www.jstatsoft.org/article/view/v001i04), artículo en acceso abierto con un coautor de la obra citada, tabla 2 | Coincide. El libro de 1990 no se consultó |
+| z modificado 0.6745 · (x − mediana) / MAD, umbral 3.5 | [Manual de NIST](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm), que lo atribuye a Iglewicz y Hoaglin | Coincide. El libro no se consultó |
+| Límites a 1.5 veces el rango intercuartílico | [Manual de NIST](https://www.itl.nist.gov/div898/handbook/prc/section1/prc16.htm) | Coincide. El libro de Tukey no se consultó |
+| Error escalado con el pronóstico ingenuo estacional | [Hyndman y Athanasopoulos, sección 5.8](https://otexts.com/fpp3/accuracy.html) | Coincide |
+
+**Datos bibliográficos**
+
+| Referencias | Comprobado en | Resultado |
+|---|---|---|
+| Artículos y libros con DOI | Crossref | Autores, título y año coinciden, y volumen y páginas cuando Crossref los registra |
+| Cleveland et al. (1990), STL | [Documentación de R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/stl.html) | Volumen 6 y páginas 3–73 coinciden. El número 1 no se confirmó |
+| Chapman et al. (2000), CRISP-DM | [Copia de la guía](https://www.kde.cs.uni-kassel.de/wp-content/uploads/lehre/ws2012-13/kdd/files/CRISPWP-0800.pdf) para título, año y las seis fases; autores en índices bibliográficos | Coincide. La portada de la copia consultada no permitió leer los autores |
+| Enlaces de Kaggle, GitHub, Towards Data Science, OTexts y PJM | Consulta directa | Responden |
+
+**Afirmaciones atribuidas a los artículos**
+
+| Referencia | Comprobado en | Resultado |
+|---|---|---|
+| van Wijk y van Selow (1999): agrupamiento con vista de calendario | Resumen | Respaldada |
+| Cleveland y McGill (1984), Heer y Bostock (2010): precisión de los canales visuales | Resúmenes | Respaldada |
+| Chen y Guestrin (2016): XGBoost | Resumen | Respaldada |
+| Wang et al. (2019): analítica de mediciones de alta resolución | Resumen | Respaldada en lo general; el resumen no detalla segmentación, agrupamiento ni anomalías |
+| Himeur et al. (2021): detección de anomalías comparando con un modelo de predicción | Resumen y fragmentos | El artículo revisa la detección de anomalías; la familia basada en predicción solo se vio en fragmentos |
+| Chicco (2012), Rajabi et al. (2020): k-medias y métodos jerárquicos | Resúmenes indirectos | Se confirman los métodos y el uso de índices de validación; la dependencia de la normalización no se confirmó |
+| Hong y Fan (2016): importancia del pronóstico y de la temperatura | Sin resumen disponible | Sin confirmar |
+| Munzner (2014): marco de datos, tarea y codificación | Solo datos bibliográficos | Sin confirmar |
+
+Para cerrar las filas sin confirmar hace falta el texto completo de esas obras.
+
