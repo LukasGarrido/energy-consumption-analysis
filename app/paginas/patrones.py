@@ -117,7 +117,7 @@ def _mapa_de_calor(
     )
     mostrar_grafico(fig)
     st.caption(
-        "Valores > 1 indican consumo superior al promedio diario. "
+        "Valores > 1 indican consumo superior al promedio de la región en todo su historial. "
         "La escala es fija e igual para todas las regiones, lo que permite comparar directamente."
     )
     st.caption("Este gráfico no responde al filtro de fecha.")
@@ -221,4 +221,4 @@ def _estacionalidad_mensual(
         "Un pico en julio-agosto señala demanda estival por refrigeración; "
         "uno en enero indica calefacción eléctrica dominante."
     )
-    st.caption("Este gráfico no responde al filtro de fecha.")
+    st.caption("Este gráfico no responde a los filtros de estación ni de fecha.")

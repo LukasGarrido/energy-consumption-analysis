@@ -213,11 +213,11 @@ def validar_ventana_movil(
 
     metricas = pd.DataFrame(filas).set_index(["pliegue", "modelo"])
 
-    # Mejora del MAE de XGBoost frente al base, por pliegue
+    # Reducción del MAE de XGBoost frente al base, por pliegue (positiva si mejora)
     mae = metricas["MAE"].unstack("modelo")
     metricas["mejora_MAE_%"] = np.nan
     for p in mae.index:
-        metricas.loc[(p, "XGBoost"), "mejora_MAE_%"] = (mae.loc[p, "XGBoost"] / mae.loc[p, "Base"] - 1) * 100
+        metricas.loc[(p, "XGBoost"), "mejora_MAE_%"] = (1 - mae.loc[p, "XGBoost"] / mae.loc[p, "Base"]) * 100
 
     supera = (mae["XGBoost"] < mae["Base"]).all()
     print(f"El modelo supera al base en todos los pliegues: {supera}")

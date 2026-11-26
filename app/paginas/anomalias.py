@@ -65,6 +65,11 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
 
 
 # Helpers internos
+def _formato_fechas(*columnas: str) -> dict:
+    """Configuración de ``st.dataframe`` para mostrar fechas sin la hora."""
+    return {c: st.column_config.DateColumn(format="YYYY-MM-DD") for c in columnas}
+
+
 def _preparar_anomalias(
     tablas: dict[str, pd.DataFrame],
     fecha_inicio: pd.Timestamp,
@@ -263,7 +268,7 @@ def _ranking_atipicos(ad: pd.DataFrame) -> None:
         c for c in ["fecha", "residuo_pct", "z_mod", "direccion", "nombre_grupo"]
         if c in at.columns
     ]
-    st.dataframe(at[columnas], hide_index=True)
+    st.dataframe(at[columnas], hide_index=True, column_config=_formato_fechas("fecha"))
 
 
 def _tabla_episodios(tablas: dict[str, pd.DataFrame]) -> None:
@@ -283,7 +288,7 @@ def _tabla_episodios(tablas: dict[str, pd.DataFrame]) -> None:
         ]
         if c in ep.columns
     ]
-    st.dataframe(ep[columnas], hide_index=True)
+    st.dataframe(ep[columnas], hide_index=True, column_config=_formato_fechas("inicio", "fin"))
 
 
 def _caso_hora_a_hora(

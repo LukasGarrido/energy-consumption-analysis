@@ -484,9 +484,11 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.p
 
 ## Exportación para el panel
 
-`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 110 columnas. Al terminar, la exportación comprueba que cada valor de `region`, `fecha`, `estacion` y `grupo` de las tablas de hechos exista en su dimensión, y se detiene si no.
+`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 111 columnas. Al terminar, la exportación comprueba que cada valor de `region`, `fecha`, `estacion` y `grupo` de las tablas de hechos exista en su dimensión, y se detiene si no.
 
 - **`pronostico_horario`:** `hora`, `mes` y `fecha` se calculan con el día operativo (D1), igual que en el notebook 03: la fila de las 00:00 es la hora 23 del día anterior.
+- **`tendencia_anual`:** consumo medio por región y año, con la columna `completo` (`Sí` si el año tiene al menos 8,700 horas, D16). El panel solo dibuja los años completos.
+- **`pronostico_metricas`:** `mejora_MAE_pct` es la reducción del MAE de XGBoost frente al base, positiva cuando XGBoost tiene menos error.
 - **`mezcla_region_tipo`:** porcentaje de días de cada tipo por región en el historial completo (`pct_dias_total`) y en el periodo común de las 10 regiones vigentes (`pct_dias_comun`, vacío en `NI` y `PJM_Load`). Los valores coinciden con la tabla de mezcla de tipos de día de esta nota.
 - **`indicadores_region`:** razón invierno/verano y amplitud diaria relativa (máximo menos mínimo entre el promedio del día, en días de 24 horas), para el historial completo y para el periodo común de las 10 regiones vigentes (columnas `_comun`). Los valores del periodo común coinciden con `02_patrones` (por ejemplo, PJME 0.950 y 0.369; DOM 0.985 y 0.400).
 

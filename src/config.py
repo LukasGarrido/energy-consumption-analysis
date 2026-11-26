@@ -20,6 +20,9 @@ HORAS_POR_DIA = 24                           # un día operativo completo tiene 
 DESVIACION_MIN_AISLADO = 0.5     # el valor se aleja más del 50 % del promedio de sus horas vecinas
 DIFERENCIA_MAX_VECINOS = 0.25    # las dos horas vecinas difieren como máximo un 25 % entre sí
 
+# Cobertura: horas mínimas para tratar un año como completo (decisión D16)
+HORAS_ANIO_COMPLETO = 8700
+
 # Limpieza: errores revisados a mano (decisión D14)
 # Lecturas que se descartan antes de unificar duplicados: (Datetime, MW) por región.
 LECTURAS_DESCARTADAS = {"DEOK": (("2017-11-05 02:00", 1044.0),)}

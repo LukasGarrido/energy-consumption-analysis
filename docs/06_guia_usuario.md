@@ -209,7 +209,7 @@ python src/export.py
 | `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,295 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
 | `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.51 (k-medias con $k = 2$ y silueta 0.413) |
 | `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE de 0.86 en la partición única, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
-| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (110 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
+| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (111 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
 
 ---
 
@@ -262,7 +262,7 @@ La app queda disponible en `http://localhost:8501`, accesible solo desde el prop
 
 La aplicación cuenta con una barra lateral de navegación y seis páginas, cada una con su propio panel de filtros:
 
-1. **Resumen:** tarjetas de indicadores clave (regiones seleccionadas, días en el filtro, consumo medio, tipos de día, MAE y MASE medios de XGBoost para `PJME`, vacíos si no está seleccionada), advertencia de días atípicos de PJME y línea de tendencia anual por región (solo años completos).
+1. **Resumen:** tarjetas de indicadores clave (regiones seleccionadas, días en el filtro, consumo medio, tipos de día, MAE y MASE medios de XGBoost para `PJME`, vacíos si no está seleccionada), advertencia de días atípicos de PJME y línea de tendencia anual por región (solo años completos: al menos 8,700 horas, D16).
 2. **Patrones:** mapa de calor 7 × 24 de consumo relativo (`MW_rel_medio`) con escala común para comparar regiones, perfiles diarios por tipo de calendario (laborable, fin de semana, festivo) en un panel por región, con la misma escala, y estacionalidad mensual.
 3. **Tipos de día:** curvas horarias medias con bandas de dispersión interpercentil, calendario anual en mapa de dispersión, barras de porcentaje de días por tipo, línea de silueta frente a $k$ y tabla resumen de grupos.
 4. **Regiones:** comparativa regional mediante gráfico de barras apiladas al 100 % (con interruptor entre historial completo y periodo común) y dispersión de indicadores estructurales (razón invierno/verano frente a amplitud diaria, en el periodo común, con aviso de las regiones que quedan fuera).
@@ -271,7 +271,7 @@ La aplicación cuenta con una barra lateral de navegación y seis páginas, cada
 
 #### Comportamiento de los filtros
 
-- **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones. Sin ninguna región o sin ninguna estación seleccionada, esas tablas quedan vacías.
+- **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones. La página «Regiones» no ofrece filtro de estación, y la estacionalidad mensual no responde a él. Sin ninguna región o sin ninguna estación seleccionada, esas tablas quedan vacías.
 - **Persistencia:** cada página conserva sus filtros y controles al cambiar de página y volver, mientras dure la sesión del navegador.
 - **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas muestran una nota aclaratoria: *"Este gráfico no responde al filtro de fecha."*
 - **Atajos:** los botones «Todas», «Vigentes» y «Ninguna» cambian la selección de regiones; «Todo», «Común», «2 años» y «1 año», el rango de fechas.

@@ -22,7 +22,7 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     renderizar_hero_banner("Comparativa Estructural entre Regiones")
 
     regiones, _, _, _ = filtros.selector_filtros_modulo(
-        tablas, "regiones", con_fechas=False
+        tablas, "regiones", con_fechas=False, con_estaciones=False
     )
 
     modo = st.radio(

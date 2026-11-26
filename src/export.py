@@ -16,7 +16,9 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pandas as pd
-from src.config import DESFASE_FIN_DE_HORA, HORAS_POR_DIA, PANEL_DIR, PROCESSED_DIR
+from src.config import (
+    DESFASE_FIN_DE_HORA, HORAS_ANIO_COMPLETO, HORAS_POR_DIA, PANEL_DIR, PROCESSED_DIR,
+)
 from src.features import agregar_variables_temporales
 
 # Constantes de nombres
@@ -61,6 +63,10 @@ DIAS_TOLERANCIA_VIGENTE = 7
 # Descripciones del diccionario de datos para las columnas cuyo nombre no basta.
 # El resto recibe una descripción genérica.
 DESCRIPCIONES_COLUMNAS = {
+    ("tendencia_anual", "completo"):
+        "Sí si la región tiene en ese año al menos las horas de un año completo",
+    ("pronostico_metricas", "mejora_MAE_pct"):
+        "Reducción del MAE de XGBoost frente al modelo base, en porcentaje (positivo: menos error)",
     ("mezcla_region_tipo", "pct_dias"):
         "Porcentaje de días de la región en el tipo de día, historial completo",
     ("mezcla_region_tipo", "pct_dias_total"):
@@ -179,8 +185,10 @@ class EnergyDataExporter:
         self.save_csv(ptc, "patron_tipo_calendario")
         
         # 3. tendencia_anual
-        tend = df.groupby(["region", "anio"])["MW"].mean().reset_index()
-        tend = tend.rename(columns={"MW": "MW_medio"})
+        tend = df.groupby(["region", "anio"]).agg(
+            MW_medio=("MW", "mean"), horas=("MW", "count")
+        ).reset_index()
+        tend["completo"] = (tend.pop("horas") >= HORAS_ANIO_COMPLETO).map({True: "Sí", False: "No"})
         self.save_csv(tend, "tendencia_anual")
         
         # 4. estacionalidad_mensual

@@ -156,7 +156,7 @@ def _fijar(clave: str, valor) -> None:
 def _chips_resumen(
     regiones: list[str],
     total_regiones: int,
-    estaciones: list[str],
+    estaciones: list[str] | None,
     f_inicio: pd.Timestamp | None,
     f_fin: pd.Timestamp | None,
 ) -> str:
@@ -169,8 +169,8 @@ def _chips_resumen(
         Regiones seleccionadas.
     total_regiones : int
         Número total de regiones disponibles.
-    estaciones : list[str]
-        Estaciones seleccionadas.
+    estaciones : list[str] | None
+        Estaciones seleccionadas (``None`` si el módulo no filtra por estación).
     f_inicio, f_fin : pd.Timestamp | None
         Rango de fechas (``None`` si el módulo no filtra por fecha).
 
@@ -180,11 +180,12 @@ def _chips_resumen(
         Fragmento HTML con los chips.
     """
     chips = [f"{len(regiones)} de {total_regiones} regiones"]
-    chips.append(
-        "Todas las estaciones"
-        if len(estaciones) == len(ESTACIONES)
-        else ", ".join(estaciones) or "Sin estaciones"
-    )
+    if estaciones is not None:
+        chips.append(
+            "Todas las estaciones"
+            if len(estaciones) == len(ESTACIONES)
+            else ", ".join(estaciones) or "Sin estaciones"
+        )
     if f_inicio is not None and f_fin is not None:
         chips.append(f"{f_inicio:%d %b %Y} → {f_fin:%d %b %Y}")
     return "".join(f'<span class="filter-chip">{c}</span>' for c in chips)
@@ -194,6 +195,7 @@ def selector_filtros_modulo(
     tablas: dict[str, pd.DataFrame],
     key_sufijo: str,
     con_fechas: bool = True,
+    con_estaciones: bool = True,
 ) -> tuple[list[str], pd.Timestamp, pd.Timestamp, list[str]]:
     """
     Renderiza el panel de filtros del módulo actual: regiones y estaciones
@@ -208,6 +210,8 @@ def selector_filtros_modulo(
         Sufijo para que cada módulo conserve sus propios filtros.
     con_fechas : bool
         Si es ``False`` se oculta el selector de fechas y se usa todo el rango.
+    con_estaciones : bool
+        Si es ``False`` se oculta el selector de estaciones y se devuelven todas.
 
     Retorna
     -------
@@ -252,19 +256,19 @@ def selector_filtros_modulo(
             key=k_reg, label_visibility="collapsed",
         ) or []
 
-        col_est, col_fec = st.columns([1, 1.4] if con_fechas else [1, 0.01])
-
         # Estaciones
-        with col_est:
+        if con_estaciones:
             st.markdown('<div class="filter-label">Estaciones</div>', unsafe_allow_html=True)
             estaciones_sel = st.pills(
                 "Estaciones", options=ESTACIONES, selection_mode="multi",
                 key=k_est, label_visibility="collapsed",
             ) or []
+        else:
+            estaciones_sel = list(ESTACIONES)
 
         # Fechas
         if con_fechas:
-            with col_fec:
+            with st.container():
                 st.markdown('<div class="filter-label">Periodo</div>', unsafe_allow_html=True)
                 p1, p2, p3, p4 = st.columns(4)
                 p1.button("Todo", key=f"f_todo_{key_sufijo}", on_click=_fijar,
@@ -301,7 +305,7 @@ def selector_filtros_modulo(
     st.markdown(
         '<div class="filter-chips">'
         + _chips_resumen(
-            regiones_sel, len(todas), estaciones_sel,
+            regiones_sel, len(todas), estaciones_sel if con_estaciones else None,
             f_inicio if con_fechas else None, f_fin if con_fechas else None,
         )
         + "</div>",
