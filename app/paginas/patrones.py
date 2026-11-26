@@ -32,6 +32,19 @@ _HEATMAP_ZMIN = 0.75
 _HEATMAP_ZMAX = 1.25
 
 
+# Color y trazo de cada tipo de calendario (Okabe-Ito)
+_ESTILO_CALENDARIO: dict[str, tuple[str, str]] = {
+    "Laborable": ("#0072B2", "solid"),
+    "Fin de semana": ("#E69F00", "dash"),
+    "Festivo": ("#CC79A7", "dot"),
+}
+
+# Rejilla de paneles por región
+_COLUMNAS_PANELES = 4
+_ALTO_PANEL = 220
+_ALTO_CABECERA = 140
+
+
 def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     """
     Renderiza el módulo del estudio de Patrones.
@@ -62,6 +75,7 @@ def _mapa_de_calor(
         st.info("Sin datos con estos filtros.")
         return
 
+    filtros.descartar_si_no_es_opcion("heatmap_region", sorted(regiones))
     region_sel = st.selectbox(
         "Región para el mapa de calor",
         options=sorted(regiones),
@@ -114,7 +128,10 @@ def _curvas_tipo_calendario(
     regiones: list[str],
     estaciones: list[str],
 ) -> None:
-    """Líneas de perfil diario por tipo de calendario (laborable, fin de semana, festivo)."""
+    """
+    Un panel por región con el perfil diario de cada tipo de calendario
+    (laborable, fin de semana, festivo), promediando las estaciones elegidas.
+    """
     st.subheader("Perfil diario por tipo de calendario")
 
     ptc = filtros.por_region(tablas["patron_tipo_calendario"], regiones)
@@ -123,26 +140,46 @@ def _curvas_tipo_calendario(
     if filtros.verificar_vacio(ptc):
         return
 
+    # Una sola curva por región y tipo: la tabla trae una fila por estación
+    ptc = ptc.groupby(
+        ["region", "tipo_calendario", "hora"], as_index=False
+    )["MW_rel_medio"].mean()
+
+    n_regiones = ptc["region"].nunique()
+    columnas = min(_COLUMNAS_PANELES, n_regiones)
+    n_filas = -(-n_regiones // columnas)
+
     fig = px.line(
         ptc,
         x="hora",
         y="MW_rel_medio",
-        color="region",
+        color="tipo_calendario",
         line_dash="tipo_calendario",
-        color_discrete_map=COLORES_REGION,
+        facet_col="region",
+        facet_col_wrap=columnas,
+        category_orders={
+            "region": sorted(ptc["region"].unique()),
+            "tipo_calendario": list(_ESTILO_CALENDARIO),
+        },
+        color_discrete_map={t: c for t, (c, _) in _ESTILO_CALENDARIO.items()},
+        line_dash_map={t: d for t, (_, d) in _ESTILO_CALENDARIO.items()},
         title="Consumo relativo medio por hora según tipo de calendario",
         labels={
-            "hora": "Hora de inicio (0–23)",
+            "hora": "Hora de inicio",
             "MW_rel_medio": "Consumo relativo",
             "region": "Región",
             "tipo_calendario": "Tipo",
         },
+        height=_ALTO_CABECERA + _ALTO_PANEL * n_filas,
     )
+    # El título de cada panel es solo el nombre de la región
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(hovermode="x unified")
     mostrar_grafico(fig)
     st.caption(
-        "Comparar la forma de la curva entre días laborables, fines de semana y festivos "
-        "revela diferencias estructurales en el perfil de demanda."
+        "Cada panel es una región y todos comparten escala. Comparar la forma de la curva "
+        "entre días laborables, fines de semana y festivos revela diferencias estructurales "
+        "en el perfil de demanda. Las curvas son el promedio simple de las estaciones elegidas."
     )
     st.caption("Este gráfico no responde al filtro de fecha.")
 

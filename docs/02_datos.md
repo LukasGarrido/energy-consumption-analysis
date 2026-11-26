@@ -120,7 +120,7 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 
 ### Salidas de la limpieza
 
-La parte de limpieza de `01_datos.ipynb` (o `run_cleaning` en `src/cleaning.py`) guarda en `data/processed/`:
+La parte de limpieza de `01_datos.ipynb` guarda en `data/processed/`:
 
 - Un archivo `<REGION>_clean.parquet` por región.
 - `consumo_horario.parquet`: las 12 regiones en formato largo (`Datetime`, `MW`, `region`), con 1,090,343 filas (1,090,167 originales − 40 duplicados unificados + 217 horas agregadas al calendario − 1 fila recortada). Se interpolan 220 valores: las 217 horas agregadas y los 3 atípicos aislados.

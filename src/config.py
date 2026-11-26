@@ -30,8 +30,8 @@ N_PLIEGUES = 3                  # pliegues mínimos de la validación en ventana
 # Agrupamiento de perfiles diarios
 K_MIN, K_MAX = 2, 10            # rango de k que se evalúa con la silueta
 TAMANO_MIN_GRUPO = 0.05         # cada grupo debe tener al menos el 5 % de los días
-SILUETA_RAZONABLE = 0.50        # >= 0.50: estructura razonable
-SILUETA_DEBIL = 0.26            # entre 0.26 y 0.50: estructura débil
+SILUETA_RAZONABLE = 0.51        # >= 0.51: estructura razonable (Kaufman y Rousseeuw)
+SILUETA_DEBIL = 0.26            # de 0.26 a 0.50: estructura débil
 
 # Detección de anomalías 
 UMBRAL_Z_MODIFICADO = 3.5       # z modificado (Iglewicz y Hoaglin) para marcar atípicos

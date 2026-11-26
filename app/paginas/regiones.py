@@ -33,7 +33,11 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     )
     col_pct = "pct_dias_total" if modo == "Historial completo" else "pct_dias_comun"
     if col_pct not in tablas["mezcla_region_tipo"].columns:
-        col_pct = "pct_dias"
+        st.error(
+            f"`mezcla_region_tipo.csv` no tiene la columna `{col_pct}`. "
+            "Ejecuta `python src/export.py` para actualizar las tablas."
+        )
+        return
 
     _barras_apiladas(tablas, regiones, col_pct, modo)
     st.divider()
@@ -55,8 +59,16 @@ def _barras_apiladas(
     if filtros.verificar_vacio(mrt):
         return
 
-    if col_pct not in mrt.columns:
-        col_pct = "pct_dias"
+    # Las regiones fuera del periodo común no tienen porcentaje en esa columna
+    sin_datos = sorted(mrt.loc[mrt[col_pct].isna(), "region"].unique())
+    if sin_datos:
+        st.caption(
+            f"Fuera del periodo común (no están entre las 10 regiones vigentes): "
+            f"{', '.join(sin_datos)}."
+        )
+        mrt = mrt[mrt[col_pct].notna()]
+        if filtros.verificar_vacio(mrt):
+            return
 
     # Ordenar regiones de mayor a menor peso del grupo 1
     orden_regiones: list[str] = (
@@ -120,6 +132,13 @@ def _dispersion_indicadores(
     col_y = "amplitud_diaria_comun" if "amplitud_diaria_comun" in ind.columns and ind["amplitud_diaria_comun"].notna().any() else "amplitud_diaria"
 
     subtitulo_periodo = "periodo comun" if col_x == "razon_inv_ver_comun" else "historial completo"
+
+    sin_datos = sorted(ind.loc[ind[[col_x, col_y]].isna().any(axis=1), "region"])
+    if sin_datos:
+        st.caption(
+            f"No aparecen en este gráfico, que usa el periodo común: {', '.join(sin_datos)}."
+        )
+        ind = ind.dropna(subset=[col_x, col_y])
 
     fig = px.scatter(
         ind,

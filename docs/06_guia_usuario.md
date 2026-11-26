@@ -105,11 +105,11 @@ Los parámetros están centralizados en `src/config.py`:
 | Parámetro | Uso | Valor por defecto |
 |---|---|---|
 | `HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA` | Pronóstico | 24 h, [24, 48, 168], [24, 168], "2017-01-01", 42 |
-| `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.50, 0.26, 10,000 días |
+| `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.51, 0.26, 10,000 días |
 | `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
 | `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (`03_pronostico_anomalias.ipynb` usa 6), 12 meses por pliegue |
 
-`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` (decisión D7) se definen en `02_patrones.ipynb`; `src/export.py` todavía no los tiene y exporta las tablas de patrones con la hora de la fuente (decisión D41). Los cortes de silueta (0.50 y 0.26) siguen pendientes de alinear con Kaufman y Rousseeuw (D28).
+`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` se definen en `02_patrones.ipynb` y quedan en `False` (decisión D7): el notebook y `src/export.py` usan la hora de la fuente (D41). Los cortes de silueta son 0.51 y 0.26 (D28).
 
 `REZAGOS_HORAS` no puede contener valores menores que `HORIZONTE_HORAS`: el código lanza un error para evitar usar información futura que no se tendría disponible al momento de pronosticar.
 
@@ -206,9 +206,9 @@ python src/export.py
 | Paso | Qué debe verse |
 |---|---|
 | `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
-| `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50 (k-medias con $k = 2$ y silueta 0.413) |
+| `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.51 (k-medias con $k = 2$ y silueta 0.413) |
 | `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE de 0.86 en la partición única, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
-| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (109 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
+| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (110 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
 
 ---
 
@@ -259,20 +259,21 @@ La app queda disponible en `http://localhost:8501`, accesible solo desde el prop
 
 #### Estructura y navegación
 
-La aplicación cuenta con una barra lateral izquierda de filtros globales y seis páginas:
+La aplicación cuenta con una barra lateral de navegación y seis páginas, cada una con su propio panel de filtros:
 
-1. **Resumen:** tarjetas de indicadores clave (regiones seleccionadas, días en el filtro, consumo medio, tipos de día, MAE y MASE medios de XGBoost), advertencia de días atípicos de PJME y línea de tendencia anual por región (solo años completos).
-2. **Patrones:** mapa de calor 7 × 24 de consumo relativo (`MW_rel_medio`) con escala común para comparar regiones, perfiles diarios por tipo de calendario (laborable, fin de semana, festivo) y estacionalidad mensual.
+1. **Resumen:** tarjetas de indicadores clave (regiones seleccionadas, días en el filtro, consumo medio, tipos de día, MAE y MASE medios de XGBoost para `PJME`, vacíos si no está seleccionada), advertencia de días atípicos de PJME y línea de tendencia anual por región (solo años completos).
+2. **Patrones:** mapa de calor 7 × 24 de consumo relativo (`MW_rel_medio`) con escala común para comparar regiones, perfiles diarios por tipo de calendario (laborable, fin de semana, festivo) en un panel por región, con la misma escala, y estacionalidad mensual.
 3. **Tipos de día:** curvas horarias medias con bandas de dispersión interpercentil, calendario anual en mapa de dispersión, barras de porcentaje de días por tipo, línea de silueta frente a $k$ y tabla resumen de grupos.
-4. **Regiones:** comparativa regional mediante gráfico de barras apiladas al 100 % (con interruptor entre historial completo y periodo común) y dispersión de indicadores estructurales (razón invierno/verano frente a amplitud diaria).
-5. **Anomalías:** línea de tiempo de residuos porcentuales con eventos históricos sombreados, **deslizador interactivo de umbral $z$-score modificado** (recalcula en tiempo real sin modificar datos en disco), ranking de días con mayor desvío, tabla de episodios históricos y selector para ver el perfil horario real vs pronóstico en una ventana de $\pm 3$ días.
-6. **Pronóstico:** métricas de validación por pliegue, gráfico comparativo de MAE por modelo, selector interactivo de métrica (MAE / MAPE) para desglosar el error por hora, mes y tipo de día, y gráfico temporal de real frente a pronóstico.
+4. **Regiones:** comparativa regional mediante gráfico de barras apiladas al 100 % (con interruptor entre historial completo y periodo común) y dispersión de indicadores estructurales (razón invierno/verano frente a amplitud diaria, en el periodo común, con aviso de las regiones que quedan fuera).
+5. **Anomalías:** línea de tiempo de residuos porcentuales con los eventos históricos del periodo sombreados y numerados según la tabla de episodios, **deslizador interactivo de umbral $z$-score modificado** (recalcula en tiempo real sin modificar datos en disco), ranking de días con mayor desvío, tabla de episodios históricos y selector para ver el perfil horario real vs pronóstico en una ventana de $\pm 3$ días.
+6. **Pronóstico:** métricas de validación por pliegue, gráfico comparativo de MAE por modelo, selector interactivo de métrica (MAE / MAPE) para desglosar el error por hora, mes y tipo de día, y gráfico temporal de real frente a pronóstico. Solo hay datos de `PJME`: se avisa si hay otras regiones seleccionadas y no se muestra nada si `PJME` no lo está.
 
 #### Comportamiento de los filtros
 
-- **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones.
+- **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones. Sin ninguna región o sin ninguna estación seleccionada, esas tablas quedan vacías.
+- **Persistencia:** cada página conserva sus filtros y controles al cambiar de página y volver, mientras dure la sesión del navegador.
 - **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas muestran una nota aclaratoria: *"Este gráfico no responde al filtro de fecha."*
-- **Botón "Restablecer filtros":** restaura instantáneamente la selección de todas las regiones, las cuatro estaciones y el rango temporal completo.
+- **Atajos:** los botones «Todas», «Vigentes» y «Ninguna» cambian la selección de regiones; «Todo», «Común», «2 años» y «1 año», el rango de fechas.
 
 ---
 

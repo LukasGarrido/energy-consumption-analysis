@@ -58,6 +58,18 @@ CLAVES_DIMENSION = {
 # vigente (llega hasta el final del dataset).
 DIAS_TOLERANCIA_VIGENTE = 7
 
+# Descripciones del diccionario de datos para las columnas cuyo nombre no basta.
+# El resto recibe una descripción genérica.
+DESCRIPCIONES_COLUMNAS = {
+    ("mezcla_region_tipo", "pct_dias"):
+        "Porcentaje de días de la región en el tipo de día, historial completo",
+    ("mezcla_region_tipo", "pct_dias_total"):
+        "Porcentaje de días de la región en el tipo de día, historial completo",
+    ("mezcla_region_tipo", "pct_dias_comun"):
+        "Porcentaje de días de la región en el tipo de día, periodo común de las "
+        "regiones vigentes (vacío en las demás)",
+}
+
 
 class EnergyDataExporter:
     def __init__(self, processed_dir: Path = PROCESSED_DIR, output_dir: Path = PANEL_DIR):
@@ -102,7 +114,7 @@ class EnergyDataExporter:
         self._export_dim_tipo_dia(resumen)
         self._export_hechos_diario(tipos)
         self._export_curvas_tipo_dia()
-        self._export_mezcla_region_tipo()
+        self._export_mezcla_region_tipo(tipos)
         self._export_silueta_k()
         
         # 4. Patrones y análisis (notebook 02_patrones)
@@ -150,9 +162,6 @@ class EnergyDataExporter:
             df["MW_rel"] = df["MW"] / df.groupby("region")["MW"].transform("mean")
             
         # 1. patron_hora_dia (para heatmap)
-        phd = df.groupby(["region", "estacion", "dia_semana", "hora"])["MW_rel"].mean().reset_index()
-        phd.rename(columns={"MW_rel": "MW_rel_medio", "MW": "MW_medio"}, inplace=False) # Wait, MW is not in agg
-        # Re-agg to include MW_medio too
         phd = df.groupby(["region", "estacion", "dia_semana", "hora"]).agg(
             MW_medio=("MW", "mean"),
             MW_rel_medio=("MW_rel", "mean")
@@ -166,17 +175,17 @@ class EnergyDataExporter:
         df.loc[df["es_festivo"], "tipo_calendario"] = "Festivo"
         
         ptc = df.groupby(["region", "estacion", "tipo_calendario", "hora"])["MW_rel"].mean().reset_index()
-        ptc.rename(columns={"MW_rel": "MW_rel_medio"}, inplace=True)
+        ptc = ptc.rename(columns={"MW_rel": "MW_rel_medio"})
         self.save_csv(ptc, "patron_tipo_calendario")
         
         # 3. tendencia_anual
         tend = df.groupby(["region", "anio"])["MW"].mean().reset_index()
-        tend.rename(columns={"MW": "MW_medio"}, inplace=True)
+        tend = tend.rename(columns={"MW": "MW_medio"})
         self.save_csv(tend, "tendencia_anual")
         
         # 4. estacionalidad_mensual
         est = df.groupby(["region", "mes"])["MW_rel"].mean().reset_index()
-        est.rename(columns={"MW_rel": "MW_rel_medio"}, inplace=True)
+        est = est.rename(columns={"MW_rel": "MW_rel_medio"})
         est["nombre_mes"] = est["mes"].map(NOMBRES_MESES)
         self.save_csv(est, "estacionalidad_mensual")
 
@@ -208,30 +217,73 @@ class EnergyDataExporter:
 
         return pd.DataFrame({"razon_inv_ver": razon, "amplitud_diaria": amplitud})
 
+    @staticmethod
+    def _mascara_periodo_comun(data: pd.DataFrame) -> pd.Series:
+        """
+        Marca las filas de las regiones vigentes dentro de su periodo común.
+
+        Son vigentes las regiones que llegan al final del dataset; el periodo
+        común empieza en el inicio más tardío y termina en el final más temprano.
+
+        Parámetros
+        ----------
+        data : pd.DataFrame
+            Tabla con `region` y `fecha` (día operativo).
+
+        Retorna
+        -------
+        pd.Series
+            Serie booleana con el mismo índice que `data`.
+        """
+        rango = data.groupby("region")["fecha"].agg(["min", "max"])
+        limite = rango["max"].max() - pd.Timedelta(days=DIAS_TOLERANCIA_VIGENTE)
+        vigentes = rango[rango["max"] >= limite]
+        ini_comun, fin_comun = vigentes["min"].max(), vigentes["max"].min()
+        return data["region"].isin(vigentes.index) & data["fecha"].between(ini_comun, fin_comun)
+
     def _export_indicadores(self, df: pd.DataFrame):
         # Historial completo de cada región
         ind_total = self._calcular_indicadores(df)
 
         # Periodo común de las regiones vigentes (las que llegan al final del dataset)
-        rango = df.groupby("region")["fecha"].agg(["min", "max"])
-        limite = rango["max"].max() - pd.Timedelta(days=DIAS_TOLERANCIA_VIGENTE)
-        vigentes = rango[rango["max"] >= limite]
-        ini_comun, fin_comun = vigentes["min"].max(), vigentes["max"].min()
-        en_comun = df["region"].isin(vigentes.index) & df["fecha"].between(ini_comun, fin_comun)
+        en_comun = self._mascara_periodo_comun(df)
         ind_comun = self._calcular_indicadores(df[en_comun]).add_suffix("_comun")
 
         ind = ind_total.join(ind_comun, how="left").rename_axis("region").reset_index()
         self.save_csv(ind, "indicadores_region")
 
     def _export_curvas_tipo_dia(self):
-        curvas = self.load_parquet("tipos_de_dia_curvas")
-        # No hay mapeo de nombres de grupo aquí porque usa 'grupo' (int)
+        curvas = self.load_parquet("tipos_de_dia_curvas").copy()
+        curvas["nombre_grupo"] = curvas["nombre_grupo"].replace(MAPA_NOMBRES_GRUPOS)
         self.save_csv(curvas, "curvas_tipo_dia")
 
-    def _export_mezcla_region_tipo(self):
-        mezcla = self.load_parquet("tipos_de_dia_mezcla_region")
+    def _export_mezcla_region_tipo(self, tipos: pd.DataFrame) -> None:
+        """
+        Exporta la mezcla de tipos de día por región en el historial completo
+        (`pct_dias_total`) y en el periodo común (`pct_dias_comun`).
+
+        Parámetros
+        ----------
+        tipos : pd.DataFrame
+            Una fila por región y día operativo, con `region`, `fecha` y `grupo`.
+        """
+        mezcla = self.load_parquet("tipos_de_dia_mezcla_region").copy()
         if "pct_dias" in mezcla.columns and "pct_dias_total" not in mezcla.columns:
             mezcla["pct_dias_total"] = mezcla["pct_dias"]
+
+        comun = tipos[self._mascara_periodo_comun(tipos)]
+        # Matriz completa: un grupo sin días en una región vigente vale 0 %, y
+        # las regiones fuera del periodo común quedan vacías al unir.
+        pct_comun = (
+            (pd.crosstab(comun["region"], comun["grupo"], normalize="index") * 100)
+            .reindex(columns=sorted(mezcla["grupo"].unique()), fill_value=0.0)
+            .rename_axis(columns="grupo")
+            .stack()
+            .rename("pct_dias_comun")
+            .reset_index()
+        )
+        mezcla = mezcla.merge(pct_comun, on=["region", "grupo"], how="left")
+        mezcla["nombre_grupo"] = mezcla["nombre_grupo"].replace(MAPA_NOMBRES_GRUPOS)
         self.save_csv(mezcla, "mezcla_region_tipo")
 
     def _export_silueta_k(self):
@@ -255,7 +307,7 @@ class EnergyDataExporter:
         met = self.load_parquet("metricas_ventana_movil_PJME")
         # app espera: MAE, RMSE, MAPE_pct, MASE, mejora_MAE_pct
         met = met.reset_index()
-        met.rename(columns={"MAPE_%": "MAPE_pct", "mejora_MAE_%": "mejora_MAE_pct"}, inplace=True)
+        met = met.rename(columns={"MAPE_%": "MAPE_pct", "mejora_MAE_%": "mejora_MAE_pct"})
         self.save_csv(met, "pronostico_metricas")
 
     def _export_anomalias(self):
@@ -317,7 +369,10 @@ class EnergyDataExporter:
                 filas.append({
                     "tabla": csv_file.stem,
                     "columna": col,
-                    "descripcion": f"Variable {col} de la tabla {csv_file.stem}"
+                    "descripcion": DESCRIPCIONES_COLUMNAS.get(
+                        (csv_file.stem, col),
+                        f"Variable {col} de la tabla {csv_file.stem}",
+                    )
                 })
         dic = pd.DataFrame(filas)
         self.save_csv(dic, "diccionario_datos")

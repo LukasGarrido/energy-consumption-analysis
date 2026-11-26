@@ -6,6 +6,7 @@ ranking de dias atípicos, tabla de episodios históricos y caso hora a hora.
 Solo hay datos de PJME; si esa región no está seleccionada se muestra un aviso.
 """
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -14,6 +15,13 @@ from app import filtros
 from app.graficos import mostrar_grafico
 from app.config import UMBRAL_Z_DEFECTO
 from app.estilos import renderizar_hero_banner
+
+
+# Color de los dias atípicos según el signo del residuo (Okabe-Ito)
+_COLORES_DIRECCION: dict[str, str] = {"alta": "#E69F00", "baja": "#009E73"}
+
+# Fracción del eje de fechas que debe separar dos números de episodio de una fila
+_SEPARACION_ETIQUETAS = 0.025
 
 
 def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
@@ -33,11 +41,11 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
         )
         return
 
+    st.session_state.setdefault("umbral_z", UMBRAL_Z_DEFECTO)
     umbral = st.slider(
         "Umbral del z modificado para marcar dias atipicos",
         min_value=1.0,
         max_value=6.0,
-        value=UMBRAL_Z_DEFECTO,
         step=0.1,
         key="umbral_z",
     )
@@ -65,8 +73,8 @@ def _preparar_anomalias(
     umbral: float,
 ) -> pd.DataFrame:
     """
-    Filtra ``anomalias_dias`` para PJME y recalcula ``es_atipico`` con el
-    umbral del deslizador. Añade la columna ``color_punto`` para el gráfico.
+    Filtra ``anomalias_dias`` para PJME y recalcula ``es_atipico`` y
+    ``direccion`` (signo de ``z_mod``) con el umbral del deslizador.
 
     Parámetros
     ----------
@@ -86,18 +94,68 @@ def _preparar_anomalias(
     ad = filtros.por_fecha(ad, "fecha", fecha_inicio, fecha_fin)
     ad = filtros.por_estacion(ad, estaciones)
 
-    # Recalcular es_atipico en la vista (no se escribe en disco)
+    # Recalcular es_atipico y direccion en la vista (no se escribe en disco):
+    # con un umbral distinto del exportado cambian los dias marcados.
     ad["es_atipico"] = ad["z_mod"].abs() > umbral
-
-    ad["color_punto"] = ad.apply(
-        lambda r: (
-            "#E69F00" if r["es_atipico"] and r.get("direccion", "") == "alta"
-            else "#009E73" if r["es_atipico"] and r.get("direccion", "") == "baja"
-            else "#CCCCCC"
-        ),
-        axis=1,
+    ad["direccion"] = np.select(
+        [ad["es_atipico"] & (ad["z_mod"] > 0), ad["es_atipico"] & (ad["z_mod"] < 0)],
+        ["alta", "baja"],
+        default="",
     )
     return ad
+
+
+def _numerar_episodios(tablas: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """
+    Episodios de PJME ordenados por fecha de inicio, con su número ``n``, que
+    identifica cada episodio en el gráfico y en la tabla.
+
+    Parámetros
+    ----------
+    tablas : dict[str, pd.DataFrame]
+
+    Retorna
+    -------
+    pd.DataFrame
+    """
+    ep = tablas["anomalias_episodios"]
+    if "region" in ep.columns:
+        ep = ep[ep["region"] == "PJME"]
+    ep = ep.sort_values("inicio").reset_index(drop=True)
+    ep.insert(0, "n", range(1, len(ep) + 1))
+    return ep
+
+
+def _niveles_etiquetas(inicios: pd.Series, separacion: pd.Timedelta) -> list[int]:
+    """
+    Asigna a cada etiqueta, en orden de fecha, la fila más baja en la que no
+    se solapa con la anterior de esa misma fila.
+
+    Parámetros
+    ----------
+    inicios : pd.Series
+        Fechas de las etiquetas, en orden creciente.
+    separacion : pd.Timedelta
+        Distancia mínima entre dos etiquetas de la misma fila.
+
+    Retorna
+    -------
+    list[int]
+        Fila (0 es la inferior) de cada etiqueta.
+    """
+    ultimo_por_nivel: list[pd.Timestamp] = []
+    niveles: list[int] = []
+    for inicio in inicios:
+        nivel = next(
+            (i for i, previo in enumerate(ultimo_por_nivel) if inicio - previo >= separacion),
+            len(ultimo_por_nivel),
+        )
+        if nivel == len(ultimo_por_nivel):
+            ultimo_por_nivel.append(inicio)
+        else:
+            ultimo_por_nivel[nivel] = inicio
+        niveles.append(nivel)
+    return niveles
 
 
 def _linea_de_tiempo(
@@ -107,24 +165,35 @@ def _linea_de_tiempo(
     """Línea de tiempo del residuo diario con atípicos resaltados y episodios sombreados."""
     st.subheader("Residuo diario de PJME (%)")
 
-    ep = tablas["anomalias_episodios"].copy()
-    if "region" in ep.columns:
-        ep = ep[ep["region"] == "PJME"].copy()
+    # Solo los episodios que caen en el periodo mostrado: los anteriores
+    # estirarían el eje de fechas fuera de los datos.
+    ep = _numerar_episodios(tablas)
+    primero, ultimo = ad["fecha"].min(), ad["fecha"].max()
+    ep = ep[(ep["fin"] >= primero) & (ep["inicio"] <= ultimo)]
 
     fig = go.Figure()
 
-    # Sombreado de episodios históricos
-    for _, row in ep.iterrows():
-        if pd.notna(row.get("inicio")) and pd.notna(row.get("fin")):
-            fig.add_vrect(
-                x0=row["inicio"],
-                x1=row["fin"],
-                fillcolor="rgba(100,100,200,0.12)",
-                line_width=0,
-                annotation_text=str(row["episodio"])[:30],
-                annotation_position="top left",
-                annotation=dict(font_size=9),
-            )
+    # Sombreado de episodios históricos, identificados por su número
+    niveles = _niveles_etiquetas(ep["inicio"], (ultimo - primero) * _SEPARACION_ETIQUETAS)
+    for (_, row), nivel in zip(ep.iterrows(), niveles):
+        x0 = max(row["inicio"], primero)
+        fig.add_vrect(
+            x0=x0,
+            x1=min(row["fin"], ultimo),
+            fillcolor="rgba(100,100,200,0.12)",
+            line_width=0,
+        )
+        fig.add_annotation(
+            x=x0,
+            y=1,
+            yref="y domain",
+            yanchor="bottom",
+            yshift=nivel * 14,
+            text=str(row["n"]),
+            hovertext=str(row["episodio"]),
+            showarrow=False,
+            font=dict(size=11),
+        )
 
     # Serie de residuos
     fig.add_trace(
@@ -137,17 +206,19 @@ def _linea_de_tiempo(
         )
     )
 
-    # Puntos atípicos
-    at = ad[ad["es_atipico"]]
-    if not at.empty:
+    # Puntos atípicos: una traza por dirección para que la leyenda explique el color
+    for direccion, color in _COLORES_DIRECCION.items():
+        at = ad[ad["direccion"] == direccion]
+        if at.empty:
+            continue
         fig.add_trace(
             go.Scatter(
                 x=at["fecha"],
                 y=at["residuo_pct"],
                 mode="markers",
-                name="Atipico",
+                name=f"Atipico {direccion}",
                 marker=dict(
-                    color=at["color_punto"].tolist(),
+                    color=color,
                     size=8,
                     line=dict(color="black", width=0.5),
                 ),
@@ -156,21 +227,24 @@ def _linea_de_tiempo(
                     "Fecha: %{x|%Y-%m-%d}<br>"
                     "Residuo: %{y:.1f}%<br>"
                     "Tipo: %{customdata[0]}<br>"
-                    "z_mod: %{customdata[1]:.2f}<extra></extra>"
+                    "z_mod: %{customdata[1]:.2f}"
                 ),
             )
         )
 
     fig.add_hline(y=0, line_dash="dot", line_color="gray")
     fig.update_layout(
-        title="Residuo diario del pronóstico — PJME (naranja: alto, verde: bajo)",
+        title="Residuo diario del pronóstico — PJME",
         xaxis_title="Fecha",
         yaxis_title="Residuo (%)",
         hovermode="x unified",
+        # Espacio sobre el área de dibujo para las filas de números
+        margin=dict(t=60 + 14 * (max(niveles, default=0) + 1)),
     )
     mostrar_grafico(fig)
     st.caption(
-        "Las regiones sombreadas corresponden a episodios históricos documentados. "
+        "Las franjas sombreadas son los episodios históricos documentados del periodo "
+        "mostrado; su número remite a la tabla de episodios. "
         "Un residuo positivo indica que el consumo real superó al pronosticado."
     )
 
@@ -196,9 +270,7 @@ def _tabla_episodios(tablas: dict[str, pd.DataFrame]) -> None:
     """Tabla de episodios históricos documentados con estado, fuente y verificación."""
     st.subheader("Episodios históricos documentados")
 
-    ep = tablas["anomalias_episodios"].copy()
-    if "region" in ep.columns:
-        ep = ep[ep["region"] == "PJME"].copy()
+    ep = _numerar_episodios(tablas)
 
     if ep.empty:
         st.info("Sin episodios registrados.")
@@ -206,7 +278,7 @@ def _tabla_episodios(tablas: dict[str, pd.DataFrame]) -> None:
 
     columnas = [
         c for c in [
-            "episodio", "inicio", "fin", "tipo", "direccion_esperada",
+            "n", "episodio", "inicio", "fin", "tipo", "direccion_esperada",
             "estado", "fuente", "verificado", "coincide_direccion",
         ]
         if c in ep.columns
@@ -228,6 +300,7 @@ def _caso_hora_a_hora(
         return
 
     fechas_atipicas = sorted(at["fecha"].dt.date.unique().tolist())
+    filtros.descartar_si_no_es_opcion("fecha_atipica_sel", fechas_atipicas)
     fecha_sel = st.selectbox(
         "Elegir un dia atipico",
         options=fechas_atipicas,

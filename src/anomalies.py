@@ -16,18 +16,32 @@ from src.config import (
 
 CONSTANTE_Z = 0.6745  # Iglewicz y Hoaglin: z modificado = 0.6745 (x - mediana) / MAD
 
-# Episodios de referencia. Las fechas son aproximadas y hay que verificarlas con una
-# fuente (PJM, NOAA, prensa) antes de citarlas en el informe.
+# Episodios de referencia, con la dirección esperada del residuo, la fuente de las
+# fechas y si están verificadas. Los no verificados no deben citarse en el informe.
 EPISODIOS_CONOCIDOS = pd.DataFrame(
     [
-        ("Huracán Sandy", "2012-10-29", "2012-10-31", "evento climático"),
-        ("Vórtice polar", "2014-01-06", "2014-01-08", "frío extremo"),
-        ("Ola de frío de febrero de 2015", "2015-02-14", "2015-02-21", "frío extremo"),
-        ("Tormenta Jonas", "2016-01-22", "2016-01-24", "evento climático"),
-        ("Ola de frío de enero de 2018", "2018-01-01", "2018-01-07", "frío extremo"),
-        ("Ola de calor de julio de 2013", "2013-07-15", "2013-07-19", "calor extremo"),
+        ("Ola de calor de agosto de 2006 (récord de PJM el 2 de agosto)", "2006-08-01", "2006-08-03", "calor extremo", "alta",
+         "https://www.spglobal.com/energy/en/news-research/latest-news/electric-power/031325-ceraweek-fercs-christie-calls-the-need-for-more-gas-fired-power-a-rendezvous-with-reality", True),
+        ("Ola de calor de julio de 2011", "2011-07-20", "2011-07-22", "calor extremo", "alta",
+         "https://www.spglobal.com/energy/en/news-research/latest-news/electric-power/031325-ceraweek-fercs-christie-calls-the-need-for-more-gas-fired-power-a-rendezvous-with-reality", True),
+        ("Huracán Sandy", "2012-10-29", "2012-10-31", "evento climático", "baja",
+         "https://www.eia.gov/todayinEnergy/detail.php?id=8750", True),
+        ("Ola de calor de julio de 2013 (pico de PJM el 18 de julio)", "2013-07-15", "2013-07-19", "calor extremo", "alta",
+         "https://greentechmedia.com/amp/article/mo-money-mo-demand-response", True),
+        ("Calor de septiembre de 2013", "2013-09-10", "2013-09-12", "calor extremo", "alta",
+         "https://greentechmedia.com/amp/article/demand-response-hits-a-new-record-in-pjm", True),
+        ("Vórtice polar de enero de 2014 (récord invernal del 7)", "2014-01-06", "2014-01-08", "frío extremo", "alta",
+         "https://www.nerc.com/pa/rrm/ea/ColdWeatherTrainingMaterials/2015_Winter_Review_December_2015_FINAL.pdf", True),
+        ("Vórtice polar de fines de enero de 2014", "2014-01-23", "2014-01-29", "frío extremo", "alta",
+         "https://www.witf.org/2018/01/05/heating_bills_spike_like_its_the_polar_vortex_of_january_2014/", True),
+        ("Ola de frío de febrero de 2015 (récord invernal del 20)", "2015-02-14", "2015-02-21", "frío extremo", "alta",
+         "https://www.nerc.com/pa/rrm/ea/ColdWeatherTrainingMaterials/2015_Winter_Review_December_2015_FINAL.pdf", True),
+        ("Tormenta Jonas", "2016-01-22", "2016-01-24", "evento climático", "por verificar",
+         "", False),
+        ("Ola de frío de enero de 2018", "2018-01-01", "2018-01-07", "frío extremo", "alta",
+         "https://www.witf.org/2018/01/05/heating_bills_spike_like_its_the_polar_vortex_of_january_2014/", True),
     ],
-    columns=["episodio", "inicio", "fin", "tipo"],
+    columns=["episodio", "inicio", "fin", "tipo", "direccion_esperada", "fuente", "verificado"],
 ).assign(inicio=lambda d: pd.to_datetime(d["inicio"]), fin=lambda d: pd.to_datetime(d["fin"]))
 
 

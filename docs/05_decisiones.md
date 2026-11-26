@@ -46,7 +46,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D14 | `DEOK` queda por revisar: 34 atípicos bajos, una racha de 3 horas de 907, 912 y 921 MW (2018-04-22) y dos lecturas de 1,044 y 2,064 MW para la misma hora el 2017-11-05, que la limpieza promedia | Los mínimos son consecutivos pero la lectura duplicada es inconsistente | Descartarla o aceptarla sin revisar | **Por revisar** (se conserva por ahora) |
 | D15 | Comparar regiones en el periodo común de las 10 vigentes (2013-06-01 → 2018-08-02 en días operativos), `NI` y `PJM_Load` aparte | No hay periodo común a las 12 regiones y la mezcla depende de los años cubiertos | Comparar cada región en todo su historial | Aplicada |
 | D16 | Cobertura mínima de 99 % y año completo con al menos 8,700 horas | Evita que un año parcial parezca una caída | Sin umbral | Aplicada |
-| D17 | Guardar la limpieza como `<REGION>_clean.parquet` y `consumo_horario.parquet` | `01_datos` usa ese nombre y `run_cleaning` guarda otro | Mantener ambos nombres | **Por hacer** (cambiar `run_cleaning` para guardar `_clean.parquet`) |
+| D17 | Guardar la limpieza como `<REGION>_clean.parquet` y `consumo_horario.parquet` | Es lo que guarda `01_datos`, el único paso que escribe la limpieza | Mantener dos nombres | Aplicada (`01_datos`; la mención a una función `run_cleaning` inexistente se quitó de `src/cleaning.py`) |
 
 ## 3. Pronóstico de referencia
 
@@ -66,11 +66,11 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | ID | Decisión | Motivo | Alternativa descartada | Estado |
 |---|---|---|---|---|
 | D6 | Un solo agrupamiento para las 12 regiones | Con perfiles normalizados los tipos son comunes y permite la matriz región por tipo de día | Uno por región | Aplicada |
-| D7 | Conservar la hora de la fuente de `COMED` y `NI`, salvo que `02_patrones` decida alinearlas a hora central (`ALINEAR_HORA_CENTRAL`) | El diagnóstico mide +1 h en ambas y 0 en el resto, coherente con hora central dentro de series en hora del este. Sin alinear, la forma puede separarse por la hora y la comparación con otras regiones podría distorsionarse | Alinearlas siempre o corregir en la limpieza | **Por decidir.** `02_patrones` se ejecutó con `ALINEAR_HORA_CENTRAL = False`, falta repetirlo con `True` y comparar la mezcla de tipos de día |
+| D7 | Conservar la hora de la fuente de `COMED` y `NI` (`ALINEAR_HORA_CENTRAL = False`) | El diagnóstico mide +1 h en ambas y 0 en el resto, coherente con hora central dentro de series en hora del este, pero la zona horaria de la fuente no está confirmada. Sensibilidad medida: alinearlas cambiaría de grupo el 1.33 % de los días y subiría el grupo 1 de 60.4 % a 67.1 % en `COMED` y de 52.3 % a 64.3 % en `NI` (silueta 0.420) | Alinearlas siempre o corregir en la limpieza | Aplicada. La mezcla de tipos de día de `COMED` y `NI` se lee con esa cautela |
 | D25 | Perfil de 24 valores divididos entre el promedio del día, solo días completos, magnitud aparte | Compara la forma y no el tamaño | Agrupar en MW | Aplicada |
-| D26 | K-medias y Ward con k de 2 a 10, mayor silueta con grupos de al menos 5 % de los días, y si gana k = 2 se justifica un k mayor | Evita grupos ininterpretables y el sesgo hacia k = 2. Ganó k = 2 (0.413) y separa temporada fría y verano. Con k = 3 la silueta es 0.30 y con k ≥ 4 queda por debajo de 0.26 | Elegir solo por silueta | **Por decidir:** reportar k = 2 como resultado o justificar un k mayor para separar el fin de semana |
+| D26 | K-medias y Ward con k de 2 a 10, mayor silueta con grupos de al menos 5 % de los días. Se reporta k = 2 | Ganó k = 2 (0.413) y separa temporada fría y verano. Subir k no separa el fin de semana: sus grupos tienen de 25.5 % a 32.9 % de sábados y domingos con k = 3 y de 20.8 % a 32.6 % con k = 4 (28.6 % esperado sin relación), con silueta 0.301 y 0.241 | Justificar un k mayor para separar el fin de semana | Aplicada |
 | D27 | Silueta y Ward sobre una muestra de 10,000 días | Escalan de forma cuadrática con unos 45,000 días | Usar todos los días | Aplicada |
-| D28 | Cortes de silueta de Kaufman y Rousseeuw: 0.71, 0.51 y 0.26 | En la fuente el 0.50 cae en «débil». Hoy `config.py` y los notebooks usan 0.50 y 0.26, y el resultado (0.413, débil) no cambia con ninguno de los dos | Mantener el 0.50 | **Por decidir:** alinear `config.py`, `profiles.py` y la documentación |
+| D28 | Cortes de silueta de Kaufman y Rousseeuw: 0.51 (razonable) y 0.26 (débil) | La fuente sitúa 0.26 a 0.50 como estructura débil y 0.51 a 0.70 como razonable. El resultado (0.413, débil) no cambia | Mantener el 0.50 | Aplicada (`SILUETA_RAZONABLE` en `src/config.py`, que usan `src/profiles.py`, `02_patrones` y el panel) |
 | D29 | Estabilidad con el índice de Rand ajustado entre k-medias y Ward (0.73), la repetición con semillas queda por hacer | Es una medida barata de cuánto depende el resultado del algoritmo. Pasó de 0.82 a 0.73 al corregir 3 horas (D2), así que es sensible a cambios pequeños | Afirmarla sin medirla | Parcial: Rand ajustado medido, semillas por hacer |
 
 ## 5. Detección de anomalías
@@ -80,7 +80,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D8 | z modificado con todos los días de la región, con comprobación por estación y opción `Z_POR_ESTACION` | Es simple y comparable. Los atípicos no se concentran en una estación (0.7 % a 1.3 %) | Calcularlo por estación desde el inicio | Aplicada (`03_pronostico_anomalias`) |
 | D30 | Residuo = real − predicción, residuo diario con signo en % de la predicción, solo días completos | El signo da la dirección y el % permite comparar épocas | Error absoluto o MW | Aplicada |
 | D31 | Umbral \|z\| > 3.5 con sensibilidad a 3, 4 y 5 y comparación por estación y pliegue | Es una convención calibrada para datos normales. Con 3, 3.5, 4 y 5 salen 52, 22, 9 y 2 días | Fijarlo sin comprobar | Aplicada |
-| D32 | Contraste con episodios con fuente y verificación, «fuera de rango» distinto de «sin coincidencia», y dirección esperada (frío y calor `alta`, Sandy `baja`) | No hay etiquetas y hay que distinguir lo no detectado de lo no evaluado | Fechas sin fuente | Aplicada. Falta verificar la tormenta Jonas y sincronizar `EPISODIOS_CONOCIDOS` en `src/anomalies.py` |
+| D32 | Contraste con episodios con fuente y verificación, «fuera de rango» distinto de «sin coincidencia», y dirección esperada (frío y calor `alta`, Sandy `baja`) | No hay etiquetas y hay que distinguir lo no detectado de lo no evaluado | Fechas sin fuente | Aplicada, con una sola tabla en `EPISODIOS_CONOCIDOS` (`src/anomalies.py`). Falta verificar la tormenta Jonas |
 | D33 | Anomalías solo para `PJME` | Es la única región con residuos | Repetir para las 12 | Aplicada |
 
 ## 6. Visualización y panel
@@ -98,10 +98,10 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | ID | Decisión | Motivo | Alternativa descartada | Estado |
 |---|---|---|---|---|
 | D37 | Las cifras con hora de fin se marcaron «por recalcular» y se borraron las salidas de las secciones afectadas de los notebooks. El análisis, el modelado, el agrupamiento, las anomalías y la exportación se volvieron a ejecutar con el día operativo | D1 las cambia | Dejarlas sin señalar | Aplicada |
-| D38 | Verificar las referencias y alinear los umbrales con la fuente | Es una tarea de la issue | Citar sin verificar | En curso (ver D28) |
+| D38 | Verificar las referencias y alinear los umbrales con la fuente | Es una tarea de la issue | Citar sin verificar | Parcial: umbrales de silueta alineados (D28), verificación de referencias por completar |
 | D39 | Quitar `prophet`, añadir `jupyterlab` e `ipykernel`, Streamlit opcional | Prophet está descartado | Dejar las dependencias sin revisar | Parcial: falta elegir entre `kaggle` y `kagglehub` |
 | D40 | Parámetros en `src/config.py`, semilla 42 y notebooks 01 a 03 en orden | Reproducibilidad | Parámetros dentro de los notebooks | Aplicada |
-| D41 | `ALINEAR_HORA_CENTRAL` con el mismo valor en `02_patrones` y en la exportación | Si difiere, los días de `COMED` y `NI` no coinciden | Archivo compartido | Por aplicar: `src/export.py` no tiene el parámetro y recalcula el calendario con la hora de la fuente. Hoy no hay diferencia porque `02_patrones` usa `False` |
+| D41 | La exportación usa la misma hora que `02_patrones`: la de la fuente | Con D7 no hay alineación en ninguno de los dos | Un parámetro compartido | Aplicada. Si se cambiara D7, `src/export.py` tendría que aplicar la misma alineación |
 | D42 | STL con `period=365` y sin interpretar el tramo final de la tendencia | Años bisiestos y efecto de borde | Interpretar la subida final | Aplicada |
 | D43 | Festivos federales de EE. UU. con `holidays` | Criterio uniforme para las 12 regiones | Festivos estatales | Aplicada |
 
@@ -116,7 +116,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | `NI` y `COMED` son la misma zona | Soportada: cociente de 1.00 y empalme el 2011-01-01 | D3 |
 | `PJMW` continúa a `PJM_Load` | Descartada: cociente 0.17. `PJM_Load` → `PJME` es compatible (1.05) | D3, D15 |
 | La tendencia STL sube al final | Descartada: efecto de borde | D42 |
-| El agrupamiento separará laborables y fines de semana | Descartada: con k = 2 los grupos son estacionales (28.9 % y 28.1 % de fines de semana) | D26 |
+| El agrupamiento separará laborables y fines de semana | Descartada: con k = 2 los grupos son estacionales (28.9 % y 28.1 % de fines de semana) y con k = 3 o 4 tampoco aparece un grupo de fin de semana | D26 |
 | XGBoost supera al base en todos los pliegues | Confirmada: 6 de 6, MASE de 0.72 a 0.87 | D5, D21 |
 | Los atípicos se concentran en una estación o pliegue | Descartada: de 0.7 % a 1.3 % por estación y de 0.5 % a 1.9 % por pliegue | D8, D31 |
 | Los episodios documentados aparecen como atípicos | Parcial: 5 de 8 evaluados, con el signo esperado en los 5 | D32 |
@@ -127,13 +127,9 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 **Decisiones abiertas**
 
 - **D3:** unir o no `NI` y `COMED`.
-- **D7:** alinear o no `COMED` y `NI` a hora central. Falta repetir `02_patrones` con `ALINEAR_HORA_CENTRAL = True` y comparar la mezcla de tipos de día.
-- **D26:** decidir si se reporta k = 2 (silueta 0.413, grupos estacionales) o se justifica un k mayor para separar el fin de semana, y registrarlo aquí.
-- **D28:** decidir si se pasan los cortes a 0.51 y 0.71 en `config.py` y `profiles.py`. No cambia el resultado actual.
 - **D14:** revisar `DEOK` con la tabla de valores aislados de `01_datos`.
-- **D17:** cambiar `run_cleaning` para guardar `_clean.parquet`.
 - **D29:** repetir el agrupamiento con varias semillas.
-- **D32:** verificar la tormenta Jonas y sincronizar `EPISODIOS_CONOCIDOS` en `src/anomalies.py`.
+- **D32:** verificar la tormenta Jonas.
 - **D39:** elegir entre `kaggle` y `kagglehub`.
 
 **Tareas de cierre**

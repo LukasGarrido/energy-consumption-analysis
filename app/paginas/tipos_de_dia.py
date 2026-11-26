@@ -12,6 +12,7 @@ import streamlit as st
 from app import filtros
 from app.graficos import color_grupo, hex_a_rgba, mapa_colores_grupos, mostrar_grafico
 from app.estilos import renderizar_hero_banner
+from src.config import SILUETA_DEBIL, SILUETA_RAZONABLE
 
 
 def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
@@ -105,6 +106,7 @@ def _calendario_de_color(
         st.info("Sin datos con estos filtros.")
         return
 
+    filtros.descartar_si_no_es_opcion("cal_region", sorted(regiones))
     region_sel = st.selectbox(
         "Región para el calendario",
         options=sorted(regiones),
@@ -121,7 +123,7 @@ def _calendario_de_color(
         return
 
     hd["anio"] = hd["fecha"].dt.year
-    hd["dia_del_anio"] = hd["fecha"].dt.dayofyear
+    hd["dia_del_anio"] = hd["fecha"].dt.day_of_year
 
     if "nombre_grupo" not in hd.columns:
         if "dim_tipo_dia" in tablas and "nombre_grupo" in tablas["dim_tipo_dia"].columns:
@@ -217,23 +219,24 @@ def _curva_silueta(tablas: dict[str, pd.DataFrame]) -> None:
         },
     )
     fig.add_hline(
-        y=0.51,
+        y=SILUETA_RAZONABLE,
         line_dash="dash",
         line_color="green",
-        annotation_text="Estructura razonable (0.51)",
+        annotation_text=f"Estructura razonable ({SILUETA_RAZONABLE:.2f})",
         annotation_position="bottom right",
     )
     fig.add_hline(
-        y=0.26,
+        y=SILUETA_DEBIL,
         line_dash="dash",
         line_color="orange",
-        annotation_text="Estructura débil (0.26)",
+        annotation_text=f"Estructura débil ({SILUETA_DEBIL:.2f})",
         annotation_position="bottom right",
     )
     mostrar_grafico(fig)
     st.caption(
-        "Un coeficiente superior a 0.51 indica separación razonable entre grupos; "
-        "entre 0.26 y 0.51 la estructura es débil pero interpretable."
+        f"Un coeficiente de al menos {SILUETA_RAZONABLE:.2f} indica separación razonable "
+        f"entre grupos; entre {SILUETA_DEBIL:.2f} y {SILUETA_RAZONABLE:.2f} la estructura "
+        "es débil pero interpretable."
     )
     st.caption("Este gráfico no responde al filtro de fecha.")
 

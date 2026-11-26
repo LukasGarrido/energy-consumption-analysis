@@ -28,7 +28,7 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 |---|---|---|---|---|
 | Descriptivo | Patrones por hora, día y estación, tendencia, comparación y picos | P1 y P2 | `01_datos` y `02_patrones` | Hecho |
 | A | Pronóstico de referencia a 24 horas | P4 y base de P3 | `03_pronostico_anomalias` | Hecho: supera al base en los 6 pliegues, MASE de 0.72 a 0.87 |
-| B | Agrupamiento de perfiles diarios | P1 y P2 | `02_patrones` | Hecho: k = 2 (estacionales), silueta 0.413 (débil). D7 y justificación de k pendientes |
+| B | Agrupamiento de perfiles diarios | P1 y P2 | `02_patrones` | Hecho: k = 2 (estacionales), silueta 0.413 (débil). se reporta k = 2 (D26) |
 | C | Detección de días atípicos | P3 | `03_pronostico_anomalias` | Hecho: 22 días atípicos, 5 episodios coinciden |
 | Exportación | Modelo en estrella para el panel | P1 a P4 | `src/export.py` y `app/streamlit_app.py` | Hecho: 17 tablas con claves validadas y panel en Streamlit de seis páginas |
 
@@ -37,14 +37,14 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 ## Hallazgos del análisis descriptivo
 
 - **Periodo:** no existe un periodo común a las 12 regiones, 10 comparten 2013-06-01 → 2018-08-03 (días operativos hasta el 2018-08-02).
-- **Ciclo diario:** mínimo entre las 3 y las 4 h, subida desde las 5–6 h y máximo entre las 17 y las 19 h (18 h en 8 de 10 regiones, `DUQ` a las 17 h, `EKPC` a las 19 h).
+- **Ciclo diario:** mínimo entre las 3 y las 4 h, subida desde las 5–6 h y máximo entre las 17 y las 19 h (18 h en 7 de 10 regiones, `DUQ` y `PJME` a las 17 h, `EKPC` a las 19 h).
 - **Forma por estación:** en verano hay una sola curva con máximo por la tarde (hasta 1.2–1.4 del promedio) y en invierno hay dos picos, uno hacia las 7 h y otro hacia las 18–19 h.
 - **Calendario:** el fin de semana consume entre un 3.9 % (`EKPC`) y un 13.9 % (`DAYTON`) menos que un laborable (≈ −9 % en promedio). Un festivo consume cerca de un 5 % menos (de −0.7 % en `DOM` a −8.8 % en `DAYTON`; `EKPC` es la excepción con +1.7 %).
 - **Estacionalidad:** dos máximos anuales (verano e invierno) con valles en abril y octubre. `EKPC` (1.20) y `PJMW` (1.12) son invernales, `COMED` (0.93), `DUQ` (0.92), `DEOK` y `PJME` (0.95), veraniegas.
 - **Tendencia:** estabilidad o ligera baja (`PJME` −9 % entre 2007 y 2017, de 33,612 a 30,653 MW; `AEP` −13 %; `DUQ` −10 %). `DOM` sube cerca de un 6 % desde 2006.
 - **Picos:** `PJME` alcanzó 62,009 MW el 2006-08-02. `DOM`, `EKPC` y `PJMW` tienen su récord el 2015-02-20 a las 7 h. Ambas fechas coinciden con episodios documentados por PJM: el récord de demanda de verano y el de invierno. El máximo de `AEP` es 25,164 MW (2007-08-08): el valor crudo mayor (2008-10-20) se descartó como atípico aislado (D2).
 - **Correlaciones:** de 0.56 a 0.96. Los pares más parecidos son `AEP`–`PJMW` y `DAYTON`–`FE` (0.96), y la región más distinta es `EKPC`.
-- **Hora de `COMED` y `NI`:** su curva diaria llega una hora más tarde que la del resto (error de 0.014 con +1 h frente a 0.024 sin desplazar). Es lo esperable si las series están en hora del este y esas zonas son de hora central. No se corrige (ver D7).
+- **Hora de `COMED` y `NI`:** su curva diaria llega una hora más tarde que la del resto (error de 0.014 con +1 h frente a 0.024 sin desplazar). Es lo esperable si las series están en hora del este y esas zonas son de hora central. Se conserva la hora de la fuente (ver D7).
 - **`NI` y `COMED`:** cociente de niveles 1.00 y empalme el 2011-01-01, lo que permite tratarlas como la misma zona (D3, por confirmar).
 
 ---
@@ -254,9 +254,9 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | Rango de k | 2 a 10 (`K_MIN`, `K_MAX`) |
 | Muestra | La silueta y Ward se calculan sobre una muestra reproducible de 10,000 días (`MUESTRA_AGRUPAMIENTO`), porque escalan de forma cuadrática. Ward asigna el resto de los días al centro más cercano, k-medias usa todos |
 | Selección de k | Mayor silueta media entre las combinaciones en que ningún grupo baja del 5 % de los días |
-| Calidad de la estructura | El proyecto usa 0.50 como umbral de estructura razonable (`SILUETA_RAZONABLE`) y 0.26 como límite de la estructura débil (`SILUETA_DEBIL`), siguiendo a Kaufman y Rousseeuw. Por debajo de 0.26 no hay estructura sustancial. Se reporta tal como sale |
+| Calidad de la estructura | El proyecto usa 0.51 como umbral de estructura razonable (`SILUETA_RAZONABLE`) y 0.26 como límite de la estructura débil (`SILUETA_DEBIL`), siguiendo a Kaufman y Rousseeuw (D28). Por debajo de 0.26 no hay estructura sustancial. Se reporta tal como sale |
 | Estabilidad | Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado). La repetición con distintas semillas queda por hacer |
-| Alineación horaria | Parámetro `ALINEAR_HORA_CENTRAL`: con `True` se resta 1 h a las regiones de `REGIONES_HORA_CENTRAL` antes de calcular el día operativo. `02_patrones.ipynb` mide el desfase de cada región para decidir (decisión D7) |
+| Alineación horaria | Parámetro `ALINEAR_HORA_CENTRAL`: con `True` se resta 1 h a las regiones de `REGIONES_HORA_CENTRAL` antes de calcular el día operativo. `02_patrones.ipynb` mide el desfase de cada región y la decisión D7 es no alinear |
 | Interpretación | Curva media de cada grupo con banda de percentiles 10 a 90, frecuencia y composición por día de la semana, mes, estación y festivo |
 | Días que no encajan | Distancia de cada día al centro de su grupo (`distancia_centroide`), insumo de la detección de anomalías |
 
@@ -268,9 +268,19 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | k elegido | 2 |
 | Silueta media (muestra) y su interpretación | 0.413, estructura débil |
 | Concordancia entre k-medias y Ward (Rand ajustado) | 0.73 |
-| Alineación de `COMED` y `NI` | No (`ALINEAR_HORA_CENTRAL = False`). El diagnóstico detecta +1 h en ambas y 0 en el resto. La decisión D7 sigue por tomar |
+| Alineación de `COMED` y `NI` | No (`ALINEAR_HORA_CENTRAL = False`, D7). El diagnóstico detecta +1 h en ambas y 0 en el resto |
 
 **Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2. Con k = 3 la silueta es 0.30 (débil) y con k ≥ 4 queda por debajo de 0.26 (sin estructura sustancial). Con Ward ningún k baja del 5 % de los días (el grupo más pequeño es 5.6 % desde k = 7).
+
+**Por qué k = 2 (D26).** Un k mayor no separa el fin de semana. Sin relación con el calendario, cada grupo tendría 28.6 % de sábados y domingos:
+
+| k | Silueta k-medias | % de fin de semana por grupo |
+|---|---|---|
+| 2 | 0.413 | 28.9 y 28.1 |
+| 3 | 0.301 | 25.5, 29.6 y 32.9 |
+| 4 | 0.241 | 30.0, 20.8, 32.6 y 32.1 |
+
+Con k = 3 aparece un perfil de pico matinal (hacia las 8 h, 25.9 % de los días, sobre todo en invierno), a cambio de una silueta menor.
 
 | k | Silueta k-medias | Silueta Ward | Grupo más pequeño k-medias (%) | Grupo más pequeño Ward (%) |
 |---|---|---|---|---|
@@ -294,7 +304,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 - **Grupo 1:** reúne los días de octubre a mayo, con una meseta de mañana (7 a 11 h), un pico nocturno a las 19–20 h, un mínimo a las 3 h y una amplitud de ≈ 0.2 del promedio del día.
 - **Grupo 2:** reúne los días de junio a septiembre, con una sola curva de pico a las 16–17 h (≈ 1.19 del promedio), un mínimo a las 4 h y una amplitud de ≈ 0.4.
 - **Son tipos estacionales, no de calendario.** El 28.9 % y el 28.1 % de los días son sábado o domingo, casi igual que el 28.6 % esperado si no hubiera relación, y los festivos no se concentran. No hay un tipo de día de fin de semana. Una hipótesis, sin verificar, es que el efecto de fin de semana es sobre todo de nivel (cerca de −9 % según `02_patrones.ipynb`) y desaparece al dividir cada perfil entre el promedio del día.
-- Los nombres automáticos de `02_patrones.ipynb` («G1 · Invierno · mixto» y «G2 · Verano · mixto») se sustituyen por los nombres basados en el calendario, y `02_patrones.ipynb` ya guarda sus tablas con esos nombres. Falta verificar que `src/export.py` exporte `dim_tipo_dia` con ellos y no con los automáticos.
+- Los nombres automáticos de `02_patrones.ipynb` («G1 · Invierno · mixto» y «G2 · Verano · mixto») se sustituyen por los nombres basados en el calendario, y `02_patrones.ipynb` ya guarda sus tablas con esos nombres. `src/export.py` exporta todas las tablas del panel con los nombres cortos «Temporada fría» y «Verano».
 
 **Mezcla de tipos de día y estacionalidad por región.** «Común» es el periodo común de las 10 regiones vigentes (2013-06-01 → 2018-08-02).
 
@@ -324,11 +334,11 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 ### 4. Limitaciones
 
 - **Estructura débil.** La silueta de 0.413 indica que los perfiles diarios forman en parte un continuo, así que los tipos de día son una simplificación útil y no categorías naturalmente separadas.
-- **k = 2 solo captura la estación.** Si se quiere separar el fin de semana hay que probar un k mayor y justificar la elección aunque la silueta baje (con k = 3 es 0.30 y con k ≥ 4 es menor de 0.26). Esta decisión está pendiente (D26).
+- **k = 2 solo captura la estación.** No hay un tipo de día de fin de semana, y con k = 3 o k = 4 tampoco aparece (D26).
 - K-medias asume grupos compactos con distancia euclidiana.
 - Al normalizar por el promedio del día se pierde la información de magnitud.
 - Las regiones cubren periodos distintos, y eso afecta a su mezcla de tipos de día, por eso se compara también en el periodo común.
-- Sin alinear `COMED` y `NI` a hora central, su curva llega una hora más tarde y puede separarse por la hora y no por la forma. Falta repetir con `ALINEAR_HORA_CENTRAL = True` y comparar (D7).
+- `COMED` y `NI` se analizan con la hora de la fuente, una hora más tarde que el resto. La zona horaria no está confirmada y alinearlas cambiaría de grupo el 1.33 % de los días y subiría el grupo 1 de 60.4 % a 67.1 % en `COMED` y de 52.3 % a 64.3 % en `NI` (silueta 0.420) (D7).
 - El agrupamiento es conjunto para las 12 regiones, lo que permite compararlas pero puede esconder formas propias de una región.
 - La silueta y Ward se calculan sobre una muestra de días (grupo más pequeño: 38.2 % en la muestra y 37.7 % con todos los días).
 - Sin temperatura, los tipos de día se interpretan por el calendario y no por el clima.
@@ -464,16 +474,17 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 
 ### 5. Reproducibilidad
 
-El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.py`. Los parámetros (`UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS`) están en `src/config.py`. La tabla de episodios, con sus fuentes, está en `03_pronostico_anomalias.ipynb` y reemplaza a `EPISODIOS_CONOCIDOS` de `src/anomalies.py`, que no incluye fuentes: conviene actualizar ese archivo con la misma tabla.
+El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.py`. Los parámetros (`UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS`) están en `src/config.py`. La tabla de episodios, con sus fuentes, es `EPISODIOS_CONOCIDOS` de `src/anomalies.py`.
 
 
 ---
 
 ## Exportación para el panel
 
-`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 109 columnas. Al terminar, la exportación comprueba que cada valor de `region`, `fecha`, `estacion` y `grupo` de las tablas de hechos exista en su dimensión, y se detiene si no.
+`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 110 columnas. Al terminar, la exportación comprueba que cada valor de `region`, `fecha`, `estacion` y `grupo` de las tablas de hechos exista en su dimensión, y se detiene si no.
 
 - **`pronostico_horario`:** `hora`, `mes` y `fecha` se calculan con el día operativo (D1), igual que en el notebook 03: la fila de las 00:00 es la hora 23 del día anterior.
+- **`mezcla_region_tipo`:** porcentaje de días de cada tipo por región en el historial completo (`pct_dias_total`) y en el periodo común de las 10 regiones vigentes (`pct_dias_comun`, vacío en `NI` y `PJM_Load`). Los valores coinciden con la tabla de mezcla de tipos de día de esta nota.
 - **`indicadores_region`:** razón invierno/verano y amplitud diaria relativa (máximo menos mínimo entre el promedio del día, en días de 24 horas), para el historial completo y para el periodo común de las 10 regiones vigentes (columnas `_comun`). Los valores del periodo común coinciden con `02_patrones` (por ejemplo, PJME 0.950 y 0.369; DOM 0.985 y 0.400).
 
 | Tabla | Filas | Tabla | Filas |
@@ -508,7 +519,7 @@ Los conceptos clave del proyecto, agrupados por tema. Cada entrada dice qué es 
 - **Hora de fin de intervalo (*hour ending*).** Convención que etiqueta cada hora con el instante en que **termina**: la hora 1 va de 00:00 a 01:00 y la hora 24 es la última del día. PJM la usa en sus reportes. `Datetime` la sigue: todas las series empiezan a las 01:00 y terminan a las 00:00, en primavera falta la fila de las 03:00 (no la de las 02:00) y en otoño se repite la de las 02:00. Consecuencias: la fila de las 00:00 es la última hora del día anterior, y un «pico a las 19 h» en `Datetime` corresponde al intervalo 18:00–19:00. Si el calendario se calcula directamente desde `Datetime`, `dia_semana`, `es_fin_de_semana` y `es_festivo` quedan desplazados un día en esa fila (1 de cada 24 horas). Se corrige con el día operativo.
 - **Día operativo.** Día definido según la convención de los datos y no según el calendario civil. Se resta una hora a `Datetime` antes de calcular la fecha: la fila de las 00:00 pasa a ser la hora 23 (23:00–24:00) del día anterior y `hora` va de 0 a 23. Decisión D1, aplicada en `src/features.py` (columna `fecha`). Es la base de los promedios diarios, de los perfiles del agrupamiento y de los residuos diarios.
 - **Hora local y EPT.** EPT (*Eastern Prevailing Time*) es la hora civil del este de EE. UU., que cambia entre horario estándar y de verano. Los datos parecen estar todos en EPT, aunque algunas regiones operen en hora central. Falta confirmarlo en la documentación de PJM.
-- **Desfase entre regiones.** Diferencia de hora entre perfiles que deberían parecerse. `COMED` (y `NI`) aparece retrasada 1 hora (error de 0.014 con ese desplazamiento frente a 0.024 sin él), coherente con series en hora del este para zonas que operan en hora central. No se corrige en la limpieza. `ALINEAR_HORA_CENTRAL` permite restar 1 h a `COMED` y `NI` antes de comparar formas de día (D7).
+- **Desfase entre regiones.** Diferencia de hora entre perfiles que deberían parecerse. `COMED` (y `NI`) aparece retrasada 1 hora (error de 0.014 con ese desplazamiento frente a 0.024 sin él), coherente con series en hora del este para zonas que operan en hora central. No se corrige en la limpieza. `ALINEAR_HORA_CENTRAL` permite restar 1 h a `COMED` y `NI` antes de comparar formas de día; el proyecto no lo aplica (D7).
 - **Día completo.** Día con sus 24 horas. Con el día operativo, el primer registro de cada serie (01:00) y el último (00:00) cierran días completos. Aun así se exigen las 24 horas por día y región en los promedios diarios, los perfiles del agrupamiento y los residuos diarios. Los bordes de los pliegues de la ventana móvil pueden dejar días incompletos, que se descartan.
 - **Error de medición frente a valor extremo real.** Un valor extremo puede ser un error del medidor o consumo real. El criterio es la **continuidad**: varias horas seguidas extremas sugieren un evento real, un valor aislado entre horas normales sugiere un error. Los picos altos forman una nube continua y se conservan. Aislados y sospechosos: el 0 de `FE` (su primer registro, se recorta), `DOM` (1,253 MW) y `PJMW` (487 MW), que se conservan hasta aplicar el z modificado (D2). El mínimo de `EKPC` (514 MW) es una racha de varias horas en la madrugada de un domingo: un valle real. `01_datos` los distingue con el cociente entre el valor y el promedio de sus horas vecinas.
 - **Periodo común y regiones vigentes.** El periodo común es el intervalo en el que *todas* las regiones comparadas tienen datos: empieza en el inicio más tardío y termina en el final más temprano. Las regiones vigentes son las que llegan hasta el final del dataset. No existe periodo común a las 12 regiones: las 10 vigentes comparten 2013-06-01 → 2018-08-03 y las comparaciones entre regiones se hacen en ese intervalo.
@@ -517,8 +528,8 @@ Los conceptos clave del proyecto, agrupados por tema. Cada entrada dice qué es 
 
 ### Agrupamiento de perfiles diarios (aprendizaje no supervisado)
 
-- **Silueta.** Mide cuán bien separado está cada día de los demás grupos. Siguiendo a Kaufman y Rousseeuw, una silueta media de 0.71 a 1.00 indica estructura fuerte, de 0.51 a 0.70 razonable, de 0.26 a 0.50 débil (podría ser artificial) y de 0.25 o menos que no hay estructura sustancial. El código usa hoy 0.50 y 0.26 (`SILUETA_RAZONABLE`, `SILUETA_DEBIL`), la alineación con 0.51 y 0.71 está pendiente (D28). Se calcula para cada *k* entre 2 y 10, con k-medias y con Ward, sobre una muestra reproducible de 10,000 días.
-- **Elección del número de grupos (*k*).** Se prueba cada *k* de 2 a 10 con ambos métodos y se elige la mayor silueta entre las combinaciones en que ningún grupo tiene menos del 5 % de los días. Con frecuencia k = 2 gana en silueta, y si ocurre se justifica un k mayor cuando sus grupos son más interpretables, aunque la silueta baje (D26).
+- **Silueta.** Mide cuán bien separado está cada día de los demás grupos. Siguiendo a Kaufman y Rousseeuw, una silueta media de 0.71 a 1.00 indica estructura fuerte, de 0.51 a 0.70 razonable, de 0.26 a 0.50 débil (podría ser artificial) y de 0.25 o menos que no hay estructura sustancial. El código usa 0.51 y 0.26 (`SILUETA_RAZONABLE`, `SILUETA_DEBIL`, D28). Se calcula para cada *k* entre 2 y 10, con k-medias y con Ward, sobre una muestra reproducible de 10,000 días.
+- **Elección del número de grupos (*k*).** Se prueba cada *k* de 2 a 10 con ambos métodos y se elige la mayor silueta entre las combinaciones en que ningún grupo tiene menos del 5 % de los días. Con frecuencia k = 2 gana en silueta; aquí se mantiene porque un k mayor no separa el fin de semana (D26).
 - **Agrupamiento jerárquico y criterio de Ward.** Es costoso en memoria con decenas de miles de elementos, por eso se ajusta sobre una muestra de 10,000 días y el resto se asigna al centro más cercano.
 - **Estabilidad del agrupamiento.** Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado, ARI). La repetición con distintas semillas queda por hacer (D29).
 - **Distancia al centroide.** Distancia de cada día al centro de su grupo. Mira la forma de la curva, mientras que el residuo del pronóstico mira el nivel: un día puede ser raro en una, en la otra o en ambas. La detección de anomalías mide su correlación.
