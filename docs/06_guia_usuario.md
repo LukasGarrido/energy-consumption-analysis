@@ -106,6 +106,7 @@ Los parámetros están centralizados en `src/config.py`:
 |---|---|---|
 | `HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA` | Pronóstico | 24 h, [24, 48, 168], [24, 168], "2017-01-01", 42 |
 | `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.51, 0.26, 10,000 días |
+| `SEMILLAS_ESTABILIDAD` | Repetición del agrupamiento para medir su estabilidad | Semillas 0 a 19 |
 | `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
 | `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (`03_pronostico_anomalias.ipynb` usa 6), 12 meses por pliegue |
 
@@ -122,7 +123,7 @@ Los datos crudos **no se incluyen en el repositorio**. Hay dos formas de obtener
 ### Opción A: con la API de Kaggle
 
 1. En Kaggle, ir a *Settings → API* y generar las credenciales siguiendo las instrucciones de la página.
-2. Guardarlas donde indique Kaggle (normalmente en la carpeta `.kaggle` del usuario).
+2. Guardarlas donde indique Kaggle (normalmente en la carpeta `.kaggle` del usuario) o definir las variables de entorno de `.env.example`. El comando no lee ese archivo por sí solo.
 3. Ejecutar desde la raíz del proyecto:
 
 ```bash

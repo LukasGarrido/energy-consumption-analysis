@@ -13,11 +13,11 @@ se divide entre su promedio, así que se compara la forma y no el nivel.
 import numpy as np
 import pandas as pd
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.neighbors import NearestCentroid
 
 from src.config import (
-    HORAS_POR_DIA, K_MAX, K_MIN, MUESTRA_AGRUPAMIENTO, SEMILLA,
+    HORAS_POR_DIA, K_MAX, K_MIN, MUESTRA_AGRUPAMIENTO, SEMILLA, SEMILLAS_ESTABILIDAD,
     SILUETA_DEBIL, SILUETA_RAZONABLE, TAMANO_MIN_GRUPO,
 )
 
@@ -132,6 +132,44 @@ def agrupar(perfiles: pd.DataFrame, k: int, metodo: str = "kmeans") -> pd.Series
     """Asigna cada día a un grupo (1 = el más frecuente). Usa todos los días."""
     etiquetas = _ajustar(perfiles.to_numpy(), k, metodo, max_ward=MUESTRA_AGRUPAMIENTO)
     return pd.Series(_ordenar_por_tamano(etiquetas), index=perfiles.index, name="grupo")
+
+
+def estabilidad_semillas(
+    perfiles: pd.DataFrame,
+    etiquetas: pd.Series,
+    semillas: tuple[int, ...] = SEMILLAS_ESTABILIDAD,
+    muestra: int = MUESTRA_AGRUPAMIENTO,
+) -> pd.DataFrame:
+    """Repite k-medias con varias semillas y lo compara con la asignación de referencia.
+
+    Cada semilla cambia la inicialización de k-medias (sobre todos los días) y la
+    muestra de días con la que se calcula la silueta.
+
+    Parámetros: `perfiles` de construir_perfiles, `etiquetas` de referencia (de
+    agrupar, que fijan k), `semillas` a probar y tamaño de la `muestra`.
+
+    Devuelve una fila por semilla: ari (índice de Rand ajustado frente a la
+    referencia), pct_dias_cambian (porcentaje de días en otro grupo),
+    pct_grupo_1 y silueta.
+    """
+    X = perfiles.to_numpy()
+    referencia = etiquetas.to_numpy()
+    k = len(np.unique(referencia))
+
+    filas = []
+    for semilla in semillas:
+        nuevas = _ordenar_por_tamano(
+            KMeans(n_clusters=k, n_init=10, random_state=semilla).fit_predict(X)
+        )
+        idx = np.random.default_rng(semilla).choice(len(X), min(muestra, len(X)), replace=False)
+        filas.append({
+            "semilla": semilla,
+            "ari": adjusted_rand_score(referencia, nuevas),
+            "pct_dias_cambian": (nuevas != referencia).mean() * 100,
+            "pct_grupo_1": (nuevas == 1).mean() * 100,
+            "silueta": silhouette_score(X[idx], nuevas[idx]),
+        })
+    return pd.DataFrame(filas)
 
 
 def calendario_dias(df: pd.DataFrame) -> pd.DataFrame:

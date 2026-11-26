@@ -193,7 +193,7 @@ El proyecto se desarrolla utilizando un ecosistema de análisis de datos, modela
 
 - **Procesamiento y Análisis de Datos:** Python, `pandas`, `numpy`, `scipy`, `pyarrow`.
 - **Aprendizaje Automático y Modelado:** `scikit-learn` (agrupamiento k-medias y Ward, métricas), `xgboost` (pronóstico de referencia a 24 horas), `statsmodels` (descomposición STL).
-- **Utilidades y Datos:** `holidays` (festivos federales de EE. UU.), `kagglehub` (descarga y gestión de datasets).
+- **Utilidades y Datos:** `holidays` (festivos federales de EE. UU.), `kaggle` (descarga del dataset desde la terminal).
 - **Visualización y Presentación:** `Plotly`, `Matplotlib`, `Seaborn`, Streamlit (panel interactivo alimentado por un modelo en estrella en CSV) y Docker Compose (ejecución opcional del panel).
 - **Entorno y Documentación:** Jupyter Notebook / JupyterLab, Git y GitHub (control de versiones), Obsidian (documentación técnica y bitácora de decisiones).
 

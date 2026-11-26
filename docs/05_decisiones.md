@@ -39,7 +39,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 |---|---|---|---|---|
 | D1 | Calcular el calendario desde `Datetime − 1 h` (día operativo), `Datetime` no se modifica | `Datetime` marca el final de la hora, sin el ajuste la hora 24 de cada día cae en el día siguiente y los perfiles de 24 horas quedan desfasados | Usar `Datetime` directamente | Aplicada en `src/features.py` y en todos los notebooks |
 | D2 | Marcar como vacío e interpolar los atípicos aislados de una hora: desviación > 50 % del promedio de las horas vecinas, vecinas que difieren ≤ 25 % entre sí y z modificado > 3.5 sobre la desviación respecto del patrón de mes y hora. Actúa en ambos sentidos y marca 3 valores (`AEP` 25,695 MW, `DOM` 1,253 MW y `PJMW` 487 MW) | Son saltos de una sola hora incompatibles con sus vecinas. El z por sí solo marca miles de saltos pequeños, por eso se exige además una desviación grande. Los valores de `PJMW` de 2012-04-01/02 (2,553 y 2,574 MW) no cumplen el criterio | Aplicar el z al MW crudo (marcaría los picos reales) o conservarlos como limitación | Aplicada (`src/cleaning.py`, `01_datos`) |
-| D3 | Guardar `NI` y `COMED` por separado y documentar la continuidad | Unirlas supone asumir que son la misma serie. El cociente de niveles es 1.00 y se tocan el 2011-01-01 (`02_patrones`), lo que respalda unirlas | Unirlas en una sola serie | **Por confirmar** |
+| D3 | Mantener `NI` y `COMED` como series separadas y documentar la continuidad | Unirlas supone asumir que son la misma serie. El cociente de niveles es 1.00 y se tocan el 2011-01-01 (`02_patrones`), lo que se reporta sin modificar los datos | Unirlas en una sola serie | Aplicada |
 | D11 | Limpieza por pasos: promediar duplicados, reindexar a calendario horario, recortar extremos vacíos, interpolar hasta 2 horas y validar | Duplicados y huecos vienen del cambio de horario y todos los huecos son de 2 horas o menos | Eliminar filas incompletas o rellenar huecos largos | Aplicada |
 | D12 | Los valores ≤ 0 pasan a vacío y el 0 inicial de `FE` (su primer registro) se recorta | La demanda no puede ser cero y sin dato vecino no se puede estimar | Interpolar el cero inicial | Aplicada |
 | D13 | Conservar picos altos continuos y rachas bajas reales (`EKPC` 514 MW, 2013-09-29, madrugada de domingo) | Un extremo real se distingue de un error por su continuidad | Tratar como atípicos todos los valores fuera del IQR | Aplicada |
@@ -71,7 +71,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D26 | K-medias y Ward con k de 2 a 10, mayor silueta con grupos de al menos 5 % de los días. Se reporta k = 2 | Ganó k = 2 (0.413) y separa temporada fría y verano. Subir k no separa el fin de semana: sus grupos tienen de 25.5 % a 32.9 % de sábados y domingos con k = 3 y de 20.8 % a 32.6 % con k = 4 (28.6 % esperado sin relación), con silueta 0.301 y 0.241 | Justificar un k mayor para separar el fin de semana | Aplicada |
 | D27 | Silueta y Ward sobre una muestra de 10,000 días | Escalan de forma cuadrática con unos 45,000 días | Usar todos los días | Aplicada |
 | D28 | Cortes de silueta de Kaufman y Rousseeuw: 0.51 (razonable) y 0.26 (débil) | La fuente sitúa 0.26 a 0.50 como estructura débil y 0.51 a 0.70 como razonable. El resultado (0.413, débil) no cambia | Mantener el 0.50 | Aplicada (`SILUETA_RAZONABLE` en `src/config.py`, que usan `src/profiles.py`, `02_patrones` y el panel) |
-| D29 | Estabilidad con el índice de Rand ajustado entre k-medias y Ward (0.73), la repetición con semillas queda por hacer | Es una medida barata de cuánto depende el resultado del algoritmo. Pasó de 0.82 a 0.73 al corregir 3 horas (D2), así que es sensible a cambios pequeños | Afirmarla sin medirla | Parcial: Rand ajustado medido, semillas por hacer |
+| D29 | Estabilidad medida entre semillas y entre algoritmos | Entre semillas (`estabilidad_semillas`, `SEMILLAS_ESTABILIDAD`): con 20 semillas, el índice de Rand ajustado frente a la asignación de referencia va de 0.997 a 1.000, cambia de grupo como máximo el 0.09 % de los días, el grupo 1 reúne entre 62.2 % y 62.3 % y la silueta va de 0.408 a 0.417. Entre k-medias y Ward el índice es 0.73: pasó de 0.82 a 0.73 al corregir 3 horas (D2), así que depende más del algoritmo que de la semilla | Afirmarla sin medirla | Aplicada (`02_patrones`) |
 
 ## 5. Detección de anomalías
 
@@ -80,7 +80,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D8 | z modificado con todos los días de la región, con comprobación por estación y opción `Z_POR_ESTACION` | Es simple y comparable. Los atípicos no se concentran en una estación (0.7 % a 1.3 %) | Calcularlo por estación desde el inicio | Aplicada (`03_pronostico_anomalias`) |
 | D30 | Residuo = real − predicción, residuo diario con signo en % de la predicción, solo días completos | El signo da la dirección y el % permite comparar épocas | Error absoluto o MW | Aplicada |
 | D31 | Umbral \|z\| > 3.5 con sensibilidad a 3, 4 y 5 y comparación por estación y pliegue | Es una convención calibrada para datos normales. Con 3, 3.5, 4 y 5 salen 52, 22, 9 y 2 días | Fijarlo sin comprobar | Aplicada |
-| D32 | Contraste con episodios con fuente y verificación, «fuera de rango» distinto de «sin coincidencia», y dirección esperada (frío y calor `alta`, Sandy `baja`) | No hay etiquetas y hay que distinguir lo no detectado de lo no evaluado | Fechas sin fuente | Aplicada, con una sola tabla en `EPISODIOS_CONOCIDOS` (`src/anomalies.py`). Falta verificar la tormenta Jonas |
+| D32 | Contraste con episodios con fuente y verificación, «fuera de rango» distinto de «sin coincidencia», y dirección esperada (frío y calor `alta`, Sandy `baja`) | No hay etiquetas y hay que distinguir lo no detectado de lo no evaluado | Fechas sin fuente | Aplicada, con una sola tabla en `EPISODIOS_CONOCIDOS` (`src/anomalies.py`). Las fechas de la tormenta Jonas (22 a 24 de enero de 2016) se verificaron con [NOAA](https://www.noaa.gov/media-release/january-2016-blizzard-ranked-category-4-on-northeast-snowfall-scale); su dirección esperada queda «por verificar» porque no se halló una fuente sobre la demanda de PJM |
 | D33 | Anomalías solo para `PJME` | Es la única región con residuos | Repetir para las 12 | Aplicada |
 
 ## 6. Visualización y panel
@@ -99,7 +99,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 |---|---|---|---|---|
 | D37 | Las cifras con hora de fin se marcaron «por recalcular» y se borraron las salidas de las secciones afectadas de los notebooks. El análisis, el modelado, el agrupamiento, las anomalías y la exportación se volvieron a ejecutar con el día operativo | D1 las cambia | Dejarlas sin señalar | Aplicada |
 | D38 | Verificar las referencias y alinear los umbrales con la fuente | Es una tarea de la issue | Citar sin verificar | Parcial: umbrales de silueta alineados (D28), verificación de referencias por completar |
-| D39 | Quitar `prophet`, añadir `jupyterlab` e `ipykernel`, Streamlit opcional | Prophet está descartado | Dejar las dependencias sin revisar | Parcial: falta elegir entre `kaggle` y `kagglehub` |
+| D39 | Quitar `prophet`, añadir `jupyterlab` e `ipykernel`, Streamlit opcional y usar `kaggle` para la descarga | Prophet está descartado, y la guía descarga con el comando `kaggle`; ningún código usa `kagglehub` | `kagglehub`, que no aporta ese comando en las instrucciones | Aplicada |
 | D40 | Parámetros en `src/config.py`, semilla 42 y notebooks 01 a 03 en orden | Reproducibilidad | Parámetros dentro de los notebooks | Aplicada |
 | D41 | La exportación usa la misma hora que `02_patrones`: la de la fuente | Con D7 no hay alineación en ninguno de los dos | Un parámetro compartido | Aplicada. Si se cambiara D7, `src/export.py` tendría que aplicar la misma alineación |
 | D42 | STL con `period=365` y sin interpretar el tramo final de la tendencia | Años bisiestos y efecto de borde | Interpretar la subida final | Aplicada |
@@ -126,11 +126,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 
 **Decisiones abiertas**
 
-- **D3:** unir o no `NI` y `COMED`.
 - **D14:** revisar `DEOK` con la tabla de valores aislados de `01_datos`.
-- **D29:** repetir el agrupamiento con varias semillas.
-- **D32:** verificar la tormenta Jonas.
-- **D39:** elegir entre `kaggle` y `kagglehub`.
 
 **Tareas de cierre**
 
