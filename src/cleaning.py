@@ -4,13 +4,13 @@
 Cada función recibe el DataFrame de UNA región (columnas Datetime y MW) y
 devuelve uno nuevo, sin modificar el original. Orden de uso:
 
-    unificar_duplicados -> marcar_valores_sospechosos -> reindexar_calendario_horario
-    -> marcar_atipicos_aislados -> recortar_extremos_vacios -> interpolar_huecos
+    descartar_lecturas -> unificar_duplicados -> marcar_valores_sospechosos
+    -> reindexar_calendario_horario -> marcar_atipicos_aislados
+    -> recortar_extremos_vacios -> interpolar_huecos -> excluir_dias
     -> validar_limpieza
 
-limpiar_region encadena esos pasos para una región. 01_datos lo aplica a las
-12 regiones y guarda <REGION>_clean.parquet y consumo_horario.parquet en
-data/processed/.
+01_datos encadena esos pasos para las 12 regiones y guarda
+<REGION>_clean.parquet y consumo_horario.parquet en data/processed/.
 """
 
 from pathlib import Path
@@ -20,9 +20,51 @@ import pandas as pd
 
 from src.anomalies import z_modificado
 from src.config import (
-    DESVIACION_MIN_AISLADO, DIFERENCIA_MAX_VECINOS, PROCESSED_DIR, RAW_DIR, UMBRAL_Z_MODIFICADO,
+    DESFASE_FIN_DE_HORA, DESVIACION_MIN_AISLADO, DIAS_EXCLUIDOS, DIFERENCIA_MAX_VECINOS,
+    LECTURAS_DESCARTADAS, PROCESSED_DIR, RAW_DIR, UMBRAL_Z_MODIFICADO,
 )
 from src.data_loader import load_regions_dict
+
+
+def _dia_operativo(fechas: pd.Series) -> pd.Series:
+    """Fecha a la que pertenece cada hora (Datetime marca el final de la hora)."""
+    return (fechas - DESFASE_FIN_DE_HORA).dt.normalize()
+
+
+def descartar_lecturas(df: pd.DataFrame, region: str) -> pd.DataFrame:
+    """Elimina las lecturas erróneas revisadas a mano (decisión D14).
+
+    Debe ejecutarse antes de unificar_duplicados, para que la lectura errónea no
+    entre en el promedio de su hora.
+
+    Parámetros: df (Datetime, MW) de una región y nombre de la región.
+    Retorna una copia de df sin las filas listadas en LECTURAS_DESCARTADAS.
+    Lanza ValueError si una lectura listada no está en los datos.
+    """
+    descartar = pd.Series(False, index=df.index)
+    for fecha, valor in LECTURAS_DESCARTADAS.get(region, ()):
+        coincide = (df["Datetime"] == pd.Timestamp(fecha)) & (df["MW"] == valor)
+        if not coincide.any():
+            raise ValueError(f"{region}: no se encontró la lectura {valor} MW de {fecha}.")
+        descartar |= coincide
+    print(f"Lecturas descartadas: {int(descartar.sum())}")
+    return df[~descartar].reset_index(drop=True)
+
+
+def excluir_dias(df: pd.DataFrame, region: str) -> pd.DataFrame:
+    """Quita los días operativos completos que son erróneos (decisión D14).
+
+    Son huecos demasiado largos para interpolarlos, así que las filas se
+    eliminan y esos días quedan fuera de la serie. Debe ejecutarse después de
+    interpolar_huecos.
+
+    Parámetros: df (Datetime, MW) de una región y nombre de la región.
+    Retorna una copia de df sin las horas de los días de DIAS_EXCLUIDOS.
+    """
+    dias = pd.to_datetime(list(DIAS_EXCLUIDOS.get(region, ())))
+    excluir = _dia_operativo(df["Datetime"]).isin(dias)
+    print(f"Horas excluidas por días erróneos: {int(excluir.sum())}")
+    return df[~excluir].reset_index(drop=True)
 
 
 def unificar_duplicados(df: pd.DataFrame) -> pd.DataFrame:
@@ -164,11 +206,14 @@ def interpolar_huecos(df: pd.DataFrame, limite_horas: int = 2) -> pd.DataFrame:
     return df
 
 
-def validar_limpieza(df: pd.DataFrame) -> pd.DataFrame:
+def validar_limpieza(df: pd.DataFrame, dias_excluidos: tuple[str, ...] = ()) -> pd.DataFrame:
     """Comprueba que la región quedó como debe y lanza un error si no.
 
-    Revisa: fechas sin repetir, orden cronológico, una hora exacta entre filas
-    consecutivas, sin vacíos y sin valores menores o iguales a 0.
+    Revisa: fechas sin repetir, orden cronológico, una fila por cada hora entre
+    la primera y la última (salvo las de `dias_excluidos`, que no deben estar),
+    sin vacíos y sin valores menores o iguales a 0.
+
+    Parámetros: df (Datetime, MW) de una región y sus días operativos excluidos.
     """
     problemas = []
 
@@ -177,10 +222,14 @@ def validar_limpieza(df: pd.DataFrame) -> pd.DataFrame:
     if not df["Datetime"].is_monotonic_increasing:
         problemas.append("las fechas no están en orden cronológico")
 
-    saltos = df["Datetime"].diff().dropna()
-    n_saltos = int((saltos != pd.Timedelta(hours=1)).sum())
-    if n_saltos > 0:
-        problemas.append(f"{n_saltos} saltos distintos de 1 hora")
+    calendario = pd.Series(pd.date_range(df["Datetime"].min(), df["Datetime"].max(), freq="h"))
+    esperadas = calendario[~_dia_operativo(calendario).isin(pd.to_datetime(list(dias_excluidos)))]
+    n_faltan = int((~esperadas.isin(df["Datetime"])).sum())
+    if n_faltan > 0:
+        problemas.append(f"faltan {n_faltan} horas del calendario")
+    n_sobran = int((~df["Datetime"].isin(esperadas)).sum())
+    if n_sobran > 0:
+        problemas.append(f"{n_sobran} horas fuera del calendario o de un día excluido")
 
     n_vacios = int(df["MW"].isna().sum())
     if n_vacios > 0:

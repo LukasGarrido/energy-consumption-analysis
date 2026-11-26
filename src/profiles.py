@@ -59,14 +59,16 @@ def _ordenar_por_tamano(etiquetas: np.ndarray) -> np.ndarray:
     return np.array([mapa[e] for e in etiquetas])
 
 
-def _ajustar(X: np.ndarray, k: int, metodo: str, max_ward: int) -> np.ndarray:
+def _ajustar(
+    X: np.ndarray, k: int, metodo: str, max_ward: int, semilla: int = SEMILLA
+) -> np.ndarray:
     """Agrupa X en k grupos. Ward ajusta sobre una muestra si hay demasiados días."""
     if metodo == "kmeans":
-        return KMeans(n_clusters=k, n_init=10, random_state=SEMILLA).fit_predict(X)
+        return KMeans(n_clusters=k, n_init=10, random_state=semilla).fit_predict(X)
     if metodo == "ward":
         if len(X) <= max_ward:
             return AgglomerativeClustering(n_clusters=k, linkage="ward").fit_predict(X)
-        idx = np.random.default_rng(SEMILLA).choice(len(X), max_ward, replace=False)
+        idx = np.random.default_rng(semilla).choice(len(X), max_ward, replace=False)
         etiquetas_muestra = AgglomerativeClustering(n_clusters=k, linkage="ward").fit_predict(X[idx])
         # El resto de días se asigna al centroide más cercano
         return NearestCentroid().fit(X[idx], etiquetas_muestra).predict(X)
@@ -140,17 +142,17 @@ def estabilidad_semillas(
     semillas: tuple[int, ...] = SEMILLAS_ESTABILIDAD,
     muestra: int = MUESTRA_AGRUPAMIENTO,
 ) -> pd.DataFrame:
-    """Repite k-medias con varias semillas y lo compara con la asignación de referencia.
+    """Repite el agrupamiento con varias semillas y lo compara con la referencia.
 
-    Cada semilla cambia la inicialización de k-medias (sobre todos los días) y la
-    muestra de días con la que se calcula la silueta.
+    Cada semilla cambia la inicialización de k-medias (sobre todos los días), la
+    muestra con la que se calcula la silueta y la muestra con la que se ajusta Ward.
 
     Parámetros: `perfiles` de construir_perfiles, `etiquetas` de referencia (de
     agrupar, que fijan k), `semillas` a probar y tamaño de la `muestra`.
 
     Devuelve una fila por semilla: ari (índice de Rand ajustado frente a la
     referencia), pct_dias_cambian (porcentaje de días en otro grupo),
-    pct_grupo_1 y silueta.
+    pct_grupo_1, silueta y ari_ward (concordancia de Ward con la referencia).
     """
     X = perfiles.to_numpy()
     referencia = etiquetas.to_numpy()
@@ -158,9 +160,8 @@ def estabilidad_semillas(
 
     filas = []
     for semilla in semillas:
-        nuevas = _ordenar_por_tamano(
-            KMeans(n_clusters=k, n_init=10, random_state=semilla).fit_predict(X)
-        )
+        nuevas = _ordenar_por_tamano(_ajustar(X, k, "kmeans", muestra, semilla))
+        ward = _ajustar(X, k, "ward", muestra, semilla)
         idx = np.random.default_rng(semilla).choice(len(X), min(muestra, len(X)), replace=False)
         filas.append({
             "semilla": semilla,
@@ -168,6 +169,7 @@ def estabilidad_semillas(
             "pct_dias_cambian": (nuevas != referencia).mean() * 100,
             "pct_grupo_1": (nuevas == 1).mean() * 100,
             "silueta": silhouette_score(X[idx], nuevas[idx]),
+            "ari_ward": adjusted_rand_score(referencia, ward),
         })
     return pd.DataFrame(filas)
 

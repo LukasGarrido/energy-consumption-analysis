@@ -239,7 +239,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 
 | Elemento | Detalle |
 |---|---|
-| Unidad de análisis | Un día de una región (45,430 perfiles de 12 regiones) |
+| Unidad de análisis | Un día de una región (45,428 perfiles de 12 regiones) |
 | Perfil | 24 valores, uno por hora, del día operativo (`Datetime − 1 h`) |
 | Normalización | Cada valor se divide entre el promedio de su día, para capturar la forma y no el tamaño |
 | Magnitud | El consumo medio diario (`MW_medio_dia`) se guarda aparte |
@@ -267,42 +267,42 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | Algoritmo elegido | K-medias |
 | k elegido | 2 |
 | Silueta media (muestra) y su interpretación | 0.413, estructura débil |
-| Concordancia entre k-medias y Ward (Rand ajustado) | 0.73 |
+| Concordancia entre k-medias y Ward (Rand ajustado) | 0.95 (mediana 0.89 en 20 muestras) |
 | Estabilidad entre 20 semillas (Rand ajustado) | 0.997 a 1.000 |
 | Alineación de `COMED` y `NI` | No (`ALINEAR_HORA_CENTRAL = False`, D7). El diagnóstico detecta +1 h en ambas y 0 en el resto |
 
-**Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2. Con k = 3 la silueta es 0.30 (débil) y con k ≥ 4 queda por debajo de 0.26 (sin estructura sustancial). Con Ward ningún k baja del 5 % de los días (el grupo más pequeño es 5.6 % desde k = 7).
+**Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2. Con k = 3 la silueta es 0.30 (débil) y con k ≥ 4 queda por debajo de 0.26 (sin estructura sustancial). Algún grupo baja del 5 % de los días desde k = 9 con k-medias y desde k = 8 con Ward.
 
 **Por qué k = 2 (D26).** Un k mayor no separa el fin de semana. Sin relación con el calendario, cada grupo tendría 28.6 % de sábados y domingos:
 
 | k | Silueta k-medias | % de fin de semana por grupo |
 |---|---|---|
 | 2 | 0.413 | 28.9 y 28.1 |
-| 3 | 0.301 | 25.5, 29.6 y 32.9 |
-| 4 | 0.241 | 30.0, 20.8, 32.6 y 32.1 |
+| 3 | 0.304 | 25.5, 29.6 y 32.9 |
+| 4 | 0.242 | 30.2, 20.5, 32.6 y 32.0 |
 
-Con k = 3 aparece un perfil de pico matinal (hacia las 8 h, 25.9 % de los días, sobre todo en invierno), a cambio de una silueta menor.
+Con k = 3 aparece un perfil de pico matinal (hacia las 8 h, 26.0 % de los días, sobre todo en invierno), a cambio de una silueta menor.
 
 | k | Silueta k-medias | Silueta Ward | Grupo más pequeño k-medias (%) | Grupo más pequeño Ward (%) |
 |---|---|---|---|---|
-| 2 | 0.413 | 0.393 | 38.2 | 23.6 |
-| 3 | 0.301 | 0.230 | 26.8 | 23.6 |
-| 4 | 0.241 | 0.204 | 17.6 | 9.9 |
-| 5 | 0.245 | 0.171 | 16.6 | 9.9 |
-| 6 | 0.226 | 0.169 | 6.4 | 9.9 |
-| 7 | 0.223 | 0.161 | 7.1 | 5.6 |
-| 8 | 0.206 | 0.148 | 5.9 | 5.6 |
-| 9 | 0.198 | 0.132 | 5.0 | 5.6 |
-| 10 | 0.194 | 0.117 | 5.6 | 5.6 |
+| 2 | 0.413 | 0.397 | 37.9 | 35.4 |
+| 3 | 0.304 | 0.224 | 25.7 | 28.5 |
+| 4 | 0.242 | 0.189 | 17.0 | 17.6 |
+| 5 | 0.248 | 0.173 | 16.8 | 5.9 |
+| 6 | 0.223 | 0.176 | 7.2 | 5.9 |
+| 7 | 0.221 | 0.179 | 7.9 | 5.9 |
+| 8 | 0.205 | 0.169 | 5.1 | 4.7 |
+| 9 | 0.197 | 0.145 | 4.9 | 4.7 |
+| 10 | 0.196 | 0.137 | 3.4 | 3.1 |
 
-**Estabilidad entre semillas (D29).** Los grupos no dependen de la inicialización: con 20 semillas, el índice de Rand ajustado frente a la asignación de referencia va de 0.997 a 1.000, cambia de grupo como máximo el 0.09 % de los días, el grupo 1 reúne entre 62.2 % y 62.3 % y la silueta va de 0.408 a 0.417.
+**Estabilidad entre semillas (D29).** Los grupos de k-medias no dependen de la inicialización: con 20 semillas, el índice de Rand ajustado frente a la asignación de referencia va de 0.997 a 1.000, cambia de grupo como máximo el 0.08 % de los días, el grupo 1 reúne entre 62.2 % y 62.3 % y la silueta va de 0.408 a 0.414. Ward, en cambio, depende de la muestra de días sobre la que se ajusta: con la semilla 42 el índice es 0.95, y al ajustar Ward sobre las muestras de 20 semillas va de 0.69 a 0.99 (mediana 0.89).
 
 **Descripción de cada grupo.**
 
 | Grupo | Nombre | Días | % de los días | Hora pico | Hora mínima | Amplitud | % fin de semana | % festivo | Estación dominante |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Temporada fría (oct–may) | 28,296 | 62.3 | 19 h | 3 h | 0.2 | 28.9 | 3.2 | Invierno (38.1 %) |
-| 2 | Verano (jun–sep) | 17,134 | 37.7 | 17 h | 4 h | 0.4 | 28.1 | 2.8 | Verano (63.0 %) |
+| 1 | Temporada fría (oct–may) | 28,295 | 62.3 | 19 h | 3 h | 0.2 | 28.9 | 3.2 | Invierno (38.1 %) |
+| 2 | Verano (jun–sep) | 17,133 | 37.7 | 17 h | 4 h | 0.4 | 28.1 | 2.8 | Verano (63.0 %) |
 
 - **Grupo 1:** reúne los días de octubre a mayo, con una meseta de mañana (7 a 11 h), un pico nocturno a las 19–20 h, un mínimo a las 3 h y una amplitud de ≈ 0.2 del promedio del día.
 - **Grupo 2:** reúne los días de junio a septiembre, con una sola curva de pico a las 16–17 h (≈ 1.19 del promedio), un mínimo a las 4 h y una amplitud de ≈ 0.4.
@@ -332,7 +332,7 @@ Con k = 3 aparece un perfil de pico matinal (hacia las 8 h, 25.9 % de los días,
 
 **Días que no encajan en su grupo.** La distancia al centro tiene una mediana de ≈ 0.21 en ambos grupos (media 0.226 y 0.223). El día más lejano es el 2008-09-14 de `DAYTON` (1.54), y `EKPC` aparece 7 veces entre los 10 primeros. La distancia no es comparable entre regiones y conviene normalizarla antes de usarla como insumo de la detección de anomalías.
 
-**Salidas** (`data/processed/`): `tipos_de_dia.parquet` (45,430 filas), `tipos_de_dia_curvas.parquet` (48 filas), `tipos_de_dia_resumen.parquet` (2 filas), `tipos_de_dia_mezcla_region.parquet` (24 filas) y `tipos_de_dia_silueta_k.parquet` (18 filas).
+**Salidas** (`data/processed/`): `tipos_de_dia.parquet` (45,428 filas), `tipos_de_dia_curvas.parquet` (48 filas), `tipos_de_dia_resumen.parquet` (2 filas), `tipos_de_dia_mezcla_region.parquet` (24 filas) y `tipos_de_dia_silueta_k.parquet` (18 filas).
 
 ### 4. Limitaciones
 
@@ -343,7 +343,7 @@ Con k = 3 aparece un perfil de pico matinal (hacia las 8 h, 25.9 % de los días,
 - Las regiones cubren periodos distintos, y eso afecta a su mezcla de tipos de día, por eso se compara también en el periodo común.
 - `COMED` y `NI` se analizan con la hora de la fuente, una hora más tarde que el resto. La zona horaria no está confirmada y alinearlas cambiaría de grupo el 1.33 % de los días y subiría el grupo 1 de 60.4 % a 67.1 % en `COMED` y de 52.3 % a 64.3 % en `NI` (silueta 0.420) (D7).
 - El agrupamiento es conjunto para las 12 regiones, lo que permite compararlas pero puede esconder formas propias de una región.
-- La silueta y Ward se calculan sobre una muestra de días (grupo más pequeño: 38.2 % en la muestra y 37.7 % con todos los días).
+- La silueta y Ward se calculan sobre una muestra de días (grupo más pequeño: 37.9 % en la muestra y 37.7 % con todos los días).
 - Sin temperatura, los tipos de día se interpretan por el calendario y no por el clima.
 
 ### 5. Reproducibilidad
@@ -496,7 +496,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.p
 | `dim_fecha` | 7,429 | `curvas_tipo_dia` | 48 |
 | `dim_estacion` | 4 | `mezcla_region_tipo` | 24 |
 | `dim_tipo_dia` | 2 | `silueta_k` | 18 |
-| `hechos_diario` | 45,430 | `pronostico_horario` | 52,584 |
+| `hechos_diario` | 45,428 | `pronostico_horario` | 52,584 |
 | `patron_hora_dia` | 8,064 | `pronostico_metricas` | 12 |
 | `patron_tipo_calendario` | 3,456 | `anomalias_dias` | 2,191 |
 | `tendencia_anual` | 132 | `anomalias_episodios` | 10 |
@@ -534,7 +534,7 @@ Los conceptos clave del proyecto, agrupados por tema. Cada entrada dice qué es 
 - **Silueta.** Mide cuán bien separado está cada día de los demás grupos. Siguiendo a Kaufman y Rousseeuw, una silueta media de 0.71 a 1.00 indica estructura fuerte, de 0.51 a 0.70 razonable, de 0.26 a 0.50 débil (podría ser artificial) y de 0.25 o menos que no hay estructura sustancial. El código usa 0.51 y 0.26 (`SILUETA_RAZONABLE`, `SILUETA_DEBIL`, D28). Se calcula para cada *k* entre 2 y 10, con k-medias y con Ward, sobre una muestra reproducible de 10,000 días.
 - **Elección del número de grupos (*k*).** Se prueba cada *k* de 2 a 10 con ambos métodos y se elige la mayor silueta entre las combinaciones en que ningún grupo tiene menos del 5 % de los días. Con frecuencia k = 2 gana en silueta; aquí se mantiene porque un k mayor no separa el fin de semana (D26).
 - **Agrupamiento jerárquico y criterio de Ward.** Es costoso en memoria con decenas de miles de elementos, por eso se ajusta sobre una muestra de 10,000 días y el resto se asigna al centro más cercano.
-- **Estabilidad del agrupamiento.** Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado, ARI). También se repite k-medias con 20 semillas, y el índice va de 0.997 a 1.000 (D29).
+- **Estabilidad del agrupamiento.** Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado, ARI). También se repite k-medias con 20 semillas, y el índice va de 0.997 a 1.000. La concordancia con Ward cambia más, porque depende de su muestra (D29).
 - **Distancia al centroide.** Distancia de cada día al centro de su grupo. Mira la forma de la curva, mientras que el residuo del pronóstico mira el nivel: un día puede ser raro en una, en la otra o en ambas. La detección de anomalías mide su correlación.
 - **Mapa de calor de calendario.** Las celdas son los días del año y el color indica el tipo de día: cada fila es un año y cada columna un día del año. Es una variante del esquema de van Wijk y van Selow (1999) y muestra cuándo ocurre cada forma de día.
 

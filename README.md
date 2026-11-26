@@ -33,7 +33,7 @@ El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda 
 
 - **Fuente:** [Hourly Energy Consumption (Kaggle)](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption), de Rob Mulla, con datos de PJM Interconnection.
 - **Contenido:** demanda horaria en MW de 12 regiones (AEP, COMED, DAYTON, DEOK, DOM, DUQ, EKPC, FE, NI, PJME, PJMW y PJM_Load), entre 1998-04-01 y 2018-08-03.
-- **Volumen:** 1,090,167 filas originales, 1,090,343 tras la limpieza.
+- **Volumen:** 1,090,167 filas originales, 1,090,295 tras la limpieza.
 - **Convención horaria:** `Datetime` marca el **final** de la hora. Las variables de calendario se calculan desde `Datetime − 1 h` (día operativo).
 - **Periodo común:** no existe uno para las 12 regiones, 10 comparten 2013-06-01 → 2018-08-03.
 
@@ -48,7 +48,7 @@ Cifras de la última ejecución de los notebooks, calculadas con el día operati
 | Hallazgo | Resultado |
 |---|---|
 | Calidad de los datos | Sin nulos, cobertura de 99.98 % a 99.99 %, 40 duplicados y 217 horas faltantes, casi todos por cambios de horario |
-| Limpieza | Las 12 regiones superan la validación (1,090,343 filas), se interpoló el 0.02 % de las horas |
+| Limpieza | Las 12 regiones superan la validación (1,090,295 filas), se interpoló el 0.02 % de las horas y se excluyeron 2 días erróneos de `DEOK` |
 | Convención horaria | `Datetime` marca el final de la hora, el calendario usa el día operativo |
 | Hora de `COMED` | Su curva llega una hora más tarde que la del resto: es lo esperable si las series están en hora del este y `COMED` es una zona de hora central |
 | Ciclo diario | Mínimo hacia las 3–4 h y máximo entre las 17 y las 19 h |

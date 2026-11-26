@@ -32,7 +32,7 @@ Una fase se considera cerrada cuando cumple su criterio de logro.
 | Fase | Actividades | Entregable | Criterio de cierre | Estado |
 |---|---|---|---|---|
 | 1. Exploración y calidad | Estructura, convención horaria, cobertura, duplicados, horas faltantes y valores sospechosos | `01_datos.ipynb` | Hallazgos y decisiones de limpieza documentados | Hecho |
-| 2. Preparación | Limpieza con reglas explícitas y validación | `01_datos.ipynb` y `data/processed/` | Las 12 regiones superan `validar_limpieza` y las filas finales cuadran (1,090,343) | Hecho |
+| 2. Preparación | Limpieza con reglas explícitas y validación | `01_datos.ipynb` y `data/processed/` | Las 12 regiones superan `validar_limpieza` y las filas finales cuadran (1,090,295) | Hecho |
 | 3. Análisis descriptivo | Patrones por hora, día y estación, tendencia, comparación, picos | `02_patrones.ipynb` | Patrones y comparación sobre el periodo común, con el día operativo | Hecho |
 | 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base, MASE, validación en ventana móvil, residuos fuera de muestra | `03_pronostico_anomalias.ipynb` | El modelo supera al base en todos los pliegues y su MASE es menor que 1 | Hecho: 6 de 6 pliegues, MASE de 0.72 a 0.87 |
 | 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | `02_patrones.ipynb` | Silueta media reportada y grupos con al menos el 5 % de los días | Hecho (D7 y D26): k = 2, silueta 0.413 (débil), grupo más pequeño 37.7 % |
