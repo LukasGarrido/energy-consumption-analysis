@@ -109,7 +109,7 @@ Los parámetros están centralizados en `src/config.py`:
 | `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
 | `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (`03_pronostico_anomalias.ipynb` usa 6), 12 meses por pliegue |
 
-`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` (decisión D7) deben tener el mismo valor en `02_patrones.ipynb` y en `src/export.py` (decisión D41). Los cortes de silueta (0.50 y 0.26) siguen pendientes de alinear con Kaufman y Rousseeuw (D28).
+`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` (decisión D7) se definen en `02_patrones.ipynb`; `src/export.py` todavía no los tiene y exporta las tablas de patrones con la hora de la fuente (decisión D41). Los cortes de silueta (0.50 y 0.26) siguen pendientes de alinear con Kaufman y Rousseeuw (D28).
 
 `REZAGOS_HORAS` no puede contener valores menores que `HORIZONTE_HORAS`: el código lanza un error para evitar usar información futura que no se tendría disponible al momento de pronosticar.
 
@@ -147,7 +147,7 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 |---|---|
 | `data/raw/` | Datos originales de Kaggle (no se versionan) |
 | `data/processed/` | Datos limpios y series consolidadas en formato Parquet |
-| `data/processed/powerbi/` | 17 tablas CSV normalizadas y diccionario de datos que lee el panel de Streamlit (la carpeta conserva el nombre histórico `powerbi/`) |
+| `data/processed/panel/` | 17 tablas CSV normalizadas y diccionario de datos que lee el panel de Streamlit |
 | `notebooks/` | Notebooks de Jupyter, numerados en orden de ejecución (01 a 03) |
 | `src/config.py` | Rutas y parámetros globales |
 | `src/data_loader.py` | Lectura segura y validación de datos crudos y procesados |
@@ -185,7 +185,7 @@ Ejecuta los notebooks **en orden numérico estricto**, con *Restart & Run All*. 
 | 1 | `01_datos.ipynb` | Revisa la estructura y calidad de las 12 regiones, convención horaria, duplicados e interpolación de saltos DST | `data/processed/<REGION>_clean.parquet` y `consumo_horario.parquet` | Disponible |
 | 2 | `02_patrones.ipynb` | Analiza patrones horarios, estacionalidad, ciclo semanal, normaliza perfiles diarios y agrupa tipos de día | `data/processed/tipos_de_dia*.parquet` (resumen, curvas, mezcla, silueta) | Disponible |
 | 3 | `03_pronostico_anomalias.ipynb` | Entrena pronóstico de referencia (XGBoost vs base a 24 h en ventana móvil) y detecta días atípicos con z modificado | `residuos_PJME.parquet`, `metricas_ventana_movil_PJME.parquet`, `anomalias_PJME_*.parquet` | Disponible |
-| 4 | `src/export.py` (script) | Consolida los datos procesados y exporta el modelo dimensional de 17 tablas CSV junto al diccionario de datos | 17 archivos CSV en `data/processed/powerbi/` | Disponible |
+| 4 | `src/export.py` (script) | Consolida los datos procesados y exporta el modelo dimensional de 17 tablas CSV junto al diccionario de datos | 17 archivos CSV en `data/processed/panel/` | Disponible |
 
 Correspondencia con la numeración anterior de siete notebooks, útil para leer versiones anteriores de la documentación:
 
@@ -208,13 +208,13 @@ python src/export.py
 | `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
 | `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50 (k-medias con $k = 2$ y silueta 0.413) |
 | `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE de 0.86 en la partición única, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
-| `src/export.py` | 17 archivos `.csv` en `data/processed/powerbi/` junto con `diccionario_datos.csv` (118 columnas documentadas) y el mensaje «Exportación completada con éxito» |
+| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (109 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
 
 ---
 
 ## 6. Cómo ver los resultados
 
-Los resultados se exploran en un panel interactivo en Streamlit, que lee las tablas calculadas en `data/processed/powerbi/` sin recalcular nada.
+Los resultados se exploran en un panel interactivo en Streamlit, que lee las tablas calculadas en `data/processed/panel/` sin recalcular nada.
 
 ### 6.1 Panel interactivo en Streamlit
 
@@ -235,7 +235,7 @@ La app se abrirá automáticamente en tu navegador predeterminado (por defecto e
 
 #### Ejecución con Docker Compose
 
-Es una alternativa que no necesita Python ni entorno virtual para levantar la app. Requiere Docker (en Windows, Docker Desktop en ejecución) y las tablas ya generadas en `data/processed/powerbi/`.
+Es una alternativa que no necesita Python ni entorno virtual para levantar la app. Requiere Docker (en Windows, Docker Desktop en ejecución) y las tablas ya generadas en `data/processed/panel/`.
 
 Desde la raíz del proyecto:
 
@@ -251,7 +251,7 @@ La app queda disponible en `http://localhost:8501`, accesible solo desde el prop
 | Ver los registros | `docker compose logs -f` |
 | Detener y eliminar el contenedor | `docker compose down` |
 
-- **Datos:** la carpeta `data/processed/powerbi/` se monta en solo lectura, no se copia en la imagen. Tras volver a ejecutar `src/export.py`, reinicia con `docker compose restart` para descartar los datos en caché.
+- **Datos:** la carpeta `data/processed/panel/` se monta en solo lectura, no se copia en la imagen. Tras volver a ejecutar `src/export.py`, reinicia con `docker compose restart` para descartar los datos en caché.
 - **Código:** los cambios en `app/`, `src/` o `.streamlit/` requieren repetir `docker compose up --build -d`.
 - **Puerto:** si el 8501 está ocupado, define `STREAMLIT_PORT` en un archivo `.env` en la raíz (por ejemplo, `STREAMLIT_PORT=8502`).
 - **Reinicio:** el contenedor vuelve a arrancar junto con Docker hasta que se detenga con `docker compose down`.
@@ -274,11 +274,6 @@ La aplicación cuenta con una barra lateral izquierda de filtros globales y seis
 - **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas muestran una nota aclaratoria: *"Este gráfico no responde al filtro de fecha."*
 - **Botón "Restablecer filtros":** restaura instantáneamente la selección de todas las regiones, las cuatro estaciones y el rango temporal completo.
 
-#### Limitaciones conocidas
-
-- La página de pronóstico usa `pronostico_horario`, cuya hora no sigue el día operativo: el error por hora aparece desplazado una hora respecto del notebook 03.
-- La dispersión de la página de regiones usa `indicadores_region`, con la razón invierno/verano de todo el historial y la amplitud en MW, por lo que sus valores difieren de los de `02_patrones` (periodo común y amplitud relativa).
-
 ---
 
 ## 7. Solución de problemas
@@ -300,7 +295,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 El archivo `app/streamlit_app.py` añade automáticamente la raíz del proyecto al `sys.path`. Asegúrate de lanzar el comando desde la raíz del repositorio (`streamlit run app/streamlit_app.py`).
 
 **Aviso en Streamlit: "Faltan los siguientes archivos CSV en la carpeta de datos...".**
-La aplicación se detiene si faltan tablas en `data/processed/powerbi/`. Ejecuta el script `python src/export.py` para exportar las 17 tablas requeridas.
+La aplicación se detiene si faltan tablas en `data/processed/panel/`. Ejecuta el script `python src/export.py` para exportar las 17 tablas requeridas.
 
 **El puerto 8501 de Streamlit ya está en uso.**
 Puedes especificar otro puerto agregando la bandera `--server.port`:

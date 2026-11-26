@@ -30,7 +30,7 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 | A | Pronóstico de referencia a 24 horas | P4 y base de P3 | `03_pronostico_anomalias` | Hecho: supera al base en los 6 pliegues, MASE de 0.72 a 0.87 |
 | B | Agrupamiento de perfiles diarios | P1 y P2 | `02_patrones` | Hecho: k = 2 (estacionales), silueta 0.413 (débil). D7 y justificación de k pendientes |
 | C | Detección de días atípicos | P3 | `03_pronostico_anomalias` | Hecho: 22 días atípicos, 5 episodios coinciden |
-| Exportación | Modelo en estrella para el panel | P1 a P4 | `src/export.py` y `app/streamlit_app.py` | Hecho: 17 tablas y panel en Streamlit de seis páginas. Dos tablas con errores por corregir (ver [Exportación para el panel](#exportación-para-el-panel)) |
+| Exportación | Modelo en estrella para el panel | P1 a P4 | `src/export.py` y `app/streamlit_app.py` | Hecho: 17 tablas con claves validadas y panel en Streamlit de seis páginas |
 
 ---
 
@@ -471,12 +471,10 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.p
 
 ## Exportación para el panel
 
-`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 118 columnas. La exportación no valida las claves. Una comprobación manual encontró dos problemas:
+`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 109 columnas. Al terminar, la exportación comprueba que cada valor de `region`, `fecha`, `estacion` y `grupo` de las tablas de hechos exista en su dimensión, y se detiene si no.
 
-- **`pronostico_horario`:** `hora` y `fecha` salen de `Datetime` sin restar una hora, contra D1. Las 2,191 filas de las 00:00 quedan con hora 0 del día siguiente, y la fecha 2018-08-03 no existe en `dim_fecha`. El error por hora del panel queda desplazado una hora respecto del notebook 03.
-- **`indicadores_region`:** la razón invierno/verano se calcula con todo el historial y no con el periodo común (PJME 0.93 y DOM 0.95, frente a 0.95 y 0.985 en `02_patrones`), la amplitud diaria está en MW y no en fracción del promedio del día, y la tabla trae columnas vacías (`Datetime`, `MW`, `fecha`, entre otras).
-
-Las demás tablas no tienen claves sin su fila en la dimensión.
+- **`pronostico_horario`:** `hora`, `mes` y `fecha` se calculan con el día operativo (D1), igual que en el notebook 03: la fila de las 00:00 es la hora 23 del día anterior.
+- **`indicadores_region`:** razón invierno/verano y amplitud diaria relativa (máximo menos mínimo entre el promedio del día, en días de 24 horas), para el historial completo y para el periodo común de las 10 regiones vigentes (columnas `_comun`). Los valores del periodo común coinciden con `02_patrones` (por ejemplo, PJME 0.950 y 0.369; DOM 0.985 y 0.400).
 
 | Tabla | Filas | Tabla | Filas |
 |---|---|---|---|

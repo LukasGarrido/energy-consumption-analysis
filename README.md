@@ -96,7 +96,7 @@ python src/export.py
 streamlit run app/streamlit_app.py
 ```
 
-La app lee las tablas de `data/processed/powerbi/` (la carpeta conserva su nombre histórico) sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py`.
+La app lee las tablas de `data/processed/panel/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py`.
 
 ### Ejecutar con Docker Compose
 
@@ -131,7 +131,7 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep, excluidos por .gitignore)
 │   └── processed/                # Datos limpios y resultados (.gitkeep)
-│       └── powerbi/              # 17 tablas CSV y diccionario de datos (generadas por src/export.py)
+│       └── panel/                # 17 tablas CSV y diccionario de datos (generadas por src/export.py)
 ├── docs/                         # Documentación técnica modular (compatible con Obsidian)
 │   ├── 01_proyecto.md            # Problema, preguntas de investigación y objetivo general
 │   ├── 02_datos.md               # Dataset, fuente, contenido y calidad de los datos
@@ -208,7 +208,6 @@ El detalle completo de métodos y herramientas está en [docs/03_metodologia.md]
 - El pronóstico y la detección de anomalías se hacen solo para `PJME`.
 - La curva de `COMED` llega una hora más tarde que la del resto, la comparación de formas de día entre regiones depende de si se alinea (parámetro `ALINEAR_HORA_CENTRAL`).
 - Los datos llegan hasta 2018 y pueden no representar la demanda actual.
-- Dos tablas del panel tienen errores de exportación por corregir: `pronostico_horario` no usa el día operativo e `indicadores_region` no usa el periodo común (detalle en [docs/04_modelo_y_resultados.md](docs/04_modelo_y_resultados.md#exportación-para-el-panel)).
 
 ---
 

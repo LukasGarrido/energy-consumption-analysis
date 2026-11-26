@@ -9,7 +9,8 @@ import pandas as pd
 # Rutas
 ROOT = Path(__file__).resolve().parents[1]  # energy-consumption-analysis/
 RAW_DIR = ROOT / "data" / "raw"             # datos sin procesar
-PROCESSED_DIR = ROOT / "data" / "processed" # datos procesados y tablas para el panel
+PROCESSED_DIR = ROOT / "data" / "processed" # datos procesados
+PANEL_DIR = PROCESSED_DIR / "panel"         # tablas CSV que lee el panel de Streamlit
 
 # Convención horaria
 DESFASE_FIN_DE_HORA = pd.Timedelta(hours=1)  # Datetime marca el final de la hora

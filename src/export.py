@@ -1,15 +1,23 @@
 """
-/src/export.py: Script de exportación de tablas para Power BI y Streamlit.
+/src/export.py: Script de exportación de tablas para el panel de Streamlit.
 
 Reúne los resultados de limpieza, patrones, agrupamiento y anomalías en un
-modelo en estrella de 17 tablas CSV en data/processed/powerbi/.
+modelo en estrella de 17 tablas CSV en data/processed/panel/, comprueba que
+todas las claves de las tablas de hechos existan en su dimensión y genera el
+diccionario de datos.
 """
 
-import pandas as pd
-import numpy as np
+import sys
 from pathlib import Path
-from src.config import PROCESSED_DIR
-from src.features import agregar_variables_temporales, ESTACIONES as MAPA_ESTACIONES
+
+# Al ejecutar `python src/export.py`, Python agrega src/ al path y no la raíz
+# del proyecto; se agrega la raíz para que `import src` funcione.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import pandas as pd
+from src.config import DESFASE_FIN_DE_HORA, HORAS_POR_DIA, PANEL_DIR, PROCESSED_DIR
+from src.features import agregar_variables_temporales
 
 # Constantes de nombres
 TABLAS_REQUERIDAS = [
@@ -37,10 +45,24 @@ NOMBRES_MESES = {
     9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
 }
 
+# Clave de cada dimensión: toda tabla de hechos que tenga la columna debe
+# tener sus valores en la dimensión correspondiente.
+CLAVES_DIMENSION = {
+    "region": "dim_region",
+    "fecha": "dim_fecha",
+    "estacion": "dim_estacion",
+    "grupo": "dim_tipo_dia",
+}
+
+# Días que puede tardar en terminar una región para seguir contando como
+# vigente (llega hasta el final del dataset).
+DIAS_TOLERANCIA_VIGENTE = 7
+
+
 class EnergyDataExporter:
-    def __init__(self, processed_dir: Path = PROCESSED_DIR):
+    def __init__(self, processed_dir: Path = PROCESSED_DIR, output_dir: Path = PANEL_DIR):
         self.processed_dir = processed_dir
-        self.output_dir = processed_dir / "powerbi"
+        self.output_dir = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.data = {}  # Caché de parquets
 
@@ -69,7 +91,7 @@ class EnergyDataExporter:
         self._export_dim_fecha(consumo)
         self._export_dim_estacion()
         
-        # 3. Agrupamiento (Notebook 05)
+        # 3. Agrupamiento (notebook 02_patrones)
         tipos = self.load_parquet("tipos_de_dia")
         resumen = self.load_parquet("tipos_de_dia_resumen")
         
@@ -83,17 +105,18 @@ class EnergyDataExporter:
         self._export_mezcla_region_tipo()
         self._export_silueta_k()
         
-        # 4. Patrones y Análisis (Notebook 03)
+        # 4. Patrones y análisis (notebook 02_patrones)
         self._export_patrones(consumo)
         self._export_indicadores(consumo)
-        
-        # 5. Pronóstico (Notebook 04)
+
+        # 5. Pronóstico (notebook 03_pronostico_anomalias)
         self._export_pronostico()
-        
-        # 6. Anomalías (Notebook 06)
+
+        # 6. Anomalías (notebook 03_pronostico_anomalias)
         self._export_anomalias()
-        
-        # 7. Diccionario de datos
+
+        # 7. Validación de claves y diccionario de datos
+        self._validar_claves()
         self._export_diccionario()
         
         print("\nExportación completada con éxito.")
@@ -157,32 +180,47 @@ class EnergyDataExporter:
         est["nombre_mes"] = est["mes"].map(NOMBRES_MESES)
         self.save_csv(est, "estacionalidad_mensual")
 
+    @staticmethod
+    def _calcular_indicadores(data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Razón invierno/verano y amplitud diaria relativa por región.
+
+        Parámetros
+        ----------
+        data : pd.DataFrame
+            Consumo horario con `region`, `fecha` (día operativo), `estacion` y `MW`.
+
+        Retorna
+        -------
+        pd.DataFrame
+            Índice `region` y columnas `razon_inv_ver` (consumo medio de invierno
+            entre el de verano) y `amplitud_diaria` (media, sobre los días de 24
+            horas, de máximo menos mínimo dividido entre el promedio del día),
+            igual que en `02_patrones`.
+        """
+        por_estacion = data.groupby(["region", "estacion"])["MW"].mean().unstack()
+        razon = por_estacion["Invierno"] / por_estacion["Verano"]
+
+        dia = data.groupby(["region", "fecha"])["MW"]
+        completos = dia.count() == HORAS_POR_DIA
+        amplitud_dia = (dia.max() - dia.min()) / dia.mean()
+        amplitud = amplitud_dia[completos].groupby(level="region").mean()
+
+        return pd.DataFrame({"razon_inv_ver": razon, "amplitud_diaria": amplitud})
+
     def _export_indicadores(self, df: pd.DataFrame):
-        def calc_metrics(data):
-            if data.empty:
-                return pd.Series({"razon": np.nan, "amplitud": np.nan})
-            inv = data[data["estacion"] == "Invierno"]["MW"].mean()
-            ver = data[data["estacion"] == "Verano"]["MW"].mean()
-            razon = inv / ver if ver > 0 else np.nan
-            amp = data.groupby("fecha")["MW"].agg(lambda x: x.max() - x.min()).mean()
-            return pd.Series({"razon": razon, "amplitud": amp})
+        # Historial completo de cada región
+        ind_total = self._calcular_indicadores(df)
 
-        # Totales
-        ind_total = df.groupby("region", group_keys=False).apply(calc_metrics)
-        ind_total = ind_total.rename(columns={"razon": "razon_inv_ver", "amplitud": "amplitud_diaria"})
-
-        # Periodo común (regiones vigentes que comparten el periodo final)
+        # Periodo común de las regiones vigentes (las que llegan al final del dataset)
         rango = df.groupby("region")["fecha"].agg(["min", "max"])
-        vig = rango[rango["max"] >= rango["max"].max() - pd.Timedelta(days=7)]
-        if not vig.empty:
-            ini_comun, fin_comun = vig["min"].max(), vig["max"].min()
-            df_comun = df[df["region"].isin(vig.index) & (df["fecha"] >= ini_comun) & (df["fecha"] <= fin_comun)]
-            ind_comun = df_comun.groupby("region", group_keys=False).apply(calc_metrics)
-            ind_comun = ind_comun.rename(columns={"razon": "razon_inv_ver_comun", "amplitud": "amplitud_diaria_comun"})
-            ind = ind_total.join(ind_comun, how="left").reset_index()
-        else:
-            ind = ind_total.reset_index()
+        limite = rango["max"].max() - pd.Timedelta(days=DIAS_TOLERANCIA_VIGENTE)
+        vigentes = rango[rango["max"] >= limite]
+        ini_comun, fin_comun = vigentes["min"].max(), vigentes["max"].min()
+        en_comun = df["region"].isin(vigentes.index) & df["fecha"].between(ini_comun, fin_comun)
+        ind_comun = self._calcular_indicadores(df[en_comun]).add_suffix("_comun")
 
+        ind = ind_total.join(ind_comun, how="left").rename_axis("region").reset_index()
         self.save_csv(ind, "indicadores_region")
 
     def _export_curvas_tipo_dia(self):
@@ -206,9 +244,12 @@ class EnergyDataExporter:
         res = self.load_parquet("residuos_PJME")
         res["error_abs"] = res["residuo"].abs()
         res["error_pct"] = res["error_abs"] / res["real"] * 100
-        res["hora"] = res["Datetime"].dt.hour
-        res["mes"] = res["Datetime"].dt.month
-        res["fecha"] = res["Datetime"].dt.normalize()
+        # Día operativo (D1): Datetime marca el final de la hora, así que la
+        # fila de las 00:00 es la hora 23 del día anterior.
+        inicio_hora = res["Datetime"] - DESFASE_FIN_DE_HORA
+        res["hora"] = inicio_hora.dt.hour
+        res["mes"] = inicio_hora.dt.month
+        res["fecha"] = inicio_hora.dt.normalize()
         self.save_csv(res, "pronostico_horario")
         
         met = self.load_parquet("metricas_ventana_movil_PJME")
@@ -224,6 +265,47 @@ class EnergyDataExporter:
         
         episodios = self.load_parquet("anomalias_PJME_episodios")
         self.save_csv(episodios, "anomalias_episodios")
+
+    def _validar_claves(self) -> None:
+        """
+        Comprueba que cada clave de las tablas exportadas exista en su dimensión.
+
+        Una clave sin su fila en la dimensión haría desaparecer esa fila al
+        filtrar en el panel.
+
+        Raises
+        ------
+        ValueError
+            Si alguna tabla tiene valores de `region`, `fecha`, `estacion` o
+            `grupo` que no están en su dimensión.
+        """
+        def normalizar(serie: pd.Series, clave: str) -> pd.Series:
+            serie = serie.dropna()
+            if clave == "fecha":
+                return pd.to_datetime(serie).dt.strftime("%Y-%m-%d")
+            return serie.astype(str)
+
+        dimensiones = {
+            clave: set(normalizar(pd.read_csv(self.output_dir / f"{tabla}.csv")[clave], clave))
+            for clave, tabla in CLAVES_DIMENSION.items()
+        }
+
+        errores = []
+        for nombre in TABLAS_REQUERIDAS:
+            if nombre.startswith("dim_"):
+                continue
+            tabla = pd.read_csv(self.output_dir / f"{nombre}.csv")
+            for clave, validos in dimensiones.items():
+                if clave not in tabla.columns:
+                    continue
+                valores = normalizar(tabla[clave], clave)
+                faltantes = sorted(set(valores) - validos)
+                if faltantes:
+                    errores.append(f"{nombre}.{clave}: {len(faltantes)} valores sin dimensión (p. ej., {faltantes[:3]})")
+
+        if errores:
+            raise ValueError("Claves sin su fila en la dimensión:\n" + "\n".join(errores))
+        print("Validación de claves: todas las claves existen en su dimensión.")
 
     def _export_diccionario(self):
         # Generación simplificada del diccionario basado en las columnas exportadas

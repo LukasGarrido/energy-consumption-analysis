@@ -1,6 +1,6 @@
 """
 app/data_loader.py
-Carga y caché de todas las tablas CSV exportadas por el notebook 07.
+Carga y caché de todas las tablas CSV exportadas por ``src/export.py``.
 
 La función principal usa ``st.cache_data`` para leer los archivos una
 sola vez por sesión y aplicar las conversiones de tipo necesarias.
@@ -9,17 +9,17 @@ sola vez por sesión y aplicar las conversiones de tipo necesarias.
 import pandas as pd
 import streamlit as st
 
-from app.config import TABLAS_REQUERIDAS, resolver_directorio_powerbi
+from app.config import TABLAS_REQUERIDAS, resolver_directorio_panel
 
 
 @st.cache_data(show_spinner="Cargando tablas de datos…")
 def cargar_datos() -> dict[str, pd.DataFrame]:
     """
-    Lee todos los CSV de la carpeta ``powerbi/`` y los devuelve en un
+    Lee todos los CSV de la carpeta ``panel/`` y los devuelve en un
     diccionario cuyas claves son los nombres de tabla (sin extensión .csv).
 
     Si faltan archivos, muestra un aviso con la lista de CSV faltantes,
-    indica que hay que ejecutar el notebook 07 y detiene la aplicación
+    indica que hay que ejecutar ``python src/export.py`` y detiene la aplicación
     con ``st.stop()``.
 
     Retorna
@@ -27,7 +27,7 @@ def cargar_datos() -> dict[str, pd.DataFrame]:
     dict[str, pd.DataFrame]
         Diccionario con todas las tablas listas para consumir.
     """
-    directorio = resolver_directorio_powerbi()
+    directorio = resolver_directorio_panel()
 
     # Comprobar que todos los archivos existen antes de leer ninguno
     faltantes = [
@@ -39,7 +39,7 @@ def cargar_datos() -> dict[str, pd.DataFrame]:
         st.error(
             "Faltan los siguientes archivos CSV en la carpeta de datos:\n\n"
             + "\n".join(f"- `{nombre}.csv`" for nombre in faltantes)
-            + "\n\nEjecuta el notebook **07_exportacion.ipynb** para generarlos."
+            + "\n\nEjecuta `python src/export.py` para generarlos."
         )
         st.stop()
 
