@@ -87,9 +87,9 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 
 | ID | Decisión | Motivo | Alternativa descartada | Estado |
 |---|---|---|---|---|
-| D4 | Panel en Power BI, Streamlit queda como prototipo opcional | Lo pide la rúbrica | Solo Streamlit | Confirmada. Archivo de Power BI por construir |
-| D34 | Seis páginas: resumen, patrones, tipos de día, regiones, anomalías y pronóstico | Cada una responde a P1 a P4 y al panorama | Cinco páginas | Aplicada. Falta alinear el README con seis páginas |
-| D35 | Modelo en estrella en CSV UTF-8 con BOM (17 tablas), fechas ISO, Sí/No, nombres sin `%` y validación de claves huérfanas | Power BI lo importa sin configuración y una clave huérfana aparece como fila en blanco. La exportación no encontró claves huérfanas | Importar parquet | Aplicada (`src/export.py`) |
+| D4 | Panel solo en Streamlit | Permite una visualización más dinámica, usa el mismo Python del análisis y no requiere licencias | Power BI, que era la opción inicial | Aplicada (`app/streamlit_app.py`) |
+| D34 | Seis páginas: resumen, patrones, tipos de día, regiones, anomalías y pronóstico | Cada una responde a P1 a P4 y al panorama | Cinco páginas | Aplicada |
+| D35 | Modelo en estrella en CSV UTF-8 con BOM (17 tablas), fechas ISO, Sí/No y nombres sin `%` | Formato legible por cualquier herramienta, y una clave sin su fila en la dimensión haría desaparecer filas al filtrar | Importar parquet | Aplicada (`src/export.py`) sin validación de claves. `pronostico_horario` tiene una fecha sin fila en `dim_fecha` |
 | D36 | Gráficos elegidos por tarea y canal perceptual, color secuencial de un matiz y categórico de hasta 8 colores, sin gráficos circulares | Cleveland y McGill ordenan la precisión de los canales | Elegir por costumbre | Aplicada |
 | D44 | Filtros por región, fecha y estación, las tablas agregadas no responden a la fecha | La rúbrica los pide y esas tablas no tienen fecha | Todo a nivel horario | Aplicada |
 
@@ -101,7 +101,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D38 | Verificar las referencias y alinear los umbrales con la fuente | Es una tarea de la issue | Citar sin verificar | En curso (ver D28) |
 | D39 | Quitar `prophet`, añadir `jupyterlab` e `ipykernel`, Streamlit opcional | Prophet está descartado | Dejar las dependencias sin revisar | Parcial: falta elegir entre `kaggle` y `kagglehub` |
 | D40 | Parámetros en `src/config.py`, semilla 42 y notebooks 01 a 03 en orden | Reproducibilidad | Parámetros dentro de los notebooks | Aplicada |
-| D41 | `ALINEAR_HORA_CENTRAL` con el mismo valor en `02_patrones` y en la exportación | Si difiere, los días de `COMED` y `NI` no coinciden | Archivo compartido | Aplicada |
+| D41 | `ALINEAR_HORA_CENTRAL` con el mismo valor en `02_patrones` y en la exportación | Si difiere, los días de `COMED` y `NI` no coinciden | Archivo compartido | Por aplicar: `src/export.py` no tiene el parámetro y recalcula el calendario con la hora de la fuente. Hoy no hay diferencia porque `02_patrones` usa `False` |
 | D42 | STL con `period=365` y sin interpretar el tramo final de la tendencia | Años bisiestos y efecto de borde | Interpretar la subida final | Aplicada |
 | D43 | Festivos federales de EE. UU. con `holidays` | Criterio uniforme para las 12 regiones | Festivos estatales | Aplicada |
 
@@ -139,10 +139,8 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 
 **Tareas de cierre**
 
-- **Nombres de los grupos:** `02_patrones` ya guarda «Temporada fría» y «Verano» en `nombre_grupo`; verificar que `src/export.py` los use y no los automáticos «G1 · Invierno · mixto» y «G2 · Verano · mixto».
 - **`AEP`:** verificar el máximo del 2008-10-20 (25,695 MW).
 - **Hora de las series (D1 y D7):** confirmar en la documentación de PJM que todas las series están en hora del este.
-- **D34:** alinear el README con seis páginas.
-- **Panel (D4, D34):** construir el archivo de Power BI y verificar la licencia.
+- **Exportación (D1, D35):** corregir `pronostico_horario` para que use el día operativo y `indicadores_region` para que use el periodo común y la amplitud relativa, y agregar la validación de claves a `src/export.py`.
 - **Reproducibilidad:** que un tercero siga la guía de usuario.
 

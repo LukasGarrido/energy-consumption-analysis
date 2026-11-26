@@ -26,16 +26,13 @@
 - [5. Orden de ejecución](#5-orden-de-ejecución)
   - [Comprobaciones tras ejecutar](#comprobaciones-tras-ejecutar)
 - [6. Cómo ver los resultados](#6-cómo-ver-los-resultados)
-  - [6.1 Prototipo interactivo en Streamlit](#61-prototipo-interactivo-en-streamlit)
-  - [6.2 Panel en Power BI Desktop](#62-panel-en-power-bi-desktop)
+  - [6.1 Panel interactivo en Streamlit](#61-panel-interactivo-en-streamlit)
 - [7. Solución de problemas](#7-solución-de-problemas)
 
 ---
 
 
-Esta guía explica cómo instalar el proyecto, obtener los datos y reproducir el análisis desde cero, así como explorar los resultados tanto en el prototipo interactivo de Streamlit como en el panel de Power BI.
-
-> El archivo de Power BI (`app/panel_pjm.pbix`) está en desarrollo. El resto de los pasos corresponde a componentes que ya existen.
+Esta guía explica cómo instalar el proyecto, obtener los datos y reproducir el análisis desde cero, así como explorar los resultados en el panel interactivo de Streamlit.
 
 ---
 
@@ -47,8 +44,8 @@ Esta guía explica cómo instalar el proyecto, obtener los datos y reproducir el
 | Git | Para clonar el repositorio |
 | Cuenta de Kaggle | Solo si se descarga el dataset con la API (opcional) |
 | Sistema operativo | Windows, Linux o macOS |
-| Power BI Desktop | Solo para ver el panel de Power BI (requiere Windows) |
-| Navegador web | Para interactuar con el prototipo de Streamlit (Chrome, Edge, Firefox, etc.) |
+| Navegador web | Para interactuar con el panel de Streamlit (Chrome, Edge, Firefox, etc.) |
+| Docker | Solo para levantar el panel con Docker Compose (opcional) |
 
 Para verificar la versión de Python:
 
@@ -150,7 +147,7 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 |---|---|
 | `data/raw/` | Datos originales de Kaggle (no se versionan) |
 | `data/processed/` | Datos limpios y series consolidadas en formato Parquet |
-| `data/processed/powerbi/` | 17 tablas CSV normalizadas y diccionario de datos exportados para Power BI y Streamlit |
+| `data/processed/powerbi/` | 17 tablas CSV normalizadas y diccionario de datos que lee el panel de Streamlit (la carpeta conserva el nombre histórico `powerbi/`) |
 | `notebooks/` | Notebooks de Jupyter, numerados en orden de ejecución (01 a 03) |
 | `src/config.py` | Rutas y parámetros globales |
 | `src/data_loader.py` | Lectura segura y validación de datos crudos y procesados |
@@ -159,20 +156,17 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 | `src/modeling.py` | Particiones temporales, modelos basales y XGBoost, métricas (MASE) y ventana móvil |
 | `src/profiles.py` | Extracción de perfiles diarios, normalización, silueta y agrupamiento |
 | `src/anomalies.py` | Cálculo de residuos diarios, z modificado y contraste con episodios históricos |
-| `src/export.py` | Script de exportación del modelo dimensional (17 tablas CSV para Power BI y Streamlit) |
-| `src/plots.py` | Funciones auxiliares de graficado y estilos |
-| `app/streamlit_app.py` | Punto de entrada del prototipo interactivo en Streamlit |
+| `src/export.py` | Script de exportación del modelo dimensional (17 tablas CSV para el panel de Streamlit) |
+| `app/streamlit_app.py` | Punto de entrada del panel interactivo en Streamlit |
 | `app/config.py` | Constantes, paleta Okabe-Ito y rutas de la app |
 | `app/data_loader.py` | Carga con caché y tipado de datos para la app |
 | `app/filtros.py` | Helpers de filtrado por región, estación y rango de fechas |
 | `app/graficos.py` | Helpers de visualización y compatibilidad con Plotly |
 | `app/paginas/` | Módulos individuales por página (resumen, patrones, tipos de día, regiones, anomalías, pronóstico) |
-| `app/panel_pjm.pbix` | Archivo del panel de Power BI *(en desarrollo)* |
 | `Dockerfile`, `compose.yaml`, `.dockerignore` | Contenedor de la app de Streamlit y su servicio de Docker Compose |
 | `requirements-app.txt` | Dependencias fijadas de la imagen Docker |
-| `public/report/` | Plantilla de informe final en PDF |
-| `public/power_electric_plant.png` | Ilustración conceptual del proyecto |
 | `docs/` | Documentación del proyecto: `01_proyecto`, `02_datos`, `03_metodologia`, `04_modelo_y_resultados`, `05_decisiones`, `06_guia_usuario` y `07_referencias` |
+| `docs/IEEE/` | Informe en formato de artículo IEEE y sus figuras |
 
 ---
 
@@ -220,11 +214,11 @@ python src/export.py
 
 ## 6. Cómo ver los resultados
 
-El proyecto ofrece dos vías de visualización analítica que consumen las mismas tablas calculadas en `data/processed/powerbi/`: el prototipo interactivo en Streamlit y el panel en Power BI.
+Los resultados se exploran en un panel interactivo en Streamlit, que lee las tablas calculadas en `data/processed/powerbi/` sin recalcular nada.
 
-### 6.1 Prototipo interactivo en Streamlit
+### 6.1 Panel interactivo en Streamlit
 
-El prototipo en Streamlit permite explorar de inmediato los resultados en cualquier navegador web, sin requerir Power BI Desktop ni licencias propietarias.
+El panel en Streamlit permite explorar los resultados de forma dinámica en cualquier navegador web, sin licencias propietarias.
 
 #### Ejecución
 
@@ -280,15 +274,10 @@ La aplicación cuenta con una barra lateral izquierda de filtros globales y seis
 - **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas muestran una nota aclaratoria: *"Este gráfico no responde al filtro de fecha."*
 - **Botón "Restablecer filtros":** restaura instantáneamente la selección de todas las regiones, las cuatro estaciones y el rango temporal completo.
 
----
+#### Limitaciones conocidas
 
-### 6.2 Panel en Power BI Desktop
-
-El panel interactivo en Power BI consume las tablas exportadas por `src/export.py` *(panel en desarrollo en `app/panel_pjm.pbix`)*:
-
-1. Instalar Power BI Desktop (requiere Windows).
-2. Abrir el archivo `app/panel_pjm.pbix`.
-3. Si los orígenes de datos no se detectan automáticamente, actualizar la ruta de origen en *Transformar datos → Configuración del origen de datos* apuntando a la carpeta `data/processed/powerbi/` de tu repositorio local.
+- La página de pronóstico usa `pronostico_horario`, cuya hora no sigue el día operativo: el error por hora aparece desplazado una hora respecto del notebook 03.
+- La dispersión de la página de regiones usa `indicadores_region`, con la razón invierno/verano de todo el historial y la amplitud en MW, por lo que sus valores difieren de los de `02_patrones` (periodo común y amplitud relativa).
 
 ---
 

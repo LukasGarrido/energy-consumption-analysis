@@ -25,7 +25,7 @@ El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda 
 
 1. **De pronosticar a caracterizar:** el aprendizaje automático (agrupamiento de perfiles diarios y detección de anomalías) se usa para obtener información, no solo precisión de pronóstico.
 2. **Comparación entre 12 regiones con calidad de datos documentada:** periodos desiguales, hora de fin de intervalo, cambios de horario y continuidad entre regiones.
-3. **Diseño de visualización justificado:** cada gráfico se asocia a una tarea y a un canal perceptual, y se entrega en un panel interactivo en Power BI complementado por un prototipo en Streamlit.
+3. **Diseño de visualización justificado:** cada gráfico se asocia a una tarea y a un canal perceptual, y se entrega en un panel interactivo en Streamlit de seis páginas.
 
 ---
 
@@ -43,7 +43,7 @@ Los datos crudos **no se incluyen en el repositorio**, se descargan desde Kaggle
 
 ## Resultados
 
-Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora de fin y se actualizan con el día operativo.
+Cifras de la última ejecución de los notebooks, calculadas con el día operativo.
 
 | Hallazgo | Resultado |
 |---|---|
@@ -53,7 +53,7 @@ Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora
 | Hora de `COMED` | Su curva llega una hora más tarde que la del resto: es lo esperable si las series están en hora del este y `COMED` es una zona de hora central |
 | Ciclo diario | Mínimo hacia las 3–4 h y máximo entre las 17 y las 19 h |
 | Calendario | El fin de semana consume entre un 3.9 % y un 13.9 % menos que un laborable (≈ −9 % en promedio), un festivo cerca de un 5 % menos |
-| Estacionalidad | Dos máximos anuales (verano e invierno), `EKPC` y `PJMW` son invernales, `COMED`, `DUQ`, `DEOK` y `PJME` veraniegas |
+| Estacionalidad | Dos máximos anuales (verano e invierno), `EKPC` y `PJMW` son invernales (y `AEP` en menor medida), `COMED`, `DUQ`, `DEOK` y `PJME` veraniegas |
 | Pronóstico a 24 h (`PJME`) | XGBoost: MAE de 1,862 MW frente a 2,300 MW del modelo base (−19.1 %), MASE de 0.86 (0.72 a 0.87 en ventana móvil de 6 pliegues) |
 | Tipos de día y anomalías | 2 tipos estacionales (k = 2, silueta 0.413: temporada fría y verano); 22 días atípicos en PJME (z modificado > 3.5), con 5 episodios contrastados |
 
@@ -63,7 +63,7 @@ Las cifras horarias y las del pronóstico se calcularon con `Datetime` como hora
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/TU_USUARIO/energy-consumption-analysis.git
+git clone https://github.com/LukasGarrido/energy-consumption-analysis.git
 cd energy-consumption-analysis
 
 # 2. Crear y activar el entorno virtual
@@ -82,9 +82,9 @@ kaggle datasets download -d robikscube/hourly-energy-consumption -p data/raw --u
 jupyter lab
 ```
 
-Ejecuta los notebooks **en orden numérico (01 a 03)**, con *Restart & Run All*. Posteriormente, ejecuta el script de exportación (`python src/export.py`) para generar las 17 tablas requeridas por Power BI y Streamlit. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/06_guia_usuario.md](docs/06_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
+Ejecuta los notebooks **en orden numérico (01 a 03)**, con *Restart & Run All*. Posteriormente, ejecuta el script de exportación (`python src/export.py`) para generar las 17 tablas que lee el panel de Streamlit. La guía completa, con las comprobaciones esperadas y la solución de problemas, está en [docs/06_guia_usuario.md](docs/06_guia_usuario.md). Se recomienda Python 3.10 a 3.12.
 
-### Ejecutar el prototipo de Streamlit
+### Ejecutar el panel de Streamlit
 
 Una vez ejecutados los notebooks y el script de exportación, la app puede levantarse directamente desde la raíz del proyecto:
 
@@ -96,7 +96,7 @@ python src/export.py
 streamlit run app/streamlit_app.py
 ```
 
-La app lee las tablas de `data/processed/powerbi/` sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py`.
+La app lee las tablas de `data/processed/powerbi/` (la carpeta conserva su nombre histórico) sin recalcular nada. Si algún CSV falta, indica cuál y recuerda ejecutar `python src/export.py`.
 
 ### Ejecutar con Docker Compose
 
@@ -114,7 +114,7 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 
 ```text
 ├── app/
-│   ├── streamlit_app.py          # Punto de entrada del prototipo Streamlit
+│   ├── streamlit_app.py          # Punto de entrada del panel en Streamlit
 │   ├── config.py                 # Constantes, paleta Okabe-Ito y resolución de rutas
 │   ├── data_loader.py            # Carga con caché y conversiones de tipo
 │   ├── estilos.py                # Mejoras visuales y diseño adaptativo (modo claro/oscuro)
@@ -128,7 +128,6 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 │   │   ├── regiones.py           # Barras apiladas y dispersión de indicadores
 │   │   ├── anomalias.py          # Línea de tiempo, episodios y caso hora a hora
 │   │   └── pronostico.py         # Métricas, error desglosado y real vs. pronóstico
-│   └── panel_pjm.pbix            # Panel en Power BI (en desarrollo)
 ├── data/
 │   ├── raw/                      # Datos crudos (.gitkeep, excluidos por .gitignore)
 │   └── processed/                # Datos limpios y resultados (.gitkeep)
@@ -154,7 +153,7 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 │   ├── cleaning.py               # Limpieza de series, deduplicación e interpolación
 │   ├── config.py                 # Rutas y parámetros globales del proyecto
 │   ├── data_loader.py            # Funciones de carga y lectura de datos
-│   ├── export.py                 # Exportación del modelo dimensional (17 tablas CSV para Power BI)
+│   ├── export.py                 # Exportación del modelo dimensional (17 tablas CSV para el panel)
 │   ├── features.py               # Día operativo, variables de calendario, rezagos y medias móviles
 │   ├── modeling.py               # Partición temporal, modelos XGBoost/base, métricas y ventana móvil
 │   └── profiles.py               # Perfiles diarios, elección de k y agrupamiento
@@ -195,10 +194,10 @@ El proyecto se desarrolla utilizando un ecosistema de análisis de datos, modela
 - **Procesamiento y Análisis de Datos:** Python, `pandas`, `numpy`, `scipy`, `pyarrow`.
 - **Aprendizaje Automático y Modelado:** `scikit-learn` (agrupamiento k-medias y Ward, métricas), `xgboost` (pronóstico de referencia a 24 horas), `statsmodels` (descomposición STL).
 - **Utilidades y Datos:** `holidays` (festivos federales de EE. UU.), `kagglehub` (descarga y gestión de datasets).
-- **Visualización y Presentación:** `Plotly`, `Matplotlib`, `Seaborn`, Streamlit (prototipo interactivo), Power BI Desktop (panel analítico en modelo en estrella).
+- **Visualización y Presentación:** `Plotly`, `Matplotlib`, `Seaborn`, Streamlit (panel interactivo alimentado por un modelo en estrella en CSV) y Docker Compose (ejecución opcional del panel).
 - **Entorno y Documentación:** Jupyter Notebook / JupyterLab, Git y GitHub (control de versiones), Obsidian (documentación técnica y bitácora de decisiones).
 
-El detalle completo de métodos y herramientas está en [docs/03_metodos_y_herramientas.md](docs/03_metodos_y_herramientas.md).
+El detalle completo de métodos y herramientas está en [docs/03_metodologia.md](docs/03_metodologia.md).
 
 ---
 
@@ -209,6 +208,7 @@ El detalle completo de métodos y herramientas está en [docs/03_metodos_y_herra
 - El pronóstico y la detección de anomalías se hacen solo para `PJME`.
 - La curva de `COMED` llega una hora más tarde que la del resto, la comparación de formas de día entre regiones depende de si se alinea (parámetro `ALINEAR_HORA_CENTRAL`).
 - Los datos llegan hasta 2018 y pueden no representar la demanda actual.
+- Dos tablas del panel tienen errores de exportación por corregir: `pronostico_horario` no usa el día operativo e `indicadores_region` no usa el periodo común (detalle en [docs/04_modelo_y_resultados.md](docs/04_modelo_y_resultados.md#exportación-para-el-panel)).
 
 ---
 
