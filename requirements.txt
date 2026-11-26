@@ -16,7 +16,7 @@ xgboost
 
 # --- Utilidades ---
 holidays
-kagglehub
+kaggle
 
 # --- Notebooks ---
 jupyterlab

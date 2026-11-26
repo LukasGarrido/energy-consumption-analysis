@@ -45,7 +45,7 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 - **Picos:** `PJME` alcanzó 62,009 MW el 2006-08-02. `DOM`, `EKPC` y `PJMW` tienen su récord el 2015-02-20 a las 7 h. Ambas fechas coinciden con episodios documentados por PJM: el récord de demanda de verano y el de invierno. El máximo de `AEP` es 25,164 MW (2007-08-08): el valor crudo mayor (2008-10-20) se descartó como atípico aislado (D2).
 - **Correlaciones:** de 0.56 a 0.96. Los pares más parecidos son `AEP`–`PJMW` y `DAYTON`–`FE` (0.96), y la región más distinta es `EKPC`.
 - **Hora de `COMED` y `NI`:** su curva diaria llega una hora más tarde que la del resto (error de 0.014 con +1 h frente a 0.024 sin desplazar). Es lo esperable si las series están en hora del este y esas zonas son de hora central. Se conserva la hora de la fuente (ver D7).
-- **`NI` y `COMED`:** cociente de niveles 1.00 y empalme el 2011-01-01, lo que permite tratarlas como la misma zona (D3, por confirmar).
+- **`NI` y `COMED`:** cociente de niveles 1.00 y empalme el 2011-01-01, compatibles con una misma zona; se mantienen como series separadas (D3).
 
 ---
 
@@ -255,7 +255,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | Muestra | La silueta y Ward se calculan sobre una muestra reproducible de 10,000 días (`MUESTRA_AGRUPAMIENTO`), porque escalan de forma cuadrática. Ward asigna el resto de los días al centro más cercano, k-medias usa todos |
 | Selección de k | Mayor silueta media entre las combinaciones en que ningún grupo baja del 5 % de los días |
 | Calidad de la estructura | El proyecto usa 0.51 como umbral de estructura razonable (`SILUETA_RAZONABLE`) y 0.26 como límite de la estructura débil (`SILUETA_DEBIL`), siguiendo a Kaufman y Rousseeuw (D28). Por debajo de 0.26 no hay estructura sustancial. Se reporta tal como sale |
-| Estabilidad | Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado). La repetición con distintas semillas queda por hacer |
+| Estabilidad | Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado) y repetición de k-medias con 20 semillas (`SEMILLAS_ESTABILIDAD`, D29) |
 | Alineación horaria | Parámetro `ALINEAR_HORA_CENTRAL`: con `True` se resta 1 h a las regiones de `REGIONES_HORA_CENTRAL` antes de calcular el día operativo. `02_patrones.ipynb` mide el desfase de cada región y la decisión D7 es no alinear |
 | Interpretación | Curva media de cada grupo con banda de percentiles 10 a 90, frecuencia y composición por día de la semana, mes, estación y festivo |
 | Días que no encajan | Distancia de cada día al centro de su grupo (`distancia_centroide`), insumo de la detección de anomalías |
@@ -268,6 +268,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | k elegido | 2 |
 | Silueta media (muestra) y su interpretación | 0.413, estructura débil |
 | Concordancia entre k-medias y Ward (Rand ajustado) | 0.73 |
+| Estabilidad entre 20 semillas (Rand ajustado) | 0.997 a 1.000 |
 | Alineación de `COMED` y `NI` | No (`ALINEAR_HORA_CENTRAL = False`, D7). El diagnóstico detecta +1 h en ambas y 0 en el resto |
 
 **Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2. Con k = 3 la silueta es 0.30 (débil) y con k ≥ 4 queda por debajo de 0.26 (sin estructura sustancial). Con Ward ningún k baja del 5 % de los días (el grupo más pequeño es 5.6 % desde k = 7).
@@ -293,6 +294,8 @@ Con k = 3 aparece un perfil de pico matinal (hacia las 8 h, 25.9 % de los días,
 | 8 | 0.206 | 0.148 | 5.9 | 5.6 |
 | 9 | 0.198 | 0.132 | 5.0 | 5.6 |
 | 10 | 0.194 | 0.117 | 5.6 | 5.6 |
+
+**Estabilidad entre semillas (D29).** Los grupos no dependen de la inicialización: con 20 semillas, el índice de Rand ajustado frente a la asignación de referencia va de 0.997 a 1.000, cambia de grupo como máximo el 0.09 % de los días, el grupo 1 reúne entre 62.2 % y 62.3 % y la silueta va de 0.408 a 0.417.
 
 **Descripción de cada grupo.**
 
@@ -438,13 +441,13 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 | Vórtice polar de enero de 2014 | 2014-01-06 → 01-08 | Coincide | 1 (2014-01-07) | 5.55 | Alta / Alta | Sí |
 | Vórtice polar de fines de enero de 2014 | 2014-01-23 → 01-29 | Coincide | 1 (2014-01-28) | 3.57 | Alta / Alta | Sí |
 | Ola de frío de febrero de 2015 | 2015-02-14 → 02-21 | Coincide | 1 (2015-02-15) | 4.85 | Alta / Alta | Sí |
-| Tormenta Jonas | 2016-01-22 → 01-24 | Sin coincidencia | 0 | n. a. | Por verificar | **No** |
+| Tormenta Jonas | 2016-01-22 → 01-24 | Sin coincidencia | 0 | n. a. | Por verificar | Sí |
 | Ola de frío de enero de 2018 | 2018-01-01 → 01-07 | Sin coincidencia | 0 | n. a. | Alta / n. a. | Sí |
 
 #### Interpretación
 
 - **El detector encuentra los eventos de mayor magnitud.** Sandy, el vórtice polar de enero de 2014 y la ola de frío de febrero de 2015 son los tres atípicos con mayor |z| entre los episodios, y en los 5 episodios detectados el signo coincide con el esperado: demanda por encima de lo esperable en frío y calor extremos y por debajo en Sandy.
-- **Dónde falla.** No salen atípicos la ola de calor de julio de 2013, la ola de frío de enero de 2018 ni la tormenta Jonas (esta última con fechas sin verificar). Una posible explicación, a confirmar, es que en episodios largos los rezagos y medias móviles del modelo ya incorporan el nivel alto de demanda y el residuo no se dispara.
+- **Dónde falla.** No salen atípicos la ola de calor de julio de 2013, la ola de frío de enero de 2018 ni la tormenta Jonas. Una posible explicación, a confirmar, es que en episodios largos los rezagos y medias móviles del modelo ya incorporan el nivel alto de demanda y el residuo no se dispara.
 - **Predominan los atípicos altos** (15 de 22). El modelo tiende además a sobrepronosticar, un sesgo coherente con la ligera baja de demanda de largo plazo de `02_patrones.ipynb`.
 - **Los casos hora a hora apuntan al clima.** En Sandy la demanda real cayó a unos 15,000 MW frente a unos 30,000 esperados. El 2014-01-07 llegó a cerca de 50,000 MW con un pronóstico muy inferior. Sin temperatura en el dataset, esto es una hipótesis.
 - **16 de los 22 atípicos no coinciden con ningún episodio de la tabla.** De los 15 que lista el notebook, 10 son altos y 5 bajos, y los 5 bajos caen entre mayo y julio (2017-05-20, 2018-06-03, 2014-07-04, 2013-07-25 y 2016-06-08), compatible con días templados con menos aire acondicionado (hipótesis). Varios se relacionan con el calendario (el 2014-07-04 es festivo, el 2016-07-05 y el 2018-05-29 son el día siguiente a un festivo, y 5 de los 15 caen en fin de semana), aunque la tasa en festivos (1.5 %) no difiere de la del resto (1.0 %). Sin temperatura no se puede confirmar la causa.
@@ -469,7 +472,7 @@ El error del modelo no se reparte por igual: es más disperso en invierno y vera
 - El umbral de 3.5 es el valor convencional para el z modificado y no garantiza una tasa de falsos positivos concreta. Los residuos no son normales, por eso se muestra la sensibilidad.
 - Los primeros pliegues entrenan con menos historia. En la práctica el pliegue 2 concentra más atípicos (7 de 22) y el pliegue 1 solo 3.
 - Los días de cambio de horario tienen una hora estimada o promediada en la limpieza, si resultan atípicos hay que descartar ese efecto.
-- La tabla de episodios no es exhaustiva: que un atípico no coincida con un episodio no lo hace una falsa alarma. Solo recoge 10 eventos, uno de ellos sin verificar.
+- La tabla de episodios no es exhaustiva: que un atípico no coincida con un episodio no lo hace una falsa alarma. Solo recoge 10 eventos, y para la tormenta Jonas no hay dirección esperada.
 - No hay verdad de referencia con la que medir la detección.
 
 ### 5. Reproducibilidad
@@ -531,7 +534,7 @@ Los conceptos clave del proyecto, agrupados por tema. Cada entrada dice qué es 
 - **Silueta.** Mide cuán bien separado está cada día de los demás grupos. Siguiendo a Kaufman y Rousseeuw, una silueta media de 0.71 a 1.00 indica estructura fuerte, de 0.51 a 0.70 razonable, de 0.26 a 0.50 débil (podría ser artificial) y de 0.25 o menos que no hay estructura sustancial. El código usa 0.51 y 0.26 (`SILUETA_RAZONABLE`, `SILUETA_DEBIL`, D28). Se calcula para cada *k* entre 2 y 10, con k-medias y con Ward, sobre una muestra reproducible de 10,000 días.
 - **Elección del número de grupos (*k*).** Se prueba cada *k* de 2 a 10 con ambos métodos y se elige la mayor silueta entre las combinaciones en que ningún grupo tiene menos del 5 % de los días. Con frecuencia k = 2 gana en silueta; aquí se mantiene porque un k mayor no separa el fin de semana (D26).
 - **Agrupamiento jerárquico y criterio de Ward.** Es costoso en memoria con decenas de miles de elementos, por eso se ajusta sobre una muestra de 10,000 días y el resto se asigna al centro más cercano.
-- **Estabilidad del agrupamiento.** Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado, ARI). La repetición con distintas semillas queda por hacer (D29).
+- **Estabilidad del agrupamiento.** Concordancia entre k-medias y Ward con el mismo k (índice de Rand ajustado, ARI). También se repite k-medias con 20 semillas, y el índice va de 0.997 a 1.000 (D29).
 - **Distancia al centroide.** Distancia de cada día al centro de su grupo. Mira la forma de la curva, mientras que el residuo del pronóstico mira el nivel: un día puede ser raro en una, en la otra o en ambas. La detección de anomalías mide su correlación.
 - **Mapa de calor de calendario.** Las celdas son los días del año y el color indica el tipo de día: cada fila es un año y cada columna un día del año. Es una variante del esquema de van Wijk y van Selow (1999) y muestra cuándo ocurre cada forma de día.
 

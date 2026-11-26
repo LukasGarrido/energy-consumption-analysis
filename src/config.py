@@ -45,5 +45,8 @@ MESES_PLIEGUE = 12              # duración de la prueba de cada pliegue
 # Agrupamiento de perfiles diarios 
 MUESTRA_AGRUPAMIENTO = 10_000   # días usados para elegir k y ajustar Ward (limita el costo)
 
+# Semillas con las que se repite el agrupamiento para medir su estabilidad
+SEMILLAS_ESTABILIDAD = tuple(range(20))
+
 # Detección de anomalías
 TOLERANCIA_EPISODIO_DIAS = 1    # margen al contrastar un día atípico con un episodio

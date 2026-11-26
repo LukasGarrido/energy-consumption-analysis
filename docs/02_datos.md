@@ -42,7 +42,7 @@ Las regiones no cubren los mismos años, por lo que **no existe un periodo comú
 - `PJM_Load` cubre 1998-04 → 2002-01 y `NI` 2004-05 → 2011-01.
 - Las otras 10 regiones llegan hasta 2018-08-03 y se denominan *vigentes*. Comparten el periodo **2013-06-01 → 2018-08-03** (días operativos hasta el 2018-08-02).
 - **Continuidad entre regiones** (`02_patrones.ipynb`, comparando las medias de 30 días a cada lado del empalme):
-  - `NI` → `COMED`: cociente de niveles 1.00 (12,230 frente a 12,242 MW) y las series se tocan el 2011-01-01. La evidencia permite unirlas (decisión D3, por confirmar).
+  - `NI` → `COMED`: cociente de niveles 1.00 (12,230 frente a 12,242 MW) y las series se tocan el 2011-01-01. La evidencia permitiría unirlas, pero se mantienen separadas (decisión D3).
   - `PJM_Load` → `PJME`: cociente 1.05, compatible con una continuación.
   - `PJM_Load` → `PJMW`: cociente 0.17. `PJMW` es una subzona aparte y no un empalme.
 
@@ -116,7 +116,7 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 | Año completo                  | Al menos 8,700 horas (99.3 %)                                                               | Criterio del proyecto                                                      | Aplicada (114 de 132 combinaciones región-año son completas) |
 | Día operativo                 | Del 01:00 al 24:00 (`Datetime − 1 h`)                                                       | `Datetime` marca el final de la hora (decisión D1)                         | Aplicada en `src/features.py`                             |
 | Día completo                  | 24 horas por día y región                                                                   | Requisito de los perfiles diarios y de los promedios diarios               | Aplicada en `src/profiles.py` y en `02_patrones.ipynb`         |
-| Series `NI` y `COMED`         | Se guardan por separado y se documenta la continuidad                                       | La evidencia permite unirlas (cociente 1.00), pero la decisión no está tomada | **Por confirmar (D3)**                                 |
+| Series `NI` y `COMED`         | Se guardan por separado y se documenta la continuidad                                       | Unirlas supone asumir que son la misma serie, aunque el cociente sea 1.00     | Aplicada (D3)                                          |
 
 ### Salidas de la limpieza
 

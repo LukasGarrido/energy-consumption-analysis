@@ -103,7 +103,7 @@ Las columnas *Pregunta* y *Objetivo* dan la trazabilidad de cada historia. HU-01
 | Los nombres de los grupos exportados al panel podrían seguir siendo los automáticos («G1 · Invierno · mixto») | Pequeño | `02_patrones` guarda «Temporada fría» y «Verano», y `src/export.py` los exporta así en `dim_tipo_dia.csv` | Cerrado |
 | Entrenar un modelo por región y pliegue es lento | Medio | Empezar con `PJME` (6 modelos en la ventana móvil) y ampliar a las demás | Abierto |
 | Las anomalías solo se evalúan en `PJME`, la única región con residuos | Medio | Documentarlo, repetir el pronóstico con otras regiones si hay tiempo (D33) | Abierto |
-| Fechas de episodios sin fuente (por ejemplo, la tormenta Jonas) | Pequeño | Cada episodio lleva su fuente y una marca de verificación (D32) | Parcialmente mitigado |
+| Fechas de episodios sin fuente | Pequeño | Cada episodio lleva su fuente y una marca de verificación (D32). Solo queda sin definir la dirección esperada de la tormenta Jonas | Mitigado |
 | El pronóstico falla en olas de calor y de frío por no usar temperatura | Medio | Documentarlo como limitación, los residuos se usan para detectar anomalías | Abierto |
 | Tablas del panel con errores de exportación (`pronostico_horario`, `indicadores_region`) | Medio: el panel muestra cifras distintas de las de los notebooks | `src/export.py` usa el día operativo y el periodo común, y valida las claves | Resuelto |
 

@@ -37,7 +37,7 @@ EPISODIOS_CONOCIDOS = pd.DataFrame(
         ("Ola de frío de febrero de 2015 (récord invernal del 20)", "2015-02-14", "2015-02-21", "frío extremo", "alta",
          "https://www.nerc.com/pa/rrm/ea/ColdWeatherTrainingMaterials/2015_Winter_Review_December_2015_FINAL.pdf", True),
         ("Tormenta Jonas", "2016-01-22", "2016-01-24", "evento climático", "por verificar",
-         "", False),
+         "https://www.noaa.gov/media-release/january-2016-blizzard-ranked-category-4-on-northeast-snowfall-scale", True),
         ("Ola de frío de enero de 2018", "2018-01-01", "2018-01-07", "frío extremo", "alta",
          "https://www.witf.org/2018/01/05/heating_bills_spike_like_its_the_polar_vortex_of_january_2014/", True),
     ],
