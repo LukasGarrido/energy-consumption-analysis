@@ -21,7 +21,16 @@ from app.estilos import renderizar_hero_banner
 _COLORES_DIRECCION: dict[str, str] = {"alta": "#E69F00", "baja": "#009E73"}
 
 # Fracción del eje de fechas que debe separar dos números de episodio de una fila
-_SEPARACION_ETIQUETAS = 0.025
+_SEPARACION_ETIQUETAS = 0.045
+
+# Cuadro emergente de la línea de tiempo
+_DATOS_EMERGENTE: list[str] = ["nombre_grupo", "z_mod"]
+_PLANTILLA_EMERGENTE = (
+    "Fecha: %{x|%Y-%m-%d}<br>"
+    "Residuo: %{y:.1f}%<br>"
+    "Tipo: %{customdata[0]}<br>"
+    "z_mod: %{customdata[1]:.2f}<extra></extra>"
+)
 
 
 def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
@@ -208,6 +217,9 @@ def _linea_de_tiempo(
             mode="lines",
             name="Residuo (%)",
             line=dict(color="#AAAAAA", width=1),
+            customdata=ad[_DATOS_EMERGENTE].values,
+            # Mismo cuadro que los marcadores: la línea pasa por sus puntos
+            hovertemplate=_PLANTILLA_EMERGENTE,
         )
     )
 
@@ -227,13 +239,8 @@ def _linea_de_tiempo(
                     size=8,
                     line=dict(color="black", width=0.5),
                 ),
-                customdata=at[["nombre_grupo", "z_mod"]].values,
-                hovertemplate=(
-                    "Fecha: %{x|%Y-%m-%d}<br>"
-                    "Residuo: %{y:.1f}%<br>"
-                    "Tipo: %{customdata[0]}<br>"
-                    "z_mod: %{customdata[1]:.2f}"
-                ),
+                customdata=at[_DATOS_EMERGENTE].values,
+                hovertemplate=_PLANTILLA_EMERGENTE,
             )
         )
 
@@ -242,7 +249,8 @@ def _linea_de_tiempo(
         title="Residuo diario del pronóstico — PJME",
         xaxis_title="Fecha",
         yaxis_title="Residuo (%)",
-        hovermode="x unified",
+        # Un punto cada vez: un cuadro unificado mostraría atípicos de otras fechas
+        hovermode="closest",
         # Espacio sobre el área de dibujo para las filas de números
         margin=dict(t=60 + 14 * (max(niveles, default=0) + 1)),
     )

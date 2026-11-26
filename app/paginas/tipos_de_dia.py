@@ -89,7 +89,7 @@ def _curvas_medias(tablas: dict[str, pd.DataFrame]) -> None:
         "La banda muestra el intervalo entre los percentiles 10 y 90. "
         "Un tipo de dia con banda estrecha tiene un perfil muy regular."
     )
-    st.caption("Este gráfico no responde al filtro de fecha.")
+    st.caption("Este gráfico usa las 12 regiones y no responde a los filtros.")
 
 
 def _calendario_de_color(
@@ -193,7 +193,7 @@ def _barras_frecuencia(tablas: dict[str, pd.DataFrame]) -> None:
         "Un tipo con un porcentaje muy bajo podría no ser representativo "
         "o indicar condiciones climáticas excepcionales."
     )
-    st.caption("Este gráfico no responde al filtro de fecha.")
+    st.caption("Este gráfico usa las 12 regiones y no responde a los filtros.")
 
 
 def _curva_silueta(tablas: dict[str, pd.DataFrame]) -> None:
@@ -238,7 +238,7 @@ def _curva_silueta(tablas: dict[str, pd.DataFrame]) -> None:
         f"entre grupos; entre {SILUETA_DEBIL:.2f} y {SILUETA_RAZONABLE:.2f} la estructura "
         "es débil pero interpretable."
     )
-    st.caption("Este gráfico no responde al filtro de fecha.")
+    st.caption("Este gráfico no responde a los filtros.")
 
 
 def _tabla_resumen(tablas: dict[str, pd.DataFrame]) -> None:
