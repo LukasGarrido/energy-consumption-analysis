@@ -377,7 +377,7 @@ button[data-baseweb="tab"] {
 
 /* Métricas nativas de Streamlit (st.metric) */
 div[data-testid="stMetric"] {
-    padding: 14px 18px;
+    padding: 14px 12px;
     border-radius: 10px;
     border: 1px solid rgba(128,128,128,0.2);
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
@@ -388,10 +388,17 @@ div[data-testid="stMetric"]:hover {
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
 
-div[data-testid="stMetricLabel"] p {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
+/* El valor se reduce en ventanas estrechas para no cortarse */
+[data-testid="stMetricValue"] {
+    font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+}
+
+/* La etiqueta baja de línea en ventanas estrechas en lugar de cortarse */
+[data-testid="stMetricLabel"] [data-testid="stMarkdownContainer"],
+[data-testid="stMetricLabel"] p {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
     line-height: 1.25;
 }
 

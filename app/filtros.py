@@ -242,8 +242,9 @@ def selector_filtros_modulo(
         )
 
         # Regiones
-        c_tit, c_a, c_b, c_c = st.columns([3, 1, 1, 1], vertical_alignment="center")
-        c_tit.markdown('<div class="filter-label">Regiones</div>', unsafe_allow_html=True)
+        st.markdown('<div class="filter-label">Regiones</div>', unsafe_allow_html=True)
+        # Los atajos ocupan su propia fila: junto al título se cortaban
+        c_a, c_b, c_c = st.columns(3)
         c_a.button("Todas", key=f"b_todas_{key_sufijo}", on_click=_fijar,
                    args=(k_reg, todas), width="stretch")
         c_b.button("Vigentes", key=f"b_vig_{key_sufijo}", on_click=_fijar,
