@@ -53,7 +53,7 @@ Cualquier cambio o extensión en el código debe respetar las decisiones registr
 4. **D4 · Plataforma de Entrega Analítica:** El panel se construye solo en Streamlit, por ser más dinámico, usar el mismo Python del análisis y no requerir licencias. Power BI se descartó.
 5. **D5 · Evaluación Temporal en Ventana Móvil:** La evaluación de residuos y modelos se realiza con validación temporal en ventana móvil (6 pliegues de 12 meses, mínimo 3) para cubrir eventos clave (como el huracán Sandy en 2012 o el vórtice polar de 2014) sin fuga de información (*data leakage*).
 6. **D6 · Agrupamiento Global Normalizado:** Se realiza un agrupamiento unificado sobre perfiles diarios normalizados para todas las regiones, lo que permite comparar directamente la distribución de tipos de día de cada región.
-7. **D7 · Tratamiento de la Zona Horaria en `COMED` y `NI`:** Se mantiene la hora reportada por defecto, con la opción de alinearla a hora central mediante el parámetro `ALINEAR_HORA_CENTRAL` de `notebooks/02_patrones.ipynb`. `src/export.py` todavía no tiene ese parámetro (D41).
+7. **D7 · Tratamiento de la Zona Horaria en `COMED` y `NI`:** Se conserva la hora de la fuente. `ALINEAR_HORA_CENTRAL` (`notebooks/02_patrones.ipynb`) queda en `False` y solo sirve para el análisis de sensibilidad; `src/export.py` usa la misma hora (D41).
 8. **D8 · Detección de Días Atípicos con Z Modificado:** La detección de anomalías se realiza calculando el puntaje z modificado sobre los residuos del pronóstico usando la mediana y la desviación absoluta de la mediana (MAD), con el umbral robusto de 3.5 (Iglewicz y Hoaglin, 1993).
 
 ---

@@ -48,7 +48,7 @@ Como *Datetime* marca el final de la hora, la hora 24 de cada día caería en el
 
 ### B. Agrupamiento de perfiles diarios
 
-Cada día se representa con 24 valores divididos por el promedio del día, de modo que se agrupa la forma y no el nivel. Se comparan k-medias y Ward \[4\], \[5\] para k entre 2 y 10 con el coeficiente de silueta \[11\], sobre una muestra reproducible de 10,000 días, y se elige la mayor silueta con grupos de al menos 5 % de los días. La estructura es razonable con una silueta superior a 0.50 y débil entre 0.26 y 0.50 \[12\]. Se reporta la concordancia entre métodos (índice de Rand ajustado) y la distancia de cada día al centro de su grupo. Un solo agrupamiento sirve a las 12 regiones, lo que permite la matriz región por tipo de día.
+Cada día se representa con 24 valores divididos por el promedio del día, de modo que se agrupa la forma y no el nivel. Se comparan k-medias y Ward \[4\], \[5\] para k entre 2 y 10 con el coeficiente de silueta \[11\], sobre una muestra reproducible de 10,000 días, y se elige la mayor silueta con grupos de al menos 5 % de los días. La estructura es razonable con una silueta de 0.51 o más y débil entre 0.26 y 0.50 \[12\]. Se reporta la concordancia entre métodos (índice de Rand ajustado) y la distancia de cada día al centro de su grupo. Un solo agrupamiento sirve a las 12 regiones, lo que permite la matriz región por tipo de día.
 
 ### C. Pronóstico de referencia
 
@@ -72,11 +72,11 @@ Cada vista parte de la tarea de la pregunta que responde \[17\] y de la precisi�
 
 El ciclo diario tiene su mínimo entre las 3 y las 4 h y su máximo entre las 17 y las 19 h (a las 18 h en 7 de las 10 regiones, a las 17 h en DUQ y PJME y a las 19 h en EKPC). El fin de semana consume entre 3.9 % (EKPC) y 13.9 % (DAYTON) menos que un laborable, cerca de 9 % en promedio, y un festivo cerca de 5 % menos.
 
-El agrupamiento de los 45,430 perfiles diarios elige k-medias con k = 2 y una silueta de 0.413, es decir, una estructura débil (Fig. 1); con k = 3 baja a 0.30 y desde k = 4 queda bajo 0.26. Ward no supera a k-medias en ningún k y concuerda con ella en 0.73 (índice de Rand ajustado). Los grupos reúnen 62.3 % y 37.7 % de los días.
+El agrupamiento de los 45,430 perfiles diarios elige k-medias con k = 2 y una silueta de 0.413, es decir, una estructura débil (Fig. 1); con k = 3 baja a 0.30 y desde k = 4 queda bajo 0.26, y ni k = 3 ni k = 4 separan el fin de semana (sus grupos tienen entre 21 % y 33 % de sábados y domingos). Ward no supera a k-medias en ningún k y concuerda con ella en 0.73 (índice de Rand ajustado). Los grupos reúnen 62.3 % y 37.7 % de los días.
 
 ![](fig_silueta.png)
 
-**Fig. 1.** Silueta media frente a k. Las líneas punteadas marcan los umbrales 0.26 y 0.50.
+**Fig. 1.** Silueta media frente a k. Las líneas punteadas marcan los umbrales 0.26 y 0.51.
 
 Según su curva media y su ubicación en el calendario, el primer grupo, temporada fría (octubre a mayo), tiene un mínimo a las 3 h, un pico nocturno hacia las 19 h y una amplitud diaria cercana a 0.2 del promedio; el segundo, verano (junio a septiembre), tiene una sola curva con pico hacia las 17 h y una amplitud cercana a 0.4. Son tipos estacionales y no de calendario, por lo que H1 se cumple solo en su parte estacional: el 28.9 % y el 28.1 % de los días de cada grupo son sábado o domingo, casi el 28.6 % esperado sin relación, y los festivos no se concentran (3.2 % y 2.8 %). Una hipótesis no verificada es que el efecto de fin de semana es sobre todo de nivel y desaparece al normalizar cada perfil.
 
@@ -116,7 +116,7 @@ El error es mayor por la tarde (≈ 2,350 MW a las 17 h frente a ≈ 1,500 MW de
 
 La demanda se organiza sobre todo por la estación, y las regiones difieren más en cómo reparten sus días entre las dos formas y en su sesgo estacional que en su forma básica. Con una silueta entre 0.26 y 0.50 \[12\], los tipos de día son una simplificación útil de un continuo de perfiles y no categorías separadas. El pronóstico mejora de forma estable al base, pero depende casi por completo del día anterior, y el detector encuentra los eventos más extremos, aunque no todos.
 
-Las limitaciones son cinco. Primero, el pronóstico y las anomalías se hacen solo para PJME. Segundo, no se usa la temperatura, principal determinante de la demanda \[1\], por lo que el modelo falla en olas de calor y de frío y esos errores son los que se marcan como atípicos. Tercero, la estructura de los grupos es débil, k = 2 solo captura la estación y falta evaluar un k mayor y la estabilidad entre semillas. Cuarto, NI y COMED podrían ser la misma zona en periodos consecutivos (cociente de niveles de 1.00 en el empalme del 2011-01-01), pero se guardan por separado hasta confirmarlo, y no hay un periodo común a las 12 regiones. Quinto, la curva de COMED y NI llega una hora más tarde, lo esperable si las series están en hora del este y esas zonas son de hora central; su alineación sigue abierta.
+Las limitaciones son cinco. Primero, el pronóstico y las anomalías se hacen solo para PJME. Segundo, no se usa la temperatura, principal determinante de la demanda \[1\], por lo que el modelo falla en olas de calor y de frío y esos errores son los que se marcan como atípicos. Tercero, la estructura de los grupos es débil, k = 2 solo captura la estación (un k mayor tampoco separa el fin de semana) y falta evaluar la estabilidad entre semillas. Cuarto, NI y COMED podrían ser la misma zona en periodos consecutivos (cociente de niveles de 1.00 en el empalme del 2011-01-01), pero se guardan por separado hasta confirmarlo, y no hay un periodo común a las 12 regiones. Quinto, la curva de COMED y NI llega una hora más tarde, lo esperable si las series están en hora del este y esas zonas son de hora central; se conserva la hora de la fuente porque no está confirmado, y alinearlas cambiaría de grupo el 1.33 % de los días y subiría el grupo de temporada fría de 60.4 % a 67.1 % en COMED y de 52.3 % a 64.3 % en NI.
 
 Entre las fortalezas están la reproducibilidad (semilla fija y parámetros centralizados), la validación fuera de muestra con control de fuga de datos, la comparación en un periodo común, el reporte de la sensibilidad al umbral y de la estructura débil tal como resulta, y el contraste con episodios documentados.
 

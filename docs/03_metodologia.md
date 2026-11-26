@@ -35,7 +35,7 @@ Una fase se considera cerrada cuando cumple su criterio de logro.
 | 2. Preparación | Limpieza con reglas explícitas y validación | `01_datos.ipynb` y `data/processed/` | Las 12 regiones superan `validar_limpieza` y las filas finales cuadran (1,090,343) | Hecho |
 | 3. Análisis descriptivo | Patrones por hora, día y estación, tendencia, comparación, picos | `02_patrones.ipynb` | Patrones y comparación sobre el periodo común, con el día operativo | Hecho |
 | 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base, MASE, validación en ventana móvil, residuos fuera de muestra | `03_pronostico_anomalias.ipynb` | El modelo supera al base en todos los pliegues y su MASE es menor que 1 | Hecho: 6 de 6 pliegues, MASE de 0.72 a 0.87 |
-| 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | `02_patrones.ipynb` | Silueta media reportada y grupos con al menos el 5 % de los días | Hecho con decisiones pendientes (D7 y D26): silueta 0.413 (débil), grupo más pequeño 37.7 % |
+| 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | `02_patrones.ipynb` | Silueta media reportada y grupos con al menos el 5 % de los días | Hecho (D7 y D26): k = 2, silueta 0.413 (débil), grupo más pequeño 37.7 % |
 | 6. Detección de anomalías | Residuo diario, z modificado y contraste con episodios conocidos | `03_pronostico_anomalias.ipynb` | Lista contrastada con al menos un episodio externo, con fuente | Hecho: 5 episodios coinciden |
 | 7. Visualización | Exportación de tablas y construcción del panel | `src/export.py` y panel en Streamlit (`app/streamlit_app.py`) | Tablas con claves coherentes y diccionario de datos. Panel con cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Hecho: 17 tablas con claves validadas, 109 columnas documentadas y panel de seis páginas con filtros |
 | 8. Documentación | Informe, conclusiones y orden del repositorio | `docs/` | Documentación al día con los resultados | En curso |
@@ -51,7 +51,7 @@ Ejecutar en orden numérico, cada uno con *Restart & Run All*. El detalle de ins
 | `03_pronostico_anomalias.ipynb` (modelado y anomalías) | `consumo_horario.parquet` y, si existe, `tipos_de_dia.parquet` | `residuos_PJME.parquet` (fuera de muestra), `metricas_ventana_movil_PJME.parquet`, `anomalias_PJME_diario.parquet`, `anomalias_PJME_lista.parquet` y `anomalias_PJME_episodios.parquet` |
 | `src/export.py` (exportación) | `consumo_horario.parquet` y las salidas de los notebooks 02 y 03 | `data/processed/panel/*.csv` (17 tablas) y `diccionario_datos.csv`, que lee el panel de Streamlit. La ruta se define una vez en `PANEL_DIR` (`src/config.py`) |
 
-`src/export.py` no tiene los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL`: toma los tipos de día tal como los guardó `02_patrones.ipynb` y recalcula el calendario de las demás tablas con la hora de la fuente. Si se alinea la hora en `02_patrones.ipynb`, las tablas de patrones del panel quedan sin alinear (D41).
+`02_patrones.ipynb` y `src/export.py` usan la hora de la fuente para todas las regiones (D7 y D41). `ALINEAR_HORA_CENTRAL` queda en el notebook para repetir el análisis de sensibilidad; si se adoptara la alineación, la exportación tendría que aplicarla también.
 
 ## Herramientas
 
@@ -90,14 +90,14 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Pronóstico a 24 horas | XGBoost con variables de calendario, rezagos (24, 48 y 168 h) y medias móviles desplazadas, frente a dos modelos base | Hecho |
 | Validación | División cronológica con control de fuga de datos y ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3), sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra | Hecho (`03_pronostico_anomalias`) |
 | Métricas | MAE, RMSE y MAPE, MASE con la escala del pronóstico ingenuo estacional de 24 h (Hyndman y Koehler), menor que 1 si el modelo mejora al ingenuo | Hecho |
-| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 02 y 03) y diccionario de datos (`src/export.py`) | Hecho: 17 tablas, diccionario de 109 columnas y validación de claves (la exportación se detiene si alguna clave no tiene su fila en la dimensión) |
+| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 02 y 03) y diccionario de datos (`src/export.py`) | Hecho: 17 tablas, diccionario de 110 columnas y validación de claves (la exportación se detiene si alguna clave no tiene su fila en la dimensión) |
 
 ## Métodos de visualización
 
 | Pregunta | Gráfico | Justificación perceptual |
 |---|---|---|
 | P1. Patrón hora por día de la semana | Mapa de calor 7 × 24, con la misma escala en todas las regiones | 168 valores de un vistazo, el color se complementa con líneas por tipo de calendario (laborable, fin de semana, festivo) para mayor precisión |
-| P1. Elección de k | Líneas de la silueta frente a k, con los umbrales 0.26 y 0.50 | Posición sobre escala común, los k que no cumplen el tamaño mínimo se marcan |
+| P1. Elección de k | Líneas de la silueta frente a k, con los umbrales 0.26 y 0.51 | Posición sobre escala común, los k que no cumplen el tamaño mínimo se marcan |
 | P1. Forma de cada tipo de día | Líneas con banda de dispersión (percentiles 10 y 90), en paneles con la misma escala | Posición sobre escala común, el canal más preciso |
 | P1. Dónde cae cada tipo de día | Mapa de calor de calendario (año por día del año) con color categórico, y composición de cada grupo por día de la semana y mes | Muestra la ubicación de cada grupo en el año |
 | P2. Mezcla de tipos de día por región | Barras apiladas al 100 %, en el historial completo y en el periodo común | Longitud sobre una línea base común, se evitan los gráficos circulares |

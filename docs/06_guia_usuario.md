@@ -105,11 +105,11 @@ Los parámetros están centralizados en `src/config.py`:
 | Parámetro | Uso | Valor por defecto |
 |---|---|---|
 | `HORIZONTE_HORAS`, `REZAGOS_HORAS`, `VENTANAS_HORAS`, `FECHA_CORTE`, `SEMILLA` | Pronóstico | 24 h, [24, 48, 168], [24, 168], "2017-01-01", 42 |
-| `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.50, 0.26, 10,000 días |
+| `K_MIN`, `K_MAX`, `TAMANO_MIN_GRUPO`, `SILUETA_RAZONABLE`, `SILUETA_DEBIL`, `MUESTRA_AGRUPAMIENTO` | Agrupamiento de perfiles diarios | 2 a 10 grupos, 5 %, 0.51, 0.26, 10,000 días |
 | `UMBRAL_Z_MODIFICADO`, `TOLERANCIA_EPISODIO_DIAS` | Valores atípicos, días atípicos y contraste con episodios | 3.5 (Iglewicz y Hoaglin); la tolerancia está en `src/config.py` |
 | `N_PLIEGUES`, `MESES_PLIEGUE` | Validación temporal en ventana móvil | 3 pliegues como mínimo (`03_pronostico_anomalias.ipynb` usa 6), 12 meses por pliegue |
 
-`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` (decisión D7) se definen en `02_patrones.ipynb`; `src/export.py` todavía no los tiene y exporta las tablas de patrones con la hora de la fuente (decisión D41). Los cortes de silueta (0.50 y 0.26) siguen pendientes de alinear con Kaufman y Rousseeuw (D28).
+`ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` se definen en `02_patrones.ipynb` y quedan en `False` (decisión D7): el notebook y `src/export.py` usan la hora de la fuente (D41). Los cortes de silueta son 0.51 y 0.26 (D28).
 
 `REZAGOS_HORAS` no puede contener valores menores que `HORIZONTE_HORAS`: el código lanza un error para evitar usar información futura que no se tendría disponible al momento de pronosticar.
 
@@ -206,9 +206,9 @@ python src/export.py
 | Paso | Qué debe verse |
 |---|---|
 | `01_datos.ipynb` | Las 12 regiones en `OK`, con 1,090,343 filas en total y cero vacíos tras interpolación. `AEP`: 121,273 filas originales, 4 duplicados unificados y 121,296 filas finales |
-| `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.50 (k-medias con $k = 2$ y silueta 0.413) |
+| `02_patrones.ipynb` | 10 regiones vigentes en el periodo común (2013-06-01 → 2018-08-03). Silueta evaluada para $k \in [2, 10]$ con umbrales 0.26 y 0.51 (k-medias con $k = 2$ y silueta 0.413) |
 | `03_pronostico_anomalias.ipynb` | XGBoost supera al base en los 6 pliegues de 12 meses (MASE de 0.86 en la partición única, entre 0.72 y 0.87 por pliegue). 22 días atípicos de 2,191 en `PJME` (z modificado > 3.5) con detección del huracán Sandy (2012-10-30) y el vórtice polar de 2014 |
-| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (109 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
+| `src/export.py` | 17 archivos `.csv` en `data/processed/panel/` junto con `diccionario_datos.csv` (110 columnas documentadas), el mensaje «Validación de claves: todas las claves existen en su dimensión.» y «Exportación completada con éxito» |
 
 ---
 

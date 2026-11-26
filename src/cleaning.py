@@ -8,8 +8,9 @@ devuelve uno nuevo, sin modificar el original. Orden de uso:
     -> marcar_atipicos_aislados -> recortar_extremos_vacios -> interpolar_huecos
     -> validar_limpieza
 
-limpiar_region encadena esos pasos para una región, y run_cleaning lo aplica
-a las 12 regiones y guarda los resultados en data/processed/.
+limpiar_region encadena esos pasos para una región. 01_datos lo aplica a las
+12 regiones y guarda <REGION>_clean.parquet y consumo_horario.parquet en
+data/processed/.
 """
 
 from pathlib import Path

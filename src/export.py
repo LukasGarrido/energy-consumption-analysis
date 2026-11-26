@@ -253,8 +253,8 @@ class EnergyDataExporter:
         self.save_csv(ind, "indicadores_region")
 
     def _export_curvas_tipo_dia(self):
-        curvas = self.load_parquet("tipos_de_dia_curvas")
-        # No hay mapeo de nombres de grupo aquí porque usa 'grupo' (int)
+        curvas = self.load_parquet("tipos_de_dia_curvas").copy()
+        curvas["nombre_grupo"] = curvas["nombre_grupo"].replace(MAPA_NOMBRES_GRUPOS)
         self.save_csv(curvas, "curvas_tipo_dia")
 
     def _export_mezcla_region_tipo(self, tipos: pd.DataFrame) -> None:
@@ -283,6 +283,7 @@ class EnergyDataExporter:
             .reset_index()
         )
         mezcla = mezcla.merge(pct_comun, on=["region", "grupo"], how="left")
+        mezcla["nombre_grupo"] = mezcla["nombre_grupo"].replace(MAPA_NOMBRES_GRUPOS)
         self.save_csv(mezcla, "mezcla_region_tipo")
 
     def _export_silueta_k(self):
