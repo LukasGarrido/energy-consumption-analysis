@@ -21,7 +21,7 @@ if str(_RAIZ_PROYECTO) not in sys.path:
 import pandas as pd
 import streamlit as st
 
-from app.config import ESTACIONES, PAGINAS, resolver_directorio_powerbi
+from app.config import ESTACIONES, PAGINAS, resolver_directorio_panel
 from app.data_loader import cargar_datos
 from app.estilos import aplicar_estilos_globales, renderizar_hero_banner
 from app.paginas import anomalias, patrones, pronostico, regiones, resumen, tipos_de_dia
@@ -110,7 +110,7 @@ def main() -> None:
 
         st.divider()
         st.caption("Estudio de Demanda PJM")
-        st.caption(f"Datos: {resolver_directorio_powerbi()}")
+        st.caption(f"Datos: {resolver_directorio_panel()}")
 
     # Despacho de módulos del estudio
     if pagina == "Resumen":

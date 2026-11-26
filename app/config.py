@@ -37,7 +37,7 @@ COLORES_REGION: dict[str, str] = {
     "PJM_Load": "#A52A2A",
 }
 
-# Tablas que el notebook 07 debe haber exportado
+# Tablas que src/export.py debe haber exportado
 TABLAS_REQUERIDAS: list[str] = [
     "dim_region",
     "dim_fecha",
@@ -75,23 +75,23 @@ PAGINAS: list[str] = [
 ]
 
 
-# Resolución de la ruta a los CSV de Power BI
-def resolver_directorio_powerbi() -> Path:
+# Resolución de la ruta a los CSV del panel
+def resolver_directorio_panel() -> Path:
     """
-    Devuelve la ruta absoluta a data/processed/powerbi/.
+    Devuelve la ruta absoluta a data/processed/panel/.
 
-    Intenta importar ``src.config.PROCESSED_DIR``; si el import falla
+    Intenta importar ``src.config.PANEL_DIR``; si el import falla
     (entorno sin el paquete src en el PYTHONPATH), construye la ruta
     relativa a la ubicación de este archivo.
 
     Retorna
     -------
     Path
-        Directorio que contiene los CSV exportados por el notebook 07.
+        Directorio que contiene los CSV exportados por ``src/export.py``.
     """
     try:
-        from src.config import PROCESSED_DIR  # type: ignore
-        return PROCESSED_DIR / "powerbi"
+        from src.config import PANEL_DIR  # type: ignore
+        return PANEL_DIR
     except Exception:
         # app/ está un nivel por debajo de la raíz del proyecto
-        return Path(__file__).resolve().parents[1] / "data" / "processed" / "powerbi"
+        return Path(__file__).resolve().parents[1] / "data" / "processed" / "panel"

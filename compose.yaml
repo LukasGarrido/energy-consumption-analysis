@@ -8,8 +8,8 @@ services:
     volumes:
       # Tablas generadas por src/export.py, montadas en solo lectura.
       - type: bind
-        source: ./data/processed/powerbi
-        target: /srv/data/processed/powerbi
+        source: ./data/processed/panel
+        target: /srv/data/processed/panel
         read_only: true
         bind:
           create_host_path: false # falla si la carpeta no existe, en vez de crearla vacía

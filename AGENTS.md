@@ -8,7 +8,7 @@ Este documento establece las directrices, reglas de contexto, convenciones de c�
 
 - **Propósito del Proyecto:** Caracterización visual y cuantitativa de la demanda eléctrica horaria de 12 regiones de la red de transmisión PJM Interconnection (EE. UU., 1998–2018).
 - **Aporte Diferencial (De Pronosticar a Caracterizar):** El objetivo central no es competir por décimas de precisión en pronóstico, sino caracterizar cómo es la demanda: descubrir qué formas de perfil diario existen (tipos de día), cuantificar en qué se diferencian las 12 regiones y localizar episodios atípicos o anómalos. El modelo predictivo actúa como una referencia basal de lo esperable para calcular residuos.
-- **Entregable Principal:** Visualizaciones analíticas justificadas por tareas y canales perceptuales integradas en un panel interactivo de seis páginas en Streamlit (`app/streamlit_app.py`), que lee las tablas generadas en `data/processed/powerbi/`, y el informe en formato IEEE (`docs/IEEE/`).
+- **Entregable Principal:** Visualizaciones analíticas justificadas por tareas y canales perceptuales integradas en un panel interactivo de seis páginas en Streamlit (`app/streamlit_app.py`), que lee las tablas generadas en `data/processed/panel/`, y el informe en formato IEEE (`docs/IEEE/`).
 - **Pila Tecnológica:** Python (pandas, NumPy, scikit-learn, XGBoost, statsmodels, holidays, pyarrow), JupyterLab / Jupyter Notebooks, Matplotlib y Seaborn (notebooks), Streamlit y Plotly (panel) y Docker Compose (ejecución opcional del panel).
 - **Ruta de Documentación Modular:** Toda la documentación temática se gestiona en `docs/` (notas `01_proyecto.md` a `07_referencias.md`), optimizada para Obsidian y enlaces Markdown. El [README.md](README.md) actúa como índice de esas notas.
 
@@ -19,7 +19,7 @@ Este documento establece las directrices, reglas de contexto, convenciones de c�
 - `data/`:
   - `data/raw/`: Datos originales descargados de Kaggle (`*.csv`). **Nunca modificar directamente los datos en crudo**. Excluidos de control de versiones.
   - `data/processed/`: Datos procesados limpios por región (`<REGION>_clean.parquet`), consolidado horario (`consumo_horario.parquet`), agrupamientos (`tipos_de_dia*.parquet`), residuos y anomalías (`residuos_PJME.parquet`, `anomalias_PJME_*.parquet`).
-  - `data/processed/powerbi/`: 17 tablas CSV exportadas por `src/export.py` junto con el `diccionario_datos.csv`, que alimentan el panel de Streamlit. La carpeta conserva el nombre histórico `powerbi/` porque así está fijada en `src/export.py`, `app/config.py` y `compose.yaml`.
+  - `data/processed/panel/`: 17 tablas CSV exportadas por `src/export.py` junto con el `diccionario_datos.csv`, que alimentan el panel de Streamlit. La ruta se define en `PANEL_DIR` (`src/config.py`) y se monta en Docker desde `compose.yaml`; la exportación valida que todas las claves existan en su dimensión.
 - `notebooks/`: Cuadernos Jupyter numerados para ejecución secuencial estricta:
   - `01_datos.ipynb`: Exploración inicial (EDA), calidad de datos, convención horaria, limpieza, interpolación de saltos por DST y validación formal de series.
   - `02_patrones.ipynb`: Patrones horarios, estacionalidad, correlaciones y comparativas regionales sobre el día operativo; perfiles diarios normalizados, k-medias/Ward, silueta y mezcla de tipos de día.
