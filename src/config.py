@@ -20,6 +20,12 @@ HORAS_POR_DIA = 24                           # un día operativo completo tiene 
 DESVIACION_MIN_AISLADO = 0.5     # el valor se aleja más del 50 % del promedio de sus horas vecinas
 DIFERENCIA_MAX_VECINOS = 0.25    # las dos horas vecinas difieren como máximo un 25 % entre sí
 
+# Limpieza: errores revisados a mano (decisión D14)
+# Lecturas que se descartan antes de unificar duplicados: (Datetime, MW) por región.
+LECTURAS_DESCARTADAS = {"DEOK": (("2017-11-05 02:00", 1044.0),)}
+# Días operativos completos que se excluyen de la serie limpia, por región.
+DIAS_EXCLUIDOS = {"DEOK": ("2018-04-22", "2018-04-24")}
+
 # Pronóstico
 HORIZONTE_HORAS = 24            # se pronostica con 24 horas de antelación
 REZAGOS_HORAS = [24, 48, 168]   # consumo de hace 1 día, 2 días y 1 semana

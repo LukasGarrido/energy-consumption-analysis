@@ -43,7 +43,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D11 | Limpieza por pasos: promediar duplicados, reindexar a calendario horario, recortar extremos vacíos, interpolar hasta 2 horas y validar | Duplicados y huecos vienen del cambio de horario y todos los huecos son de 2 horas o menos | Eliminar filas incompletas o rellenar huecos largos | Aplicada |
 | D12 | Los valores ≤ 0 pasan a vacío y el 0 inicial de `FE` (su primer registro) se recorta | La demanda no puede ser cero y sin dato vecino no se puede estimar | Interpolar el cero inicial | Aplicada |
 | D13 | Conservar picos altos continuos y rachas bajas reales (`EKPC` 514 MW, 2013-09-29, madrugada de domingo) | Un extremo real se distingue de un error por su continuidad | Tratar como atípicos todos los valores fuera del IQR | Aplicada |
-| D14 | `DEOK` queda por revisar: 34 atípicos bajos, una racha de 3 horas de 907, 912 y 921 MW (2018-04-22) y dos lecturas de 1,044 y 2,064 MW para la misma hora el 2017-11-05, que la limpieza promedia | Los mínimos son consecutivos pero la lectura duplicada es inconsistente | Descartarla o aceptarla sin revisar | **Por revisar** (se conserva por ahora) |
+| D14 | Excluir los días 2018-04-22 y 2018-04-24 de `DEOK` y descartar la lectura de 1,044 MW del 2017-11-05 02:00 (`DIAS_EXCLUIDOS` y `LECTURAS_DESCARTADAS` en `src/config.py`) | En los dos días la demanda cae a menos de la mitad justo en la primera hora y se recupera al empezar el día siguiente, sin cambios en las regiones vecinas. La lectura descartada difiere un 98 % de su duplicada, frente a menos de 7 % en los otros cambios de hora, y no encaja con las horas vecinas. No se conoce la causa | Conservarlos y documentarlos como limitación, o interpolar 24 horas | Aplicada (`src/cleaning.py`, `01_datos`) |
 | D15 | Comparar regiones en el periodo común de las 10 vigentes (2013-06-01 → 2018-08-02 en días operativos), `NI` y `PJM_Load` aparte | No hay periodo común a las 12 regiones y la mezcla depende de los años cubiertos | Comparar cada región en todo su historial | Aplicada |
 | D16 | Cobertura mínima de 99 % y año completo con al menos 8,700 horas | Evita que un año parcial parezca una caída | Sin umbral | Aplicada |
 | D17 | Guardar la limpieza como `<REGION>_clean.parquet` y `consumo_horario.parquet` | Es lo que guarda `01_datos`, el único paso que escribe la limpieza | Mantener dos nombres | Aplicada (`01_datos`; la mención a una función `run_cleaning` inexistente se quitó de `src/cleaning.py`) |
@@ -68,10 +68,10 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D6 | Un solo agrupamiento para las 12 regiones | Con perfiles normalizados los tipos son comunes y permite la matriz región por tipo de día | Uno por región | Aplicada |
 | D7 | Conservar la hora de la fuente de `COMED` y `NI` (`ALINEAR_HORA_CENTRAL = False`) | El diagnóstico mide +1 h en ambas y 0 en el resto, coherente con hora central dentro de series en hora del este, pero la zona horaria de la fuente no está confirmada. Sensibilidad medida: alinearlas cambiaría de grupo el 1.33 % de los días y subiría el grupo 1 de 60.4 % a 67.1 % en `COMED` y de 52.3 % a 64.3 % en `NI` (silueta 0.420) | Alinearlas siempre o corregir en la limpieza | Aplicada. La mezcla de tipos de día de `COMED` y `NI` se lee con esa cautela |
 | D25 | Perfil de 24 valores divididos entre el promedio del día, solo días completos, magnitud aparte | Compara la forma y no el tamaño | Agrupar en MW | Aplicada |
-| D26 | K-medias y Ward con k de 2 a 10, mayor silueta con grupos de al menos 5 % de los días. Se reporta k = 2 | Ganó k = 2 (0.413) y separa temporada fría y verano. Subir k no separa el fin de semana: sus grupos tienen de 25.5 % a 32.9 % de sábados y domingos con k = 3 y de 20.8 % a 32.6 % con k = 4 (28.6 % esperado sin relación), con silueta 0.301 y 0.241 | Justificar un k mayor para separar el fin de semana | Aplicada |
+| D26 | K-medias y Ward con k de 2 a 10, mayor silueta con grupos de al menos 5 % de los días. Se reporta k = 2 | Ganó k = 2 (0.413) y separa temporada fría y verano. Subir k no separa el fin de semana: sus grupos tienen de 25.5 % a 32.9 % de sábados y domingos con k = 3 y de 20.5 % a 32.6 % con k = 4 (28.6 % esperado sin relación), con silueta 0.304 y 0.242 | Justificar un k mayor para separar el fin de semana | Aplicada |
 | D27 | Silueta y Ward sobre una muestra de 10,000 días | Escalan de forma cuadrática con unos 45,000 días | Usar todos los días | Aplicada |
 | D28 | Cortes de silueta de Kaufman y Rousseeuw: 0.51 (razonable) y 0.26 (débil) | La fuente sitúa 0.26 a 0.50 como estructura débil y 0.51 a 0.70 como razonable. El resultado (0.413, débil) no cambia | Mantener el 0.50 | Aplicada (`SILUETA_RAZONABLE` en `src/config.py`, que usan `src/profiles.py`, `02_patrones` y el panel) |
-| D29 | Estabilidad medida entre semillas y entre algoritmos | Entre semillas (`estabilidad_semillas`, `SEMILLAS_ESTABILIDAD`): con 20 semillas, el índice de Rand ajustado frente a la asignación de referencia va de 0.997 a 1.000, cambia de grupo como máximo el 0.09 % de los días, el grupo 1 reúne entre 62.2 % y 62.3 % y la silueta va de 0.408 a 0.417. Entre k-medias y Ward el índice es 0.73: pasó de 0.82 a 0.73 al corregir 3 horas (D2), así que depende más del algoritmo que de la semilla | Afirmarla sin medirla | Aplicada (`02_patrones`) |
+| D29 | Estabilidad medida entre semillas y entre algoritmos | Entre semillas (`estabilidad_semillas`, `SEMILLAS_ESTABILIDAD`): con 20 semillas, el índice de Rand ajustado frente a la asignación de referencia va de 0.997 a 1.000, cambia de grupo como máximo el 0.08 % de los días, el grupo 1 reúne entre 62.2 % y 62.3 % y la silueta va de 0.408 a 0.414. Entre k-medias y Ward depende de la muestra de Ward: con la semilla 42 el índice es 0.95, y al ajustar Ward sobre las muestras de 20 semillas va de 0.69 a 0.99 (mediana 0.89). Por eso un cambio pequeño en los datos mueve mucho la cifra de una sola semilla (0.82, 0.73 y 0.95 en distintas versiones) | Afirmarla sin medirla | Aplicada (`02_patrones`) |
 
 ## 5. Detección de anomalías
 
@@ -120,13 +120,13 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | XGBoost supera al base en todos los pliegues | Confirmada: 6 de 6, MASE de 0.72 a 0.87 | D5, D21 |
 | Los atípicos se concentran en una estación o pliegue | Descartada: de 0.7 % a 1.3 % por estación y de 0.5 % a 1.9 % por pliegue | D8, D31 |
 | Los episodios documentados aparecen como atípicos | Parcial: 5 de 8 evaluados, con el signo esperado en los 5 | D32 |
-| Las filas cuadran | 1,090,167 − 40 + 217 − 1 = 1,090,343 | D11 |
+| Las filas cuadran | 1,090,167 − 1 − 39 + 217 − 1 − 48 = 1,090,295 | D11, D14 |
 
 ## 9. Pendientes de decisión
 
 **Decisiones abiertas**
 
-- **D14:** revisar `DEOK` con la tabla de valores aislados de `01_datos`.
+Ninguna.
 
 **Tareas de cierre**
 
