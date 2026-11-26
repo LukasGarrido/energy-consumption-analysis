@@ -206,7 +206,7 @@ El detalle completo de métodos y herramientas está en [docs/03_metodologia.md]
 - El dataset no incluye temperatura, el principal determinante de la demanda: los episodios atípicos se interpretan por coincidencia con eventos.
 - Los tipos de día pueden resultar con una estructura débil, porque los perfiles diarios forman en parte un continuo.
 - El pronóstico y la detección de anomalías se hacen solo para `PJME`.
-- Las curvas de `COMED` y `NI` llegan una hora más tarde que las del resto. Se conserva la hora de la fuente porque la zona horaria no está confirmada, y su mezcla de tipos de día cambiaría al alinearlas ([D7](docs/05_decisiones.md)).
+- Las curvas de `COMED` y `NI` llegan una hora más tarde que las del resto. Se conserva la hora de la fuente porque no hay una confirmación expresa de su zona horaria, y su mezcla de tipos de día cambiaría al alinearlas ([D7](docs/05_decisiones.md)).
 - Los datos llegan hasta 2018 y pueden no representar la demanda actual.
 
 ---
