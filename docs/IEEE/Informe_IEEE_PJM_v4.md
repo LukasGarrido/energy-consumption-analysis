@@ -34,9 +34,9 @@ Los datos provienen del conjunto de Kaggle \[3\], que recopila la demanda public
 
 ### B. Calidad y preparación
 
-No hay valores nulos y todas las regiones cubren entre 99.98 % y 99.99 % de sus horas. Casi todas las irregularidades se deben al cambio de horario: 4 fechas con las 02:00 duplicada en 10 regiones (primer domingo de noviembre de 2014 a 2017) y 217 horas faltantes, de las que 126 son la hora inexistente de primavera, 82 la de otoño que falta hasta 2013 y 9 no se relacionan con el cambio de horario (el 2010-12-10 00:00 en siete regiones y dos horas de AEP). El 0 MW inicial de FE se recortó; se conservaron el valle real de 514 MW de EKPC, los atípicos altos según el rango intercuartílico \[9\], que son picos reales, y dos valores bajos aislados de DOM y PJMW.
+No hay valores nulos y todas las regiones cubren entre 99.98 % y 99.99 % de sus horas. Casi todas las irregularidades se deben al cambio de horario: 4 fechas con las 02:00 duplicada en 10 regiones (primer domingo de noviembre de 2014 a 2017) y 217 horas faltantes, de las que 126 son la hora inexistente de primavera, 82 la de otoño que falta hasta 2013 y 9 no se relacionan con el cambio de horario (el 2010-12-10 00:00 en siete regiones y dos horas de AEP). El 0 MW inicial de FE se recortó; se conservaron el valle real de 514 MW de EKPC, y los atípicos altos continuos según el rango intercuartílico \[9\], que son picos reales.
 
-La limpieza promedia las horas repetidas, reindexa a un calendario horario completo, interpola linealmente huecos de hasta 2 horas (los únicos observados), convierte en vacíos los valores menores o iguales a 0 y recorta los vacíos de los extremos. Se unificaron 40 duplicados, se interpolaron 217 horas (0.02 %) y se recortó 1 fila. Quedan 1,090,343 filas en formato largo, y las 12 regiones superan la validación de continuidad horaria.
+La limpieza promedia las horas repetidas, reindexa a un calendario horario completo, interpola linealmente huecos de hasta 2 horas (los únicos observados), convierte en vacíos los valores menores o iguales a 0 y los atípicos aislados de una hora (a más de 50 % del promedio de sus horas vecinas, con vecinas que difieren a lo sumo 25 % y z modificado respecto del patrón de mes y hora mayor que 3.5 \[16\]) y recorta los vacíos de los extremos. Se unificaron 40 duplicados, se interpolaron 220 horas (217 faltantes y 3 atípicos aislados de AEP, DOM y PJMW, 0.02 %) y se recortó 1 fila. Quedan 1,090,343 filas en formato largo, y las 12 regiones superan la validación de continuidad horaria.
 
 ## III. Metodología
 
@@ -72,7 +72,7 @@ Cada vista parte de la tarea de la pregunta que responde \[17\] y de la precisi�
 
 El ciclo diario tiene su mínimo entre las 3 y las 4 h y su máximo entre las 17 y las 19 h (a las 18 h en 7 de las 10 regiones, a las 17 h en DUQ y PJME y a las 19 h en EKPC). El fin de semana consume entre 3.9 % (EKPC) y 13.9 % (DAYTON) menos que un laborable, cerca de 9 % en promedio, y un festivo cerca de 5 % menos.
 
-El agrupamiento de los 45,430 perfiles diarios elige k-medias con k = 2 y una silueta de 0.413, es decir, una estructura débil (Fig. 1); con k = 3 baja a 0.30 y desde k = 4 queda bajo 0.26. Ward no supera a k-medias en ningún k y concuerda con ella en 0.82 (índice de Rand ajustado). Los grupos reúnen 62.3 % y 37.7 % de los días.
+El agrupamiento de los 45,430 perfiles diarios elige k-medias con k = 2 y una silueta de 0.413, es decir, una estructura débil (Fig. 1); con k = 3 baja a 0.30 y desde k = 4 queda bajo 0.26. Ward no supera a k-medias en ningún k y concuerda con ella en 0.73 (índice de Rand ajustado). Los grupos reúnen 62.3 % y 37.7 % de los días.
 
 ![](fig_silueta.png)
 

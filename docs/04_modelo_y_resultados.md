@@ -42,7 +42,7 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 - **Calendario:** el fin de semana consume entre un 3.9 % (`EKPC`) y un 13.9 % (`DAYTON`) menos que un laborable (≈ −9 % en promedio). Un festivo consume cerca de un 5 % menos (de −0.7 % en `DOM` a −8.8 % en `DAYTON`; `EKPC` es la excepción con +1.7 %).
 - **Estacionalidad:** dos máximos anuales (verano e invierno) con valles en abril y octubre. `EKPC` (1.20) y `PJMW` (1.12) son invernales, `COMED` (0.93), `DUQ` (0.92), `DEOK` y `PJME` (0.95), veraniegas.
 - **Tendencia:** estabilidad o ligera baja (`PJME` −9 % entre 2007 y 2017, de 33,612 a 30,653 MW; `AEP` −13 %; `DUQ` −10 %). `DOM` sube cerca de un 6 % desde 2006.
-- **Picos:** `PJME` alcanzó 62,009 MW el 2006-08-02. `DOM`, `EKPC` y `PJMW` tienen su récord el 2015-02-20 a las 7 h. Ambas fechas coinciden con episodios documentados por PJM: el récord de demanda de verano y el de invierno. El máximo de `AEP` (2008-10-20) es inusual y debe verificarse.
+- **Picos:** `PJME` alcanzó 62,009 MW el 2006-08-02. `DOM`, `EKPC` y `PJMW` tienen su récord el 2015-02-20 a las 7 h. Ambas fechas coinciden con episodios documentados por PJM: el récord de demanda de verano y el de invierno. El máximo de `AEP` es 25,164 MW (2007-08-08): el valor crudo mayor (2008-10-20) se descartó como atípico aislado (D2).
 - **Correlaciones:** de 0.56 a 0.96. Los pares más parecidos son `AEP`–`PJMW` y `DAYTON`–`FE` (0.96), y la región más distinta es `EKPC`.
 - **Hora de `COMED` y `NI`:** su curva diaria llega una hora más tarde que la del resto (error de 0.014 con +1 h frente a 0.024 sin desplazar). Es lo esperable si las series están en hora del este y esas zonas son de hora central. No se corrige (ver D7).
 - **`NI` y `COMED`:** cociente de niveles 1.00 y empalme el 2011-01-01, lo que permite tratarlas como la misma zona (D3, por confirmar).
@@ -267,29 +267,29 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | Algoritmo elegido | K-medias |
 | k elegido | 2 |
 | Silueta media (muestra) y su interpretación | 0.413, estructura débil |
-| Concordancia entre k-medias y Ward (Rand ajustado) | 0.82 |
+| Concordancia entre k-medias y Ward (Rand ajustado) | 0.73 |
 | Alineación de `COMED` y `NI` | No (`ALINEAR_HORA_CENTRAL = False`). El diagnóstico detecta +1 h en ambas y 0 en el resto. La decisión D7 sigue por tomar |
 
-**Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2. Con k = 3 la silueta es 0.30 (débil) y con k ≥ 4 queda por debajo de 0.26 (sin estructura sustancial). Con Ward, k ≥ 7 tiene un grupo con menos del 5 % de los días.
+**Elección de k.** La mayor silueta con grupos de al menos el 5 % es k-medias con k = 2. Con k = 3 la silueta es 0.30 (débil) y con k ≥ 4 queda por debajo de 0.26 (sin estructura sustancial). Con Ward ningún k baja del 5 % de los días (el grupo más pequeño es 5.6 % desde k = 7).
 
 | k | Silueta k-medias | Silueta Ward | Grupo más pequeño k-medias (%) | Grupo más pequeño Ward (%) |
 |---|---|---|---|---|
-| 2 | 0.413 | 0.373 | 38.2 | 46.3 |
-| 3 | 0.301 | 0.238 | 26.8 | 22.7 |
-| 4 | 0.240 | 0.189 | 17.6 | 15.9 |
-| 5 | 0.245 | 0.174 | 16.7 | 12.6 |
-| 6 | 0.226 | 0.164 | 6.4 | 6.0 |
-| 7 | 0.220 | 0.159 | 8.0 | 4.0 |
-| 8 | 0.205 | 0.152 | 5.7 | 4.0 |
-| 9 | 0.198 | 0.141 | 5.0 | 4.0 |
-| 10 | 0.194 | 0.132 | 5.7 | 4.0 |
+| 2 | 0.413 | 0.393 | 38.2 | 23.6 |
+| 3 | 0.301 | 0.230 | 26.8 | 23.6 |
+| 4 | 0.241 | 0.204 | 17.6 | 9.9 |
+| 5 | 0.245 | 0.171 | 16.6 | 9.9 |
+| 6 | 0.226 | 0.169 | 6.4 | 9.9 |
+| 7 | 0.223 | 0.161 | 7.1 | 5.6 |
+| 8 | 0.206 | 0.148 | 5.9 | 5.6 |
+| 9 | 0.198 | 0.132 | 5.0 | 5.6 |
+| 10 | 0.194 | 0.117 | 5.6 | 5.6 |
 
 **Descripción de cada grupo.**
 
 | Grupo | Nombre | Días | % de los días | Hora pico | Hora mínima | Amplitud | % fin de semana | % festivo | Estación dominante |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Temporada fría (oct–may) | 28,299 | 62.3 | 19 h | 3 h | 0.2 | 28.9 | 3.2 | Invierno (38.1 %) |
-| 2 | Verano (jun–sep) | 17,131 | 37.7 | 17 h | 4 h | 0.4 | 28.1 | 2.8 | Verano (63.0 %) |
+| 1 | Temporada fría (oct–may) | 28,296 | 62.3 | 19 h | 3 h | 0.2 | 28.9 | 3.2 | Invierno (38.1 %) |
+| 2 | Verano (jun–sep) | 17,134 | 37.7 | 17 h | 4 h | 0.4 | 28.1 | 2.8 | Verano (63.0 %) |
 
 - **Grupo 1:** reúne los días de octubre a mayo, con una meseta de mañana (7 a 11 h), un pico nocturno a las 19–20 h, un mínimo a las 3 h y una amplitud de ≈ 0.2 del promedio del día.
 - **Grupo 2:** reúne los días de junio a septiembre, con una sola curva de pico a las 16–17 h (≈ 1.19 del promedio), un mínimo a las 4 h y una amplitud de ≈ 0.4.
@@ -306,7 +306,7 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb`, `src/modeling.py`
 | DEOK | 60.2 | 39.8 | 58.3 | 41.7 | 0.945 | 0.347 |
 | DOM | 55.2 | 44.8 | 55.3 | 44.7 | 0.985 | 0.400 |
 | DUQ | 65.4 | 34.6 | 63.3 | 36.7 | 0.917 | 0.327 |
-| EKPC | 55.2 | 44.8 | 55.2 | 44.8 | 1.196 | 0.440 |
+| EKPC | 55.1 | 44.9 | 55.1 | 44.9 | 1.196 | 0.440 |
 | FE | 69.4 | 30.6 | 69.1 | 30.9 | 0.996 | 0.306 |
 | NI | 52.3 | 47.7 | n. a. | n. a. | n. a. | n. a. |
 | PJME | 59.9 | 40.1 | 60.0 | 40.0 | 0.950 | 0.369 |

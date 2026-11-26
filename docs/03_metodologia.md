@@ -78,7 +78,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Método | Descripción | Estado |
 |---|---|---|
 | Limpieza de series de tiempo | Unificación de horas repetidas (promedio), reindexado a calendario horario, recorte de extremos, interpolación lineal de huecos de hasta 2 horas y validación (`src/cleaning.py`) | Hecho |
-| Detección de valores atípicos aislados | z modificado de la desviación respecto del patrón esperado (> 3.5) con criterio de continuidad. Los valores aislados de `DOM` y `PJMW` se conservan (D2) | Por hacer |
+| Detección de valores atípicos aislados | Desviación respecto de las horas vecinas, z modificado frente al patrón de mes y hora (> 3.5) y criterio de continuidad (`marcar_atipicos_aislados`). Marca 3 valores en `AEP`, `DOM` y `PJMW` (D2) | Hecho (`01_datos`) |
 | Análisis exploratorio | Estadística descriptiva, cobertura, duplicados, horas faltantes (con su causa) y valores aislados frente a rachas y distribución | Hecho (`01_datos`) |
 | Variables de calendario | Día operativo (`Datetime − 1 h`): fecha, hora (0 a 23), día de la semana, mes, estación, fin de semana y festivo (`src/features.py`, D1) | Hecho |
 | Normalización relativa | Consumo dividido entre el promedio de su región (`MW_rel`), para comparar formas | Hecho |
