@@ -44,7 +44,9 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     mae_str = f"{mae_medio:,.0f}" if pd.notna(mae_medio) else "—"
     mase_str = f"{mase_medio:.3f}" if pd.notna(mase_medio) else "—"
 
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    # Dos filas de tres: en una sola fila los valores se cortan
+    col1, col2, col3 = st.columns(3)
+    col4, col5, col6 = st.columns(3)
     col1.metric("Regiones", len(regiones))
     col2.metric("Dias filtrados", f"{hd['fecha'].nunique():,}")
     col3.metric("Consumo medio (MW)", consumo_str)
@@ -70,9 +72,15 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     # Tendencia anual (solo años completos)
     st.subheader("Tendencia anual del consumo medio")
 
+    if "completo" not in tablas["tendencia_anual"].columns:
+        st.error(
+            "`tendencia_anual.csv` no tiene la columna `completo`. "
+            "Ejecuta `python src/export.py` para actualizar las tablas."
+        )
+        return
+
     tend = filtros.por_region(tablas["tendencia_anual"], regiones)
-    if "completo" in tend.columns:
-        tend = tend[tend["completo"] == "Sí"].copy()
+    tend = tend[tend["completo"] == "Sí"].copy()
 
     if filtros.verificar_vacio(tend):
         return

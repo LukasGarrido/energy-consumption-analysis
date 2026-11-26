@@ -69,7 +69,19 @@ def _tabla_metricas(met: pd.DataFrame) -> None:
         ]
         if c in met.columns
     ]
-    st.dataframe(met[columnas].sort_values(["pliegue", "modelo"]), hide_index=True)
+    st.dataframe(
+        met[columnas].sort_values(["pliegue", "modelo"]),
+        hide_index=True,
+        column_config={
+            "inicio_prueba": st.column_config.DateColumn(format="YYYY-MM-DD"),
+            "fin_prueba": st.column_config.DateColumn(format="YYYY-MM-DD"),
+            "mejora_MAE_pct": st.column_config.NumberColumn(
+                "Mejora del MAE (%)",
+                format="%.1f",
+                help="Cuánto menor es el MAE de XGBoost que el del modelo base.",
+            ),
+        },
+    )
 
 
 def _barras_mae_pliegue(met: pd.DataFrame) -> None:
@@ -136,8 +148,8 @@ def _error_desglosado(
         )
         mostrar_grafico(fig_h)
         st.caption(
-            "Las horas con mayor error suelen coincidir con transiciones de consumo "
-            "(mañana y tarde), donde la variabilidad es mayor."
+            "Con todo el periodo, el error es mayor por la tarde y menor de madrugada; "
+            "los filtros de fecha y estación pueden cambiar ese patrón."
         )
 
     # Por mes
