@@ -38,7 +38,7 @@ def agregar_variables_temporales(df: pd.DataFrame, col_fecha: str = "Datetime") 
     df["anio"] = inicio_hora.dt.year
     df["mes"] = inicio_hora.dt.month
     df["hora"] = inicio_hora.dt.hour
-    df["dia_semana"] = inicio_hora.dt.dayofweek
+    df["dia_semana"] = inicio_hora.dt.day_of_week
     df["es_fin_de_semana"] = df["dia_semana"] >= 5
     df["estacion"] = df["mes"].map(ESTACIONES)
 

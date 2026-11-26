@@ -32,8 +32,10 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     metricas_xgb = metricas_xgb[metricas_xgb["modelo"] == "XGBoost"]
 
     n_tipos = tablas["dim_tipo_dia"]["grupo"].nunique()
-    mae_medio = metricas_xgb["MAE"].mean()
-    mase_medio = metricas_xgb["MASE"].mean()
+    # Solo hay pronóstico de PJME: sin esa región no se muestran sus métricas
+    hay_pjme = "PJME" in regiones
+    mae_medio = metricas_xgb["MAE"].mean() if hay_pjme else float("nan")
+    mase_medio = metricas_xgb["MASE"].mean() if hay_pjme else float("nan")
 
     col_mw = "MW_medio" if "MW_medio" in hd.columns else ("MW_medio_dia" if "MW_medio_dia" in hd.columns else None)
     consumo_str = (
@@ -47,8 +49,9 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     col2.metric("Dias filtrados", f"{hd['fecha'].nunique():,}")
     col3.metric("Consumo medio (MW)", consumo_str)
     col4.metric("Tipos de dia", n_tipos)
-    col5.metric("MAE medio (MW)", mae_str)
-    col6.metric("MASE medio", mase_str)
+    ayuda = "Media de XGBoost en los pliegues de validación, solo para PJME."
+    col5.metric("MAE PJME (MW)", mae_str, help=ayuda)
+    col6.metric("MASE PJME", mase_str, help=ayuda)
 
     # Aviso de dias atípicos de PJME
     if "PJME" in regiones:

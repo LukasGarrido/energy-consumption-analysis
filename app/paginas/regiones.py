@@ -133,6 +133,13 @@ def _dispersion_indicadores(
 
     subtitulo_periodo = "periodo comun" if col_x == "razon_inv_ver_comun" else "historial completo"
 
+    sin_datos = sorted(ind.loc[ind[[col_x, col_y]].isna().any(axis=1), "region"])
+    if sin_datos:
+        st.caption(
+            f"No aparecen en este gráfico, que usa el periodo común: {', '.join(sin_datos)}."
+        )
+        ind = ind.dropna(subset=[col_x, col_y])
+
     fig = px.scatter(
         ind,
         x=col_x,

@@ -3,8 +3,8 @@ app/streamlit_app.py
 Punto de entrada del panel interactivo PJM.
 
 Este archivo contiene únicamente la configuración de la página, la barra
-lateral con filtros y el despacho a la página elegida. Toda la lógica
-de visualización vive en ``app/paginas/`` y los módulos auxiliares.
+lateral de navegación y el despacho a la página elegida. Toda la lógica
+de filtros y visualización vive en ``app/paginas/`` y los módulos auxiliares.
 
 Para ejecutar la app:
     streamlit run app/streamlit_app.py
@@ -18,61 +18,13 @@ _RAIZ_PROYECTO = Path(__file__).resolve().parents[1]
 if str(_RAIZ_PROYECTO) not in sys.path:
     sys.path.insert(0, str(_RAIZ_PROYECTO))
 
-import pandas as pd
 import streamlit as st
 
-from app.config import ESTACIONES, PAGINAS, resolver_directorio_panel
+from app.config import PAGINAS, resolver_directorio_panel
 from app.data_loader import cargar_datos
 from app.filtros import conservar_estado_widgets
 from app.estilos import aplicar_estilos_globales, renderizar_hero_banner
 from app.paginas import anomalias, patrones, pronostico, regiones, resumen, tipos_de_dia
-
-
-def _normalizar_rango_fecha(
-    valor,
-    fecha_global_max: pd.Timestamp,
-) -> tuple[pd.Timestamp, pd.Timestamp]:
-    """
-    Convierte el valor devuelto por ``st.date_input`` en un par de
-    ``pd.Timestamp`` (inicio, fin), cualquiera que sea su forma
-    (tupla de dos fechas, tupla de una o fecha única).
-
-    Parámetros
-    ----------
-    valor
-        Resultado de ``st.date_input``.
-    fecha_global_max : pd.Timestamp
-        Fecha máxima del historial, usada como fin cuando solo hay una fecha.
-
-    Retorna
-    -------
-    tuple[pd.Timestamp, pd.Timestamp]
-    """
-    if isinstance(valor, (list, tuple)) and len(valor) == 2:
-        return pd.Timestamp(valor[0]), pd.Timestamp(valor[1])
-    if isinstance(valor, (list, tuple)) and len(valor) == 1:
-        return pd.Timestamp(valor[0]), fecha_global_max
-    return pd.Timestamp(valor), fecha_global_max
-
-
-def _restablecer_filtros(
-    todas_las_regiones: list[str],
-    fecha_min,
-    fecha_max,
-) -> None:
-    """
-    Callback del botón 'Restablecer filtros': restaura todos los valores
-    del ``st.session_state`` a sus valores por defecto.
-
-    Parámetros
-    ----------
-    todas_las_regiones : list[str]
-    fecha_min : date
-    fecha_max : date
-    """
-    st.session_state["regiones_sel"] = todas_las_regiones
-    st.session_state["fecha_rango"] = (fecha_min, fecha_max)
-    st.session_state["estaciones_sel"] = ESTACIONES
 
 
 def main() -> None:

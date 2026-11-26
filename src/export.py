@@ -162,9 +162,6 @@ class EnergyDataExporter:
             df["MW_rel"] = df["MW"] / df.groupby("region")["MW"].transform("mean")
             
         # 1. patron_hora_dia (para heatmap)
-        phd = df.groupby(["region", "estacion", "dia_semana", "hora"])["MW_rel"].mean().reset_index()
-        phd.rename(columns={"MW_rel": "MW_rel_medio", "MW": "MW_medio"}, inplace=False) # Wait, MW is not in agg
-        # Re-agg to include MW_medio too
         phd = df.groupby(["region", "estacion", "dia_semana", "hora"]).agg(
             MW_medio=("MW", "mean"),
             MW_rel_medio=("MW_rel", "mean")
@@ -178,17 +175,17 @@ class EnergyDataExporter:
         df.loc[df["es_festivo"], "tipo_calendario"] = "Festivo"
         
         ptc = df.groupby(["region", "estacion", "tipo_calendario", "hora"])["MW_rel"].mean().reset_index()
-        ptc.rename(columns={"MW_rel": "MW_rel_medio"}, inplace=True)
+        ptc = ptc.rename(columns={"MW_rel": "MW_rel_medio"})
         self.save_csv(ptc, "patron_tipo_calendario")
         
         # 3. tendencia_anual
         tend = df.groupby(["region", "anio"])["MW"].mean().reset_index()
-        tend.rename(columns={"MW": "MW_medio"}, inplace=True)
+        tend = tend.rename(columns={"MW": "MW_medio"})
         self.save_csv(tend, "tendencia_anual")
         
         # 4. estacionalidad_mensual
         est = df.groupby(["region", "mes"])["MW_rel"].mean().reset_index()
-        est.rename(columns={"MW_rel": "MW_rel_medio"}, inplace=True)
+        est = est.rename(columns={"MW_rel": "MW_rel_medio"})
         est["nombre_mes"] = est["mes"].map(NOMBRES_MESES)
         self.save_csv(est, "estacionalidad_mensual")
 
@@ -309,7 +306,7 @@ class EnergyDataExporter:
         met = self.load_parquet("metricas_ventana_movil_PJME")
         # app espera: MAE, RMSE, MAPE_pct, MASE, mejora_MAE_pct
         met = met.reset_index()
-        met.rename(columns={"MAPE_%": "MAPE_pct", "mejora_MAE_%": "mejora_MAE_pct"}, inplace=True)
+        met = met.rename(columns={"MAPE_%": "MAPE_pct", "mejora_MAE_%": "mejora_MAE_pct"})
         self.save_csv(met, "pronostico_metricas")
 
     def _export_anomalias(self):
