@@ -16,7 +16,7 @@
 - [Herramientas](#herramientas)
 - [Métodos de ciencia de datos](#métodos-de-ciencia-de-datos)
 - [Métodos de visualización](#métodos-de-visualización)
-  - [Páginas del panel (Power BI)](#páginas-del-panel-power-bi)
+  - [Páginas del panel (Streamlit)](#páginas-del-panel-streamlit)
 - [Métodos considerados y descartados](#métodos-considerados-y-descartados)
 
 ---
@@ -37,7 +37,7 @@ Una fase se considera cerrada cuando cumple su criterio de logro.
 | 4. Pronóstico de referencia | Modelo a 24 horas contra modelos base, MASE, validación en ventana móvil, residuos fuera de muestra | `03_pronostico_anomalias.ipynb` | El modelo supera al base en todos los pliegues y su MASE es menor que 1 | Hecho: 6 de 6 pliegues, MASE de 0.72 a 0.87 |
 | 5. Agrupamiento de perfiles diarios | Perfiles normalizados, elección de k, caracterización con el calendario, mezcla por región y distancia al centro | `02_patrones.ipynb` | Silueta media reportada y grupos con al menos el 5 % de los días | Hecho con decisiones pendientes (D7 y D26): silueta 0.413 (débil), grupo más pequeño 37.7 % |
 | 6. Detección de anomalías | Residuo diario, z modificado y contraste con episodios conocidos | `03_pronostico_anomalias.ipynb` | Lista contrastada con al menos un episodio externo, con fuente | Hecho: 5 episodios coinciden |
-| 7. Visualización | Exportación de tablas y construcción del panel | `src/export.py` y panel en Power BI | Tablas con claves coherentes y diccionario de datos. Panel con cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Exportación hecha (17 tablas, 0 claves huérfanas, 118 columnas documentadas). Panel pendiente |
+| 7. Visualización | Exportación de tablas y construcción del panel | `src/export.py` y panel en Streamlit (`app/streamlit_app.py`) | Tablas con claves coherentes y diccionario de datos. Panel con cada vista justificada por una tarea y filtros por región, fecha y estación funcionando | Hecho con salvedad: 17 tablas, 118 columnas documentadas y panel de seis páginas con filtros. `pronostico_horario` e `indicadores_region` tienen errores de exportación por corregir ([01_proyecto.md](01_proyecto.md#partes-interesadas-e-historias-de-usuario), HU-10) |
 | 8. Documentación | Informe, conclusiones y orden del repositorio | `docs/` | Documentación al día con los resultados | En curso |
 
 ## Flujo de notebooks
@@ -49,9 +49,9 @@ Ejecutar en orden numérico, cada uno con *Restart & Run All*. El detalle de ins
 | `01_datos.ipynb` (exploración y limpieza) | `data/raw/*.csv` | Hallazgos y decisiones de limpieza. `data/processed/<REGION>_clean.parquet` y `consumo_horario.parquet` |
 | `02_patrones.ipynb` (análisis y agrupamiento) | `consumo_horario.parquet` | Patrones, tendencia, comparación y picos. `tipos_de_dia.parquet`, `tipos_de_dia_curvas.parquet`, `tipos_de_dia_resumen.parquet`, `tipos_de_dia_mezcla_region.parquet` y `tipos_de_dia_silueta_k.parquet` |
 | `03_pronostico_anomalias.ipynb` (modelado y anomalías) | `consumo_horario.parquet` y, si existe, `tipos_de_dia.parquet` | `residuos_PJME.parquet` (fuera de muestra), `metricas_ventana_movil_PJME.parquet`, `anomalias_PJME_diario.parquet`, `anomalias_PJME_lista.parquet` y `anomalias_PJME_episodios.parquet` |
-| `src/export.py` (exportación) | `consumo_horario.parquet` y las salidas de los notebooks 02 y 03 | `data/processed/powerbi/*.csv` (17 tablas) y `diccionario_datos.csv` |
+| `src/export.py` (exportación) | `consumo_horario.parquet` y las salidas de los notebooks 02 y 03 | `data/processed/powerbi/*.csv` (17 tablas) y `diccionario_datos.csv`, que lee el panel de Streamlit. La carpeta conserva el nombre `powerbi/` porque así está fijada en `src/export.py`, `app/config.py` y `compose.yaml` |
 
-Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el mismo valor en `02_patrones.ipynb` y en la exportación (D41).
+`src/export.py` no tiene los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL`: toma los tipos de día tal como los guardó `02_patrones.ipynb` y recalcula el calendario de las demás tablas con la hora de la fuente. Si se alinea la hora en `02_patrones.ipynb`, las tablas de patrones del panel quedan sin alinear (D41).
 
 ## Herramientas
 
@@ -64,8 +64,8 @@ Los parámetros `ALINEAR_HORA_CENTRAL` y `REGIONES_HORA_CENTRAL` deben tener el 
 | holidays | Festivos federales de EE. UU. para la variable `es_festivo` |
 | pyarrow | Lectura y escritura de archivos parquet |
 | Matplotlib y Seaborn | Gráficos exploratorios en los notebooks |
-| Power BI Desktop | Panel interactivo final, importa los CSV de `data/processed/powerbi/` (D4) |
-| Streamlit | Prototipo opcional (`app/streamlit_app.py`) |
+| Streamlit y Plotly | Panel interactivo (`app/streamlit_app.py`), lee los CSV de `data/processed/powerbi/` (D4) |
+| Docker Compose | Ejecución opcional del panel sin entorno de Python (`compose.yaml`) |
 | Jupyter Notebook | Desarrollo y documentación del análisis |
 | VS Code y Antigravity IDE | Edición de código |
 | GitHub | Control de versiones y gestión de tareas |
@@ -90,7 +90,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | Pronóstico a 24 horas | XGBoost con variables de calendario, rezagos (24, 48 y 168 h) y medias móviles desplazadas, frente a dos modelos base | Hecho |
 | Validación | División cronológica con control de fuga de datos y ventana móvil con entrenamiento creciente: 6 pliegues de 12 meses (mínimo 3), sin solapamiento, de modo que cada hora se predice una sola vez fuera de muestra | Hecho (`03_pronostico_anomalias`) |
 | Métricas | MAE, RMSE y MAPE, MASE con la escala del pronóstico ingenuo estacional de 24 h (Hyndman y Koehler), menor que 1 si el modelo mejora al ingenuo | Hecho |
-| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 02 y 03) con validación de claves y diccionario de datos (`src/export.py`) | Hecho: 17 tablas, 0 claves huérfanas, diccionario de 118 columnas |
+| Exportación para el panel | Modelo en estrella en CSV (4 dimensiones, hechos y resultados de los notebooks 02 y 03) y diccionario de datos (`src/export.py`) | Hecho con salvedad: 17 tablas y diccionario de 118 columnas. La exportación no valida las claves: `pronostico_horario` tiene una fecha (2018-08-03) sin fila en `dim_fecha` |
 
 ## Métodos de visualización
 
@@ -108,7 +108,7 @@ La reproducibilidad se apoya en una semilla fija (`SEMILLA = 42` en `src/config.
 | P4. Error del pronóstico | Barras del error por hora, mes y tipo de día, líneas del MAE por pliegue | Posición y longitud |
 | Calidad de los datos | Barras de intervalos y mapa de calor | Muestran los periodos desiguales que condicionan las comparaciones |
 
-### Páginas del panel (Power BI)
+### Páginas del panel (Streamlit)
 
 | Página | Pregunta | Contenido |
 |---|---|---|

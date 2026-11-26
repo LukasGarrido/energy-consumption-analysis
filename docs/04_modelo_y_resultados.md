@@ -30,7 +30,7 @@ Este documento describe los componentes analíticos del proyecto, cómo se eval�
 | A | Pronóstico de referencia a 24 horas | P4 y base de P3 | `03_pronostico_anomalias` | Hecho: supera al base en los 6 pliegues, MASE de 0.72 a 0.87 |
 | B | Agrupamiento de perfiles diarios | P1 y P2 | `02_patrones` | Hecho: k = 2 (estacionales), silueta 0.413 (débil). D7 y justificación de k pendientes |
 | C | Detección de días atípicos | P3 | `03_pronostico_anomalias` | Hecho: 22 días atípicos, 5 episodios coinciden |
-| Exportación | Modelo en estrella para el panel | P1 a P4 | `src/export.py` | Hecho: 17 tablas. El panel de Power BI está por construir |
+| Exportación | Modelo en estrella para el panel | P1 a P4 | `src/export.py` y `app/streamlit_app.py` | Hecho: 17 tablas y panel en Streamlit de seis páginas. Dos tablas con errores por corregir (ver [Exportación para el panel](#exportación-para-el-panel)) |
 
 ---
 
@@ -471,7 +471,12 @@ El código está en `notebooks/03_pronostico_anomalias.ipynb` y `src/anomalies.p
 
 ## Exportación para el panel
 
-`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella. Todas las claves de las tablas de hechos existen en su dimensión (0 claves huérfanas) y el diccionario `diccionario_datos.csv` documenta 118 columnas.
+`src/export.py` reúne los resultados de los notebooks 01 a 03 en un modelo en estrella que lee el panel de Streamlit, y el diccionario `diccionario_datos.csv` documenta 118 columnas. La exportación no valida las claves. Una comprobación manual encontró dos problemas:
+
+- **`pronostico_horario`:** `hora` y `fecha` salen de `Datetime` sin restar una hora, contra D1. Las 2,191 filas de las 00:00 quedan con hora 0 del día siguiente, y la fecha 2018-08-03 no existe en `dim_fecha`. El error por hora del panel queda desplazado una hora respecto del notebook 03.
+- **`indicadores_region`:** la razón invierno/verano se calcula con todo el historial y no con el periodo común (PJME 0.93 y DOM 0.95, frente a 0.95 y 0.985 en `02_patrones`), la amplitud diaria está en MW y no en fracción del promedio del día, y la tabla trae columnas vacías (`Datetime`, `MW`, `fecha`, entre otras).
+
+Las demás tablas no tienen claves sin su fila en la dimensión.
 
 | Tabla | Filas | Tabla | Filas |
 |---|---|---|---|
@@ -540,8 +545,8 @@ Los conceptos clave del proyecto, agrupados por tema. Cada entrada dice qué es 
 
 - **Notebooks de Jupyter.** Hay tres, en orden: `01_datos`, `02_patrones` y `03_pronostico_anomalias`. La exportación vive en `src/export.py`.
 - **Módulo reutilizable y paquete editable.** `src/` contiene `config.py` (rutas y parámetros), `data_loader.py`, `cleaning.py`, `features.py`, `modeling.py`, `profiles.py`, `anomalies.py` y `export.py`. Con `pip install -e .` los notebooks lo encuentran y los cambios se reflejan sin reinstalar.
-- **Modelo en estrella.** Forma de organizar tablas para un panel: **dimensiones** pequeñas, con una fila por valor de un filtro (región, fecha, estación, tipo de día), y **hechos** grandes, con una fila por observación. Cada hecho se relaciona con sus dimensiones por una clave, y un filtro sobre la dimensión actúa en todas las tablas relacionadas. La exportación genera 4 dimensiones y las tablas de hechos y resultados, y comprueba que no haya claves huérfanas, que aparecerían como filas en blanco en los filtros. Las tablas ya agregadas no responden al filtro de fecha.
-- **Power BI.** Herramienta del panel final, de seis páginas. Python genera los CSV (dimensiones, hechos, residuos, tipos de día y anomalías) y Power BI los muestra. Hay que verificar la licencia necesaria para publicarlo o compartirlo.
+- **Modelo en estrella.** Forma de organizar tablas para un panel: **dimensiones** pequeñas, con una fila por valor de un filtro (región, fecha, estación, tipo de día), y **hechos** grandes, con una fila por observación. Cada hecho se relaciona con sus dimensiones por una clave, y un filtro sobre la dimensión actúa en todas las tablas relacionadas. La exportación genera 4 dimensiones y las tablas de hechos y resultados. Una clave sin su fila en la dimensión haría que esa fila desapareciera al filtrar. Las tablas ya agregadas no responden al filtro de fecha.
+- **Streamlit.** Herramienta del panel interactivo, de seis páginas. Python genera los CSV (dimensiones, hechos, residuos, tipos de día y anomalías) y la app los lee y los dibuja con Plotly, sin recalcular nada. Se ejecuta en local o con Docker Compose y no requiere licencias.
 
 ### Siglas
 
