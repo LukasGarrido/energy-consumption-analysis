@@ -16,6 +16,10 @@ PANEL_DIR = PROCESSED_DIR / "panel"         # tablas CSV que lee el panel de Str
 DESFASE_FIN_DE_HORA = pd.Timedelta(hours=1)  # Datetime marca el final de la hora
 HORAS_POR_DIA = 24                           # un día operativo completo tiene 24 horas
 
+# Limpieza: atípicos aislados (decisión D2)
+DESVIACION_MIN_AISLADO = 0.5     # el valor se aleja más del 50 % del promedio de sus horas vecinas
+DIFERENCIA_MAX_VECINOS = 0.25    # las dos horas vecinas difieren como máximo un 25 % entre sí
+
 # Pronóstico
 HORIZONTE_HORAS = 24            # se pronostica con 24 horas de antelación
 REZAGOS_HORAS = [24, 48, 168]   # consumo de hace 1 día, 2 días y 1 semana

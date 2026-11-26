@@ -84,15 +84,16 @@ Casi todo se explica por el cambio de horario de EE. UU. (desde 2007: del segund
 | Región | Valor | Fecha | Tipo | Tratamiento |
 | ------ | ----- | ----- | ---- | ----------- |
 | FE | 0 MW | 2011-06-01 01:00 | Primer registro de la serie | Se marca vacío y se recorta |
-| DOM | 1,253 MW | 2009-12-12 00:00 | Aislado (0.10 frente a sus horas vecinas) | Se conserva (D2) |
-| PJMW | 487 MW | 2003-05-29 00:00 | Aislado (0.10 frente a sus horas vecinas) | Se conserva (D2) |
+| AEP | 25,695 MW | 2008-10-20 14:00 | Aislado (1.59 frente a sus horas vecinas) | Se interpola: 16,172 MW (D2) |
+| DOM | 1,253 MW | 2009-12-12 00:00 | Aislado (0.10 frente a sus horas vecinas) | Se interpola: 12,572.5 MW (D2) |
+| PJMW | 487 MW | 2003-05-29 00:00 | Aislado (0.10 frente a sus horas vecinas) | Se interpola: 4,938.5 MW (D2) |
 | PJMW | 2,553 y 2,574 MW | 2012-04-02 y 2012-04-01 16:00 | No cumplen el criterio de aislado (0.77 y 0.98 frente a sus vecinos) | Se conservan |
 | EKPC | 514 MW | 2013-09-29, de madrugada | Racha de varias horas en domingo: valle real, no error | Se conserva |
 | DEOK | Racha de 3 horas con mínimos de 907, 912 y 921 MW (2018-04-22). Dos lecturas de la misma hora, 1,044 y 2,064 MW (2017-11-05 02:00) | 2018-04-22 y 2017-11-05 | **Por revisar**: la limpieza promedia las dos lecturas del 2017-11-05 | Se conserva por ahora |
 
 Con el criterio del rango intercuartílico, los atípicos **altos** van de 567 (`PJM_Load`) a 3,450 por región (`PJME`) y son picos reales de demanda. Los atípicos **bajos** son 34 en `DEOK`, 10 en `PJMW`, 5 en `PJME` (entre ellos el 2012-10-30, huracán Sandy, un valle real), 1 en `DOM`, 1 en `FE` y ninguno en el resto.
 
-El máximo de `AEP` (25,695 MW el 2008-10-20, en otoño) es inusual para su estacionalidad y conviene verificarlo.
+El máximo de `AEP` en los datos crudos (25,695 MW el 2008-10-20, en otoño) es un salto de una sola hora y se trata como atípico aislado. Tras la limpieza el máximo es 25,164 MW (2007-08-08, verano). No se contrastó con la fuente.
 
 ---
 
@@ -106,7 +107,7 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 | Cobertura mínima              | Una región se excluye de una comparación si tiene menos del 99 % de las horas de su periodo | Criterio del proyecto, el valor observado es de 99.98 % o más              | Cumplida                                                  |
 | Horas repetidas               | Se promedian las lecturas                                                                   | Cambio de horario de otoño (desde 2014): dos lecturas para una hora        | Aplicada                                                  |
 | Valores imposibles            | MW ≤ 0 pasa a vacío                                                                         | Restricción física: la demanda no puede ser negativa                       | Aplicada                                                  |
-| Valores atípicos aislados     | z modificado de la desviación respecto del patrón esperado > 3.5 y horas vecinas normales   | Iglewicz y Hoaglin (1993)                                                  | **Por hacer (D2)**: hoy solo se corrigen los valores ≤ 0. Los 2 aislados (`DOM` y `PJMW`) se conservan |
+| Valores atípicos aislados     | Desviación > 50 % del promedio de las horas vecinas, vecinas que difieren ≤ 25 % entre sí y z modificado de la desviación respecto del patrón (mes y hora) > 3.5 | Iglewicz y Hoaglin (1993), los cortes de 50 % y 25 % son criterio del proyecto | Aplicada (D2): 3 valores en `AEP`, `DOM` y `PJMW` |
 | Picos altos continuos         | Se conservan                                                                                | Son demanda real, se distinguen por su continuidad                         | Aplicada                                                  |
 | Rachas bajas reales           | Se conservan                                                                                | Un valle de varias horas seguidas es consumo real (`EKPC`, 2013-09-29)     | Aplicada                                                  |
 | Horas faltantes               | Se reindexa a un calendario horario completo                                                | Una serie regular es requisito de rezagos, medias móviles y descomposición | Aplicada                                                  |
@@ -122,7 +123,7 @@ Reglas explícitas que gobiernan la preparación de los datos. El z modificado s
 La parte de limpieza de `01_datos.ipynb` (o `run_cleaning` en `src/cleaning.py`) guarda en `data/processed/`:
 
 - Un archivo `<REGION>_clean.parquet` por región.
-- `consumo_horario.parquet`: las 12 regiones en formato largo (`Datetime`, `MW`, `region`), con 1,090,343 filas (1,090,167 originales − 40 duplicados unificados + 217 horas interpoladas − 1 fila recortada).
+- `consumo_horario.parquet`: las 12 regiones en formato largo (`Datetime`, `MW`, `region`), con 1,090,343 filas (1,090,167 originales − 40 duplicados unificados + 217 horas agregadas al calendario − 1 fila recortada). Se interpolan 220 valores: las 217 horas agregadas y los 3 atípicos aislados.
 
 Las 12 regiones superan `validar_limpieza`: fechas sin repetir, orden cronológico, una hora exacta entre filas consecutivas, sin vacíos y sin valores menores o iguales a 0.
 

@@ -44,7 +44,7 @@ Una sola tabla reúne el criterio de logro de cada objetivo, su estado y el resu
 
 | N.º | Objetivo | Criterio de logro | Estado y resultado |
 |---|---|---|---|
-| OE1 | Preparar una base horaria regular y documentada | Las 12 regiones superan la validación (fechas sin repetir, una hora entre filas, sin vacíos) y las filas finales cuadran (1,090,343) | **Cumplido.** 1,090,343 filas: se unificaron 40 duplicados, se interpolaron 217 horas (0.02 %) y se recortó 1 fila |
+| OE1 | Preparar una base horaria regular y documentada | Las 12 regiones superan la validación (fechas sin repetir, una hora entre filas, sin vacíos) y las filas finales cuadran (1,090,343) | **Cumplido.** 1,090,343 filas: se unificaron 40 duplicados, se interpolaron 220 horas (217 faltantes y 3 atípicos aislados, 0.02 %) y se recortó 1 fila |
 | OE2 | Identificar tipos de día agrupando los perfiles diarios | Silueta media reportada (mayor que 0.50, razonable, de 0.26 a 0.50, débil), cada grupo con al menos el 5 % de los días y grupos interpretables con el calendario | **Cumplido con salvedad.** 2 tipos de día estacionales (temporada fría 62.3 % y verano 37.7 %), silueta 0.413 (débil). No separan laborables de fines de semana |
 | OE3 | Comparar las regiones por su mezcla de tipos de día y su estacionalidad | Cada región caracterizada por su distribución de tipos de día (historial completo y periodo común) y por indicadores de variabilidad, razón invierno/verano y caída de fin de semana | **Cumplido** (`02_patrones.ipynb`). Variabilidad (CV) de 17 % a 26 %, razón invierno/verano de 0.92 a 1.20, días de verano de 31 % a 45 % |
 | OE4 | Detectar días atípicos respecto de la demanda esperada | Días con z modificado del residuo > 3.5, con su magnitud y dirección, y contraste con episodios externos con fuente | **Cumplido** (`03_pronostico_anomalias.ipynb`). 22 días atípicos de `PJME`, 5 episodios con coincidencia y 5 de 5 con el signo esperado |
@@ -94,9 +94,9 @@ Las columnas *Pregunta* y *Objetivo* dan la trazabilidad de cada historia. HU-01
 | Horas faltantes sin causa horaria (2010-12-10 en 7 regiones, más 2 de `AEP`) | Pequeño | Se interpolan como el resto | Aceptado, falla común de la fuente por confirmar |
 | La convención de hora de fin desplaza el día de la fila de las 00:00 | Pequeño (1 de cada 24 horas) | Día operativo (D1) en `features.py` | Resuelto: el análisis, el modelado, el agrupamiento y la exportación se ejecutaron con el día operativo |
 | Las cifras publicadas (horas, fin de semana, pronóstico) quedaron desactualizadas | Medio | Reemplazarlas tras repetir los notebooks | Cerrado |
-| Valores bajos aislados en `DOM` y `PJMW` | Pequeño | Se conservan, regla del z modificado en la limpieza por hacer (D2) | Aceptado |
+| Atípicos aislados en `AEP`, `DOM` y `PJMW` | Pequeño | Se marcan como vacío y se interpolan en la limpieza (D2) | Resuelto |
 | `DEOK` con una racha baja (2018-04-22) y lecturas duplicadas inconsistentes (2017-11-05) | Pequeño | Revisar con la tabla de valores aislados de `01_datos.ipynb` (D14) | Abierto |
-| Máximo de `AEP` (2008-10-20) inusual | Pequeño | Verificar contra la fuente | Abierto |
+| Máximo de `AEP` (2008-10-20) inusual | Pequeño | Se trata como atípico aislado (D2), sin contraste con la fuente | Resuelto |
 | La hora de `COMED` y `NI` llega una hora más tarde que el resto | Medio: los tipos de día podrían separarse por la hora y no por la forma | Medido en `02_patrones.ipynb` (+1 h). Repetir con `ALINEAR_HORA_CENTRAL = True` y comparar (D7) | Abierto |
 | La estructura de los grupos resulta débil | Medio | Reportarla como tal y apoyarla con el calendario | Se materializó (silueta 0.413), reportada |
 | Con k = 2 los tipos de día solo capturan la estación y no el fin de semana | Medio: P1 queda respondida solo en parte | Justificar un k mayor aunque baje la silueta, o reportarlo como limitación (D26) | Abierto |

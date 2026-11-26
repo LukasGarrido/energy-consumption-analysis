@@ -38,7 +38,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | ID | Decisión | Motivo | Alternativa descartada | Estado |
 |---|---|---|---|---|
 | D1 | Calcular el calendario desde `Datetime − 1 h` (día operativo), `Datetime` no se modifica | `Datetime` marca el final de la hora, sin el ajuste la hora 24 de cada día cae en el día siguiente y los perfiles de 24 horas quedan desfasados | Usar `Datetime` directamente | Aplicada en `src/features.py` y en todos los notebooks |
-| D2 | Conservar los atípicos aislados (`DOM` 1,253 MW y `PJMW` 487 MW) y dejar la regla del z modificado de la limpieza por hacer | Son 2 valores en más de 1 M de filas. Los de `PJMW` de 2012-04-01/02 (2,553 y 2,574 MW) no cumplen el criterio de aislado (0.98 y 0.77 frente a sus vecinos). La regla debe aplicarse a la desviación respecto del patrón esperado y no al MW crudo, porque marcaría los picos reales | Implementarla ahora en `cleaning.py` | **Por hacer** (`cleaning.py`, `01_datos`, `02_datos.md`) |
+| D2 | Marcar como vacío e interpolar los atípicos aislados de una hora: desviación > 50 % del promedio de las horas vecinas, vecinas que difieren ≤ 25 % entre sí y z modificado > 3.5 sobre la desviación respecto del patrón de mes y hora. Actúa en ambos sentidos y marca 3 valores (`AEP` 25,695 MW, `DOM` 1,253 MW y `PJMW` 487 MW) | Son saltos de una sola hora incompatibles con sus vecinas. El z por sí solo marca miles de saltos pequeños, por eso se exige además una desviación grande. Los valores de `PJMW` de 2012-04-01/02 (2,553 y 2,574 MW) no cumplen el criterio | Aplicar el z al MW crudo (marcaría los picos reales) o conservarlos como limitación | Aplicada (`src/cleaning.py`, `01_datos`) |
 | D3 | Guardar `NI` y `COMED` por separado y documentar la continuidad | Unirlas supone asumir que son la misma serie. El cociente de niveles es 1.00 y se tocan el 2011-01-01 (`02_patrones`), lo que respalda unirlas | Unirlas en una sola serie | **Por confirmar** |
 | D11 | Limpieza por pasos: promediar duplicados, reindexar a calendario horario, recortar extremos vacíos, interpolar hasta 2 horas y validar | Duplicados y huecos vienen del cambio de horario y todos los huecos son de 2 horas o menos | Eliminar filas incompletas o rellenar huecos largos | Aplicada |
 | D12 | Los valores ≤ 0 pasan a vacío y el 0 inicial de `FE` (su primer registro) se recorta | La demanda no puede ser cero y sin dato vecino no se puede estimar | Interpolar el cero inicial | Aplicada |
@@ -71,7 +71,7 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 | D26 | K-medias y Ward con k de 2 a 10, mayor silueta con grupos de al menos 5 % de los días, y si gana k = 2 se justifica un k mayor | Evita grupos ininterpretables y el sesgo hacia k = 2. Ganó k = 2 (0.413) y separa temporada fría y verano. Con k = 3 la silueta es 0.30 y con k ≥ 4 queda por debajo de 0.26 | Elegir solo por silueta | **Por decidir:** reportar k = 2 como resultado o justificar un k mayor para separar el fin de semana |
 | D27 | Silueta y Ward sobre una muestra de 10,000 días | Escalan de forma cuadrática con unos 45,000 días | Usar todos los días | Aplicada |
 | D28 | Cortes de silueta de Kaufman y Rousseeuw: 0.71, 0.51 y 0.26 | En la fuente el 0.50 cae en «débil». Hoy `config.py` y los notebooks usan 0.50 y 0.26, y el resultado (0.413, débil) no cambia con ninguno de los dos | Mantener el 0.50 | **Por decidir:** alinear `config.py`, `profiles.py` y la documentación |
-| D29 | Estabilidad con el índice de Rand ajustado entre k-medias y Ward (0.82), la repetición con semillas queda por hacer | Es una medida barata de que el resultado no depende del algoritmo | Afirmarla sin medirla | Parcial: Rand ajustado medido, semillas por hacer |
+| D29 | Estabilidad con el índice de Rand ajustado entre k-medias y Ward (0.73), la repetición con semillas queda por hacer | Es una medida barata de cuánto depende el resultado del algoritmo. Pasó de 0.82 a 0.73 al corregir 3 horas (D2), así que es sensible a cambios pequeños | Afirmarla sin medirla | Parcial: Rand ajustado medido, semillas por hacer |
 
 ## 5. Detección de anomalías
 
@@ -130,7 +130,6 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 - **D7:** alinear o no `COMED` y `NI` a hora central. Falta repetir `02_patrones` con `ALINEAR_HORA_CENTRAL = True` y comparar la mezcla de tipos de día.
 - **D26:** decidir si se reporta k = 2 (silueta 0.413, grupos estacionales) o se justifica un k mayor para separar el fin de semana, y registrarlo aquí.
 - **D28:** decidir si se pasan los cortes a 0.51 y 0.71 en `config.py` y `profiles.py`. No cambia el resultado actual.
-- **D2:** implementar la regla del z modificado en la limpieza o dejarla como limitación.
 - **D14:** revisar `DEOK` con la tabla de valores aislados de `01_datos`.
 - **D17:** cambiar `run_cleaning` para guardar `_clean.parquet`.
 - **D29:** repetir el agrupamiento con varias semillas.
@@ -139,7 +138,6 @@ Los notebooks se citan con su nombre actual: `01_datos` (exploración y limpieza
 
 **Tareas de cierre**
 
-- **`AEP`:** verificar el máximo del 2008-10-20 (25,695 MW).
 - **Hora de las series (D1 y D7):** confirmar en la documentación de PJM que todas las series están en hora del este.
 - **Reproducibilidad:** que un tercero siga la guía de usuario.
 
