@@ -55,9 +55,10 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
         ad = tablas["anomalias_dias"]
         ad = ad[ad["region"] == "PJME"].copy()
         ad = filtros.por_fecha(ad, "fecha", fecha_inicio, fecha_fin)
+        ad = filtros.por_estacion(ad, estaciones)
         n_atipicos = int((ad["z_mod"].abs() > UMBRAL_Z_DEFECTO).sum())
         st.info(
-            f"PJME: **{n_atipicos}** dias atipicos en el periodo "
+            f"PJME: **{n_atipicos}** dias atipicos en el periodo y las estaciones elegidas "
             f"(|z_mod| > {UMBRAL_Z_DEFECTO})."
         )
 

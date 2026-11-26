@@ -23,6 +23,7 @@ import streamlit as st
 
 from app.config import ESTACIONES, PAGINAS, resolver_directorio_panel
 from app.data_loader import cargar_datos
+from app.filtros import conservar_estado_widgets
 from app.estilos import aplicar_estilos_globales, renderizar_hero_banner
 from app.paginas import anomalias, patrones, pronostico, regiones, resumen, tipos_de_dia
 
@@ -86,6 +87,9 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
+
+    # Conservar los filtros de las páginas que no se muestran
+    conservar_estado_widgets()
 
     # Aplicar estilos globales y limpieza
     aplicar_estilos_globales()

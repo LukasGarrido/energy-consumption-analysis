@@ -259,20 +259,21 @@ La app queda disponible en `http://localhost:8501`, accesible solo desde el prop
 
 #### Estructura y navegación
 
-La aplicación cuenta con una barra lateral izquierda de filtros globales y seis páginas:
+La aplicación cuenta con una barra lateral de navegación y seis páginas, cada una con su propio panel de filtros:
 
 1. **Resumen:** tarjetas de indicadores clave (regiones seleccionadas, días en el filtro, consumo medio, tipos de día, MAE y MASE medios de XGBoost), advertencia de días atípicos de PJME y línea de tendencia anual por región (solo años completos).
-2. **Patrones:** mapa de calor 7 × 24 de consumo relativo (`MW_rel_medio`) con escala común para comparar regiones, perfiles diarios por tipo de calendario (laborable, fin de semana, festivo) y estacionalidad mensual.
+2. **Patrones:** mapa de calor 7 × 24 de consumo relativo (`MW_rel_medio`) con escala común para comparar regiones, perfiles diarios por tipo de calendario (laborable, fin de semana, festivo) en un panel por región, con la misma escala, y estacionalidad mensual.
 3. **Tipos de día:** curvas horarias medias con bandas de dispersión interpercentil, calendario anual en mapa de dispersión, barras de porcentaje de días por tipo, línea de silueta frente a $k$ y tabla resumen de grupos.
 4. **Regiones:** comparativa regional mediante gráfico de barras apiladas al 100 % (con interruptor entre historial completo y periodo común) y dispersión de indicadores estructurales (razón invierno/verano frente a amplitud diaria).
-5. **Anomalías:** línea de tiempo de residuos porcentuales con eventos históricos sombreados, **deslizador interactivo de umbral $z$-score modificado** (recalcula en tiempo real sin modificar datos en disco), ranking de días con mayor desvío, tabla de episodios históricos y selector para ver el perfil horario real vs pronóstico en una ventana de $\pm 3$ días.
-6. **Pronóstico:** métricas de validación por pliegue, gráfico comparativo de MAE por modelo, selector interactivo de métrica (MAE / MAPE) para desglosar el error por hora, mes y tipo de día, y gráfico temporal de real frente a pronóstico.
+5. **Anomalías:** línea de tiempo de residuos porcentuales con los eventos históricos del periodo sombreados y numerados según la tabla de episodios, **deslizador interactivo de umbral $z$-score modificado** (recalcula en tiempo real sin modificar datos en disco), ranking de días con mayor desvío, tabla de episodios históricos y selector para ver el perfil horario real vs pronóstico en una ventana de $\pm 3$ días.
+6. **Pronóstico:** métricas de validación por pliegue, gráfico comparativo de MAE por modelo, selector interactivo de métrica (MAE / MAPE) para desglosar el error por hora, mes y tipo de día, y gráfico temporal de real frente a pronóstico. Solo hay datos de `PJME`: se avisa si hay otras regiones seleccionadas y no se muestra nada si `PJME` no lo está.
 
 #### Comportamiento de los filtros
 
-- **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones.
+- **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones. Sin ninguna región o sin ninguna estación seleccionada, esas tablas quedan vacías.
+- **Persistencia:** cada página conserva sus filtros y controles al cambiar de página y volver, mientras dure la sesión del navegador.
 - **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas muestran una nota aclaratoria: *"Este gráfico no responde al filtro de fecha."*
-- **Botón "Restablecer filtros":** restaura instantáneamente la selección de todas las regiones, las cuatro estaciones y el rango temporal completo.
+- **Atajos:** los botones «Todas», «Vigentes» y «Ninguna» cambian la selección de regiones; «Todo», «Común», «2 años» y «1 año», el rango de fechas.
 
 ---
 

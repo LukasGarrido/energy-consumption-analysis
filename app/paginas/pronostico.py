@@ -2,6 +2,8 @@
 app/paginas/pronostico.py
 Página 'Pronóstico': métricas de validación por pliegue, error desglosado
 por hora, mes y tipo de dia, y comparación real vs. pronóstico.
+
+Solo hay datos de PJME; si esa región no está seleccionada se muestra un aviso.
 """
 
 import pandas as pd
@@ -28,6 +30,18 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
     regiones, fecha_inicio, fecha_fin, estaciones = filtros.selector_filtros_modulo(
         tablas, "pronostico", con_fechas=True
     )
+
+    if "PJME" not in regiones:
+        st.info(
+            "El pronóstico solo está disponible para la región **PJME**. "
+            "Selecciona PJME en el selector de regiones para ver este módulo."
+        )
+        return
+    if len(regiones) > 1:
+        st.info(
+            "Las métricas y los gráficos de esta página son solo de **PJME**: "
+            "las demás regiones no tienen pronóstico."
+        )
 
     met = tablas["pronostico_metricas"].copy()
 

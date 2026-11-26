@@ -13,7 +13,7 @@ from app.config import ESTACIONES
 def por_region(df: pd.DataFrame, regiones: list[str]) -> pd.DataFrame:
     """
     Filtra ``df`` por las regiones seleccionadas si la columna ``region``
-    existe. Si la lista está vacía devuelve el DataFrame sin cambios.
+    existe. Si la lista está vacía no queda ninguna fila.
 
     Parámetros
     ----------
@@ -25,14 +25,15 @@ def por_region(df: pd.DataFrame, regiones: list[str]) -> pd.DataFrame:
     -------
     pd.DataFrame
     """
-    if "region" in df.columns and regiones:
+    if "region" in df.columns:
         return df[df["region"].isin(regiones)].copy()
     return df
 
 
 def por_estacion(df: pd.DataFrame, estaciones: list[str]) -> pd.DataFrame:
     """
-    Filtra ``df`` por estaciones si la columna ``estacion`` existe.
+    Filtra ``df`` por estaciones si la columna ``estacion`` existe. Si la
+    lista está vacía no queda ninguna fila.
 
     Parámetros
     ----------
@@ -44,7 +45,7 @@ def por_estacion(df: pd.DataFrame, estaciones: list[str]) -> pd.DataFrame:
     -------
     pd.DataFrame
     """
-    if "estacion" in df.columns and estaciones:
+    if "estacion" in df.columns:
         return df[df["estacion"].isin(estaciones)].copy()
     return df
 
@@ -106,6 +107,45 @@ def verificar_vacio(df: pd.DataFrame) -> bool:
 _REGIONES_HISTORICAS: tuple[str, ...] = ("NI", "PJM_Load")
 # Inicio del periodo común de las 10 regiones vigentes
 _INICIO_PERIODO_COMUN = pd.Timestamp("2013-06-01").date()
+
+
+# Claves de widgets cuyo valor debe sobrevivir al cambiar de página
+_PREFIJOS_PERSISTENTES: tuple[str, ...] = ("regiones_", "estaciones_", "fecha_rango_")
+_CLAVES_PERSISTENTES: tuple[str, ...] = (
+    "heatmap_region", "cal_region", "modo_periodo", "umbral_z",
+    "fecha_atipica_sel", "metrica_error",
+)
+
+
+def conservar_estado_widgets() -> None:
+    """
+    Evita que Streamlit borre el valor de los filtros de las páginas que no se
+    están mostrando.
+
+    Streamlit elimina de ``st.session_state`` la clave de un widget que no se
+    renderiza en una ejecución. Reasignarla la convierte en un valor propio de
+    la sesión. Debe llamarse en cada ejecución, antes de crear los widgets.
+    """
+    for clave in list(st.session_state.keys()):
+        if clave in _CLAVES_PERSISTENTES or str(clave).startswith(_PREFIJOS_PERSISTENTES):
+            st.session_state[clave] = st.session_state[clave]
+
+
+def descartar_si_no_es_opcion(clave: str, opciones: list) -> None:
+    """
+    Borra ``st.session_state[clave]`` si su valor ya no está entre las opciones
+    del widget (por ejemplo, tras quitar una región), para que vuelva al
+    valor por defecto.
+
+    Parámetros
+    ----------
+    clave : str
+        Clave del widget de selección única.
+    opciones : list
+        Opciones que se ofrecerán en esta ejecución.
+    """
+    if clave in st.session_state and st.session_state[clave] not in opciones:
+        del st.session_state[clave]
 
 
 def _fijar(clave: str, valor) -> None:

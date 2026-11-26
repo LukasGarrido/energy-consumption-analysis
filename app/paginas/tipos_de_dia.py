@@ -105,6 +105,7 @@ def _calendario_de_color(
         st.info("Sin datos con estos filtros.")
         return
 
+    filtros.descartar_si_no_es_opcion("cal_region", sorted(regiones))
     region_sel = st.selectbox(
         "Región para el calendario",
         options=sorted(regiones),
