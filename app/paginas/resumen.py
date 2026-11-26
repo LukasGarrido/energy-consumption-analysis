@@ -99,10 +99,12 @@ def mostrar(tablas: dict[str, pd.DataFrame]) -> None:
             "region": "Región",
         },
     )
-    fig.update_layout(hovermode="x unified")
+    # Un punto cada vez: las regiones cubren años distintos y un cuadro unificado
+    # mezclaría valores de otros años
+    fig.update_layout(hovermode="closest")
     mostrar_grafico(fig)
     st.caption(
         "Observar si la tendencia es estable, creciente o decreciente. "
         "Solo se incluyen años con datos completos para evitar sesgos de borde."
     )
-    st.caption("Este gráfico no responde al filtro de fecha.")
+    st.caption("Este gráfico no responde a los filtros de estación ni de fecha.")

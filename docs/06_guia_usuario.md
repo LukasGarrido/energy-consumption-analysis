@@ -273,7 +273,7 @@ La aplicación cuenta con una barra lateral de navegación y seis páginas, cada
 
 - **Filtro de región y estación:** aplican a todas las tablas que disponen de dichas dimensiones. La página «Regiones» no ofrece filtro de estación, y la estacionalidad mensual no responde a él. Sin ninguna región o sin ninguna estación seleccionada, esas tablas quedan vacías.
 - **Persistencia:** cada página conserva sus filtros y controles al cambiar de página y volver, mientras dure la sesión del navegador.
-- **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas muestran una nota aclaratoria: *"Este gráfico no responde al filtro de fecha."*
+- **Filtro de fecha:** actúa sobre `hechos_diario`, `pronostico_horario` y `anomalias_dias`. Los gráficos que consumen tablas agregadas llevan una nota que indica a qué filtros no responden.
 - **Atajos:** los botones «Todas», «Vigentes» y «Ninguna» cambian la selección de regiones; «Todo», «Común», «2 años» y «1 año», el rango de fechas.
 
 ---

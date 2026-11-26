@@ -105,7 +105,7 @@ def _barras_mae_pliegue(met: pd.DataFrame) -> None:
         "Un MAE de XGBoost consistentemente menor que el modelo base "
         "confirma la utilidad del modelo para detectar lo normal y acotar los residuos."
     )
-    st.caption("Este gráfico no responde al filtro de fecha.")
+    st.caption("Este gráfico no responde a los filtros de estación ni de fecha.")
 
 
 def _error_desglosado(
