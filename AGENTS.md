@@ -39,6 +39,7 @@ Este documento establece las directrices, reglas de contexto, convenciones de c�
   - `paginas/`: Un módulo por página (resumen, patrones, tipos de día, regiones, anomalías y pronóstico).
 - `docs/`: Documentación técnica modular compatible con Obsidian (`01_proyecto.md` a `07_referencias.md`).
   - `docs/IEEE/`: Informe en formato de artículo IEEE (`Informe_IEEE_PJM_v4.md`) y sus figuras (`fig_*.png`).
+  - `docs/img/`: Figuras del README (`resumen.png`, `mapa_calor.png`), generadas con `generar_figuras.py` desde las tablas del panel.
 - `Dockerfile`, `compose.yaml`, `requirements-app.txt`: Imagen y servicio de Docker Compose del panel.
 
 ---
