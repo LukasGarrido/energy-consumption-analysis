@@ -1,31 +1,74 @@
 <div align="center">
 
-# Análisis visual de la demanda eléctrica horaria de la red PJM
+# ⚡ Análisis visual de la demanda eléctrica horaria de la red PJM
 
-Análisis de la demanda eléctrica horaria de 12 regiones de la red PJM (Estados Unidos, 1998–2018): tipos de día, diferencias entre regiones y episodios atípicos, apoyado en aprendizaje automático y comunicado mediante visualizaciones.
+**¿Qué formas de día existen, en qué se diferencian las regiones y qué días se salen de lo esperable?**
+
+12 regiones de Estados Unidos · 1998–2018 · aprendizaje automático y visualización de datos
+
+![Python](https://img.shields.io/badge/Python-3.10--3.12-3776AB?logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-agrupamiento-F7931E?logo=scikitlearn&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-pronóstico_24_h-1A7F37)
+![Streamlit](https://img.shields.io/badge/Streamlit-panel_interactivo-FF4B4B?logo=streamlit&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+[![Licencia MIT](https://img.shields.io/badge/Licencia-MIT-yellow)](LICENSE)
+
+[Resumen visual](#resumen-visual) · [Resultados](#resultados) · [Inicio rápido](#inicio-rápido) · [Documentación](#documentación) · [Informe](docs/IEEE/Informe_IEEE_PJM_v4.md)
+
+| 📊 Observaciones | 🗺️ Regiones | 🌗 Tipos de día | 🚨 Días atípicos | 🎯 Mejora del MAE |
+|:---:|:---:|:---:|:---:|:---:|
+| **1,090,295** | **12** | **2** | **22** | **19.1 %** |
+| horas validadas | de la red PJM | estacionales | en `PJME` | frente al modelo base |
 
 </div>
 
 ---
 
+## Resumen visual
+
+Una respuesta gráfica por cada pregunta de investigación.
+
+![Resumen: curvas de los dos tipos de día, mezcla de tipos por región, días atípicos de PJME y error del pronóstico por pliegue](docs/img/resumen.png)
+
+---
+
 ## Descripción
 
-El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda de una sola región. Este proyecto se centra en **caracterizar** cómo es la demanda: qué formas de día existen, en qué se diferencian las regiones y qué días se desvían de lo esperable. El pronóstico pasa a ser una referencia de lo esperable, y los resultados se comunican en un panel interactivo.
+El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda de una sola región. Este proyecto se centra en **caracterizar** cómo es la demanda. El pronóstico pasa a ser una referencia de lo esperable, y los resultados se comunican en un panel interactivo.
 
 ### Preguntas de investigación
 
 | N.º | Pregunta | Tarea visual |
 |---|---|---|
-| P1 | ¿Qué tipos de día (formas de perfil diario) existen y cómo se distribuyen en el calendario? | Descubrir patrones |
-| P2 | ¿En qué se diferencian las regiones por su mezcla de tipos de día y su estacionalidad? | Comparar |
-| P3 | ¿Qué días se desvían de la demanda esperable y a qué episodios corresponden? | Localizar anomalías |
-| P4 | ¿Cuándo y cuánto falla un pronóstico a 24 horas? | Evaluar |
+| 🔵 P1 | ¿Qué tipos de día (formas de perfil diario) existen y cómo se distribuyen en el calendario? | Descubrir patrones |
+| 🟠 P2 | ¿En qué se diferencian las regiones por su mezcla de tipos de día y su estacionalidad? | Comparar |
+| 🔴 P3 | ¿Qué días se desvían de la demanda esperable y a qué episodios corresponden? | Localizar anomalías |
+| 🟢 P4 | ¿Cuándo y cuánto falla un pronóstico a 24 horas? | Evaluar |
 
 ### Aporte diferencial
 
 1. **De pronosticar a caracterizar:** el aprendizaje automático (agrupamiento de perfiles diarios y detección de anomalías) se usa para obtener información, no solo precisión de pronóstico.
 2. **Comparación entre 12 regiones con calidad de datos documentada:** periodos desiguales, hora de fin de intervalo, cambios de horario y continuidad entre regiones.
 3. **Diseño de visualización justificado:** cada gráfico se asocia a una tarea y a un canal perceptual, y se entrega en un panel interactivo en Streamlit de seis páginas.
+
+### Flujo del análisis
+
+```mermaid
+flowchart LR
+    A[("CSV de Kaggle<br/>12 regiones")] --> B["01 · Datos<br/>limpieza y validación"]
+    B --> C["02 · Patrones<br/>tipos de día"]
+    B --> D["03 · Pronóstico<br/>y anomalías"]
+    C --> E["export.py<br/>17 tablas CSV"]
+    D --> E
+    E --> F["Panel Streamlit<br/>6 páginas"]
+
+    classDef datos fill:#F2F2F2,stroke:#8C8C8C,color:#000
+    classDef analisis fill:#D6EAF8,stroke:#0072B2,color:#000
+    classDef salida fill:#FDEBD0,stroke:#E69F00,color:#000
+    class A datos
+    class B,C,D analisis
+    class E,F salida
+```
 
 ---
 
@@ -55,7 +98,14 @@ Cifras de la última ejecución de los notebooks, calculadas con el día operati
 | Calendario | El fin de semana consume entre un 3.9 % y un 13.9 % menos que un laborable (≈ −9 % en promedio), un festivo cerca de un 5 % menos |
 | Estacionalidad | Dos máximos anuales (verano e invierno), `EKPC` y `PJMW` son invernales (y `AEP` en menor medida), `COMED`, `DUQ`, `DEOK` y `PJME` veraniegas |
 | Pronóstico a 24 h (`PJME`) | XGBoost: MAE de 1,862 MW frente a 2,300 MW del modelo base (−19.1 %), MASE de 0.86 (0.72 a 0.87 en ventana móvil de 6 pliegues) |
-| Tipos de día y anomalías | 2 tipos estacionales (k = 2, silueta 0.413: temporada fría y verano); 22 días atípicos en PJME (z modificado > 3.5), con 5 episodios contrastados |
+| Tipos de día | 2 tipos estacionales, temporada fría (62.3 %) y verano (37.7 %), con estructura débil (k = 2, silueta 0.413) |
+| Días atípicos | 22 en `PJME` (z modificado > 3.5); coinciden 5 de los 8 episodios externos evaluados |
+
+### Cuándo se consume más
+
+![Mapa de calor de PJME: la demanda es máxima en las tardes de días laborables y mínima de madrugada](docs/img/mapa_calor.png)
+
+Las figuras se regeneran con `python docs/img/generar_figuras.py` después de `python src/export.py`.
 
 ---
 
@@ -112,6 +162,9 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 
 ## Estructura del repositorio
 
+<details>
+<summary>Ver el árbol de directorios</summary>
+
 ```text
 ├── app/
 │   ├── streamlit_app.py          # Punto de entrada del panel en Streamlit
@@ -140,6 +193,10 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 │   ├── 05_decisiones.md          # Registro histórico de decisiones del proyecto
 │   ├── 06_guia_usuario.md        # Guía de instalación, uso y reproducción
 │   ├── 07_referencias.md         # Bibliografía y referencias respaldadas
+│   ├── img/                      # Figuras del README y el script que las genera
+│   │   ├── generar_figuras.py    # Genera las figuras desde las tablas del panel
+│   │   ├── mapa_calor.png        # Demanda por hora y día de la semana
+│   │   └── resumen.png           # Una vista por pregunta de investigación
 │   └── IEEE/                     # Informe final en formato paper IEEE y figuras
 │       ├── fig_*.png             # Figuras del informe (anomalías, error, regiones, silueta)
 │       └── Informe_IEEE_PJM_v4.md # Informe técnico en formato paper IEEE
@@ -169,6 +226,8 @@ Para detenerla: `docker compose down`. Más detalles en la [guía de usuario](do
 ├── requirements-app.txt          # Dependencias de la imagen Docker de la app
 └── requirements.txt              # Dependencias del proyecto
 ```
+
+</details>
 
 ---
 
