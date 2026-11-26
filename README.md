@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Análisis visual de la demanda eléctrica horaria de la red PJM
+# Análisis visual de la demanda eléctrica horaria de la red PJM
 
 **¿Qué formas de día existen, en qué se diferencian las regiones y qué días se salen de lo esperable?**
 
@@ -15,7 +15,7 @@
 
 [Resumen visual](#resumen-visual) · [Resultados](#resultados) · [Inicio rápido](#inicio-rápido) · [Documentación](#documentación) · [Informe](docs/IEEE/Informe_IEEE_PJM_v4.md)
 
-| 📊 Observaciones | 🗺️ Regiones | 🌗 Tipos de día | 🚨 Días atípicos | 🎯 Mejora del MAE |
+| Observaciones | Regiones | Tipos de día | Días atípicos | Mejora del MAE |
 |:---:|:---:|:---:|:---:|:---:|
 | **1,090,295** | **12** | **2** | **22** | **19.1 %** |
 | horas validadas | de la red PJM | estacionales | en `PJME` | frente al modelo base |
@@ -40,10 +40,10 @@ El dataset *Hourly Energy Consumption* suele usarse para pronosticar la demanda 
 
 | N.º | Pregunta | Tarea visual |
 |---|---|---|
-| 🔵 P1 | ¿Qué tipos de día (formas de perfil diario) existen y cómo se distribuyen en el calendario? | Descubrir patrones |
-| 🟠 P2 | ¿En qué se diferencian las regiones por su mezcla de tipos de día y su estacionalidad? | Comparar |
-| 🔴 P3 | ¿Qué días se desvían de la demanda esperable y a qué episodios corresponden? | Localizar anomalías |
-| 🟢 P4 | ¿Cuándo y cuánto falla un pronóstico a 24 horas? | Evaluar |
+| P1 | ¿Qué tipos de día (formas de perfil diario) existen y cómo se distribuyen en el calendario? | Descubrir patrones |
+| P2 | ¿En qué se diferencian las regiones por su mezcla de tipos de día y su estacionalidad? | Comparar |
+| P3 | ¿Qué días se desvían de la demanda esperable y a qué episodios corresponden? | Localizar anomalías |
+| P4 | ¿Cuándo y cuánto falla un pronóstico a 24 horas? | Evaluar |
 
 ### Aporte diferencial
 
